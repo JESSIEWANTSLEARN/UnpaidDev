@@ -10,7 +10,7 @@
     <title>WalangBrownout</title>
     <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -115,6 +115,7 @@
 
             </nav>
         </aside>
+        
     </main>
 
     <footer>
