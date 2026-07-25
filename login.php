@@ -24,6 +24,11 @@
 </head>
 <body>
     <main>
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Welcome Back</h2>
+            <p class="text-xs text-gray-500 mt-1">Sign in to access your account portal</p>
+        </div>
+
         <form action="login.php" method="POST" class="space-y-4">
             <input type="hidden" name="action_type" value="login_password">
 
@@ -41,6 +46,18 @@
                 Continue to OTP
             </button>
         </form>
+        
+        <div class="mt-6 pt-4 border-t border-gray-100">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2">
+                Demo Logins (Pass: <code>admin123</code> | OTP: <code>123456</code>)
+            </p>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px] text-gray-600">
+                <span class="bg-gray-50 p-1.5 rounded border border-gray-200">👑 admin@wbo.ph</span>
+                <span class="bg-gray-50 p-1.5 rounded border border-gray-200">📦 warehouse@wbo.ph</span>
+                <span class="bg-gray-50 p-1.5 rounded border border-gray-200">👔 hr@wbo.ph</span>
+                <span class="bg-gray-50 p-1.5 rounded border border-gray-200">🛠️ staff@wbo.ph</span>
+            </div>
+        </div>
     </main>
 </body>
 </html>
