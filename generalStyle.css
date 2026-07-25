@@ -1,0 +1,22 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #F2F2F2;
+    color: #0E5BA8;
+}
+
+header {
+    padding: 20px;
+    text-align: center;
+}
+
+footer {
+    padding: 10px;
+    text-align: center;
+}
+
+nav {
+    background-color: #2C3E50;
+    padding: 10px;
+}
