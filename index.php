@@ -21,13 +21,10 @@
         }
 
         header {
-            margin-bottom: 20px;
-            padding: 20px;
             text-align: left;
         }
 
         footer {
-            padding: 10px;
             text-align: center;
         }
 
