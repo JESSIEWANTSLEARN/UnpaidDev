@@ -116,6 +116,45 @@
             </nav>
         </aside>
         
+        <aside class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4">
+                <div class="mb-4">
+                    <div class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Calendar</div>
+                    <div class="mt-2 flex items-center gap-2">
+                        <label class="text-xs font-semibold text-slate-600">Month</label>
+                        <select id="calendar-month-select"
+                            class="rounded-lg border border-slate-200 px-2 py-1 text-sm text-slate-700 bg-white">
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7">August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+
+                        <label class="text-xs font-semibold text-slate-600">Year</label>
+            
+                        <select id="calendar-year-select" class="rounded-lg border border-slate-200 px-2 py-1 text-sm text-slate-700 bg-white"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-7 gap-2 text-center text-[11px] font-semibold text-slate-500 mb-2">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                </div>
+                
+                <div id="calendar-days" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+
+                <div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-3">
+                    <div id="selected-date-label" class="font-semibold text-slate-800">Selected date</div>
+                    <div id="selected-date-event" class="text-slate-600 mt-1">Choose a highlighted date.</div>
+                </div>
+            </aside>
+        </section>
     </main>
 
     <footer>
