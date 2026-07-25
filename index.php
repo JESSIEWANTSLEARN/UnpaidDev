@@ -116,6 +116,46 @@
             </nav>
         </aside>
         
+        <div class="space-y-6">
+            <div class="bg-gradient-to-br from-[#0b5091] via-[#165ea7] to-[#0f2f56] text-white rounded-3xl p-8 md:p-10 shadow-xl">
+                <span class="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] uppercase">Enterprise Portal</span>
+                
+                <h1 class="mt-4 text-4xl md:text-5xl font-extrabold leading-tight">Walang Brown Out Portal System</h1>
+                
+                <p class="mt-4 text-blue-100 text-base md:text-lg max-w-2xl">A secure, role-based appliance operations platform for staff, warehouse teams, and administrators.</p>
+                
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <a href="login.php"
+                        class="bg-white text-[#0b5091] font-bold px-6 py-3 rounded-xl shadow-md hover:bg-gray-100 transition text-center">Go
+                            to Sign In</a>
+                    <a href="#features"
+                        class="border border-white/40 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 transition text-center">Explore
+                            Features</a>
+                </div>
+
+            </div>
+
+            <section id="features" class="grid md:grid-cols-3 gap-4">
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="text-xl mb-2">🔐</div>
+                    <h2 class="font-bold text-slate-800 mb-1">Role-Based Security</h2>
+                    <p class="text-sm text-slate-600">Every account is routed to the correct access level for streamlined operations.</p>
+                </div>
+                    
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="text-xl mb-2">📦</div>
+                    <h2 class="font-bold text-slate-800 mb-1">Warehouse Control</h2>
+                    <p class="text-sm text-slate-600">Manage stock, products, and logistics through a clean administration flow.</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="text-xl mb-2">📊</div>
+                    <h2 class="font-bold text-slate-800 mb-1">Operations Overview</h2>
+                    <p class="text-sm text-slate-600">Monitor the system with clear, professional dashboards designed for daily use.</p>
+                </div>
+            </section>
+        </div>
+        
         <aside class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4">
                 <div class="mb-4">
                     <div class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Calendar</div>
@@ -146,7 +186,7 @@
                 <div class="grid grid-cols-7 gap-2 text-center text-[11px] font-semibold text-slate-500 mb-2">
                     <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
                 </div>
-                
+
                 <div id="calendar-days" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
 
                 <div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-3">
