@@ -15,6 +15,11 @@ $demo_users = [
     'user@wbo.ph' => ['id' => 5, 'password' => 'user123', 'name' => 'John Lorena', 'role' => 'user']
 ];
 
+if (isset($_GET['action']) && $_GET['action'] === 'reset_otp') {
+    unset($_SESSION['temp_user'], $_SESSION['otp_code']);
+    header('Location: login.php');
+    exit();
+}
 
 
 
