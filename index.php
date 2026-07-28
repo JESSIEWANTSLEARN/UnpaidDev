@@ -51,6 +51,7 @@
 
 </head>
 <body>
+    <!-- Header -->
     <header>
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -72,6 +73,7 @@
         </nav>
     </header>
 
+    <!-- Main Content -->
     <main>
         <aside class="w-64 bg-white rounded-3xl shadow-md border border-slate-200 p-5">
             <h2 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-500 mb-4">
@@ -194,6 +196,7 @@
         </section>
     </main>
 
+    <!-- Footer -->
     <footer>
         <p><strong>&copy; 2026 WalangBrownout. All rights reserved.</strong></p>
     </footer>
