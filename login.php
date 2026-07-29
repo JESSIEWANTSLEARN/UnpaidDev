@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
     $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
     $user = null;
-    
+
  if ($pdo) {
         try {
             $stmt = $pdo->prepare('SELECT user_id, name, email, password_hash, role FROM wbo_users WHERE email = ?');
@@ -34,6 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
             $user = null;
         }
     }
+     if ($user && password_verify($password, $user['password_hash'])) {
+        $otp = sprintf('%06d', mt_rand(100000, 999999));
+
+        $_SESSION['temp_user'] = [
+            'id' => (int) $user['user_id'],
+            'email' => $user['email'],
+            'name' => $user['name'],
+            'role' => normalize_role($user['role'])
+        ];
+        $_SESSION['otp_code'] = $otp;
+
 
 
 
