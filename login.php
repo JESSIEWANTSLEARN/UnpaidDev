@@ -20,6 +20,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'reset_otp') {
     header('Location: login.php');
     exit();
 }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_POST['action_type'] === 'login_password') {
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $user = null;
 
 
 
