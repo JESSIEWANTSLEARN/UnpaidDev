@@ -24,7 +24,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
     $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
     $user = null;
-
+    
+ if ($pdo) {
+        try {
+            $stmt = $pdo->prepare('SELECT user_id, name, email, password_hash, role FROM wbo_users WHERE email = ?');
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+        } catch (PDOException $e) {
+            $user = null;
+        }
+    }
 
 
 
