@@ -62,6 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
         $error = 'Invalid email or password.';
     }
 }
+     $_SESSION['otp_code'] = $otp;
+
+        $success = "OTP sent! For demo purposes, your code is: <strong>$otp</strong>";
+    } else {
+        $error = 'Invalid email or password.';
+    }
+}
+
 
 
 
