@@ -44,6 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
             'role' => normalize_role($user['role'])
         ];
         $_SESSION['otp_code'] = $otp;
+         
+              $success = "OTP sent! For demo purposes, your code is: <strong>$otp</strong>";
+    } elseif (isset($demo_users[$email]) && $demo_users[$email]['password'] === $password) {
+        $otp = sprintf('%06d', mt_rand(100000, 999999));
+
+        $_SESSION['temp_user'] = [
+            'id' => $demo_users[$email]['id'],
+            'email' => $email,
+            'name' => $demo_users[$email]['name'],
+            'role' => $demo_users[$email]['role']
+        ];
+        $_SESSION['otp_code'] = $otp;
+
+        $success = "OTP sent! For demo purposes, your code is: <strong>$otp</strong>";
 
 
 
