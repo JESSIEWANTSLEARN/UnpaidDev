@@ -15,6 +15,13 @@ $otp_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_pin = trim($_POST['otp_pin'] ?? '');
+    
+     if ($user_pin === $otp_code) {
+        $_SESSION['logged_in'] = true;
+        $_SESSION['user_id'] = $_SESSION['pending_user']['id'] ?? 1;
+        $_SESSION['role'] = normalize_role($_SESSION['pending_user']['role'] ?? 'user');
+        $_SESSION['name'] = $_SESSION['pending_user']['name'] ?? '';
+        $_SESSION['username'] = $_SESSION['pending_user']['username'] ?? '';
 
 
 ?>
