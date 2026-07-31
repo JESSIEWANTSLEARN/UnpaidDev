@@ -23,6 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['name'] = $_SESSION['pending_user']['name'] ?? '';
         $_SESSION['username'] = $_SESSION['pending_user']['username'] ?? '';
 
+         
+        unset($_SESSION['pending_user'], $_SESSION['generated_otp']);
+        redirect_to_dashboard($_SESSION['role']);
+    } else {
+        $otp_error = 'Invalid verification code. Please try again.';
+    }
+}
+
 
 ?>
 
