@@ -13,6 +13,9 @@ if (empty($_SESSION['generated_otp'])) {
 $user_email = $_SESSION['pending_user']['username'] ?? $_SESSION['pending_user']['email'] ?? 'user@wbo.ph';
 $otp_error = '';
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user_pin = trim($_POST['otp_pin'] ?? '');
+
 
 ?>
 
