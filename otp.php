@@ -9,6 +9,9 @@ if (!isset($_SESSION['pending_user'])) {
 if (empty($_SESSION['generated_otp'])) {
     $_SESSION['generated_otp'] = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
 }
+    $otp_code = $_SESSION['generated_otp'];
+$user_email = $_SESSION['pending_user']['username'] ?? $_SESSION['pending_user']['email'] ?? 'user@wbo.ph';
+$otp_error = '';
 
 
 ?>
