@@ -1,4 +1,15 @@
 <?php
+require_once __DIR__ . '/session.php';
+
+if (!isset($_SESSION['pending_user'])) {
+    header('Location: login.php');
+    exit();
+}
+
+if (empty($_SESSION['generated_otp'])) {
+    $_SESSION['generated_otp'] = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+}
+
 
 ?>
 
