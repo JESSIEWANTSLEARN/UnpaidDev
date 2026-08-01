@@ -35,7 +35,12 @@ function redirect_to_dashboard($role)
     header('Location: ' . $target);
     exit();
 }
-
+function check_access($required_role)
+{
+    if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
+        header('Location: login.php');
+        exit();
+    }
 
 
 ?>
