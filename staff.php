@@ -1,6 +1,8 @@
 <?php
 require_once 'session.php';
 check_access('staff');
+$message = '';
+$message_type = '';
 
 
 ?>
