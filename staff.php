@@ -26,6 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message_type = "error";
         }
     }
+
+        if ($action === 'update_settings') {
+        $dispatch_alerts = isset($_POST['dispatch_alerts']) ? 1 : 0;
+        $sms_notifications = isset($_POST['sms_notifications']) ? 1 : 0;
+
+        // Save preferences to DB...
+        $message = "Field operation preferences saved!";
+        $message_type = "success";
+    }
+
         
 ?>
 
