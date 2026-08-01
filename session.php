@@ -39,7 +39,10 @@ function check_access($required_role)
 {
     if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
         header('Location: login.php');
-        exit();
+        exit
+            
+    $user_role = normalize_role($_SESSION['role'] ?? 'user');
+    $required_role = normalize_role($required_role);
     }
 
 
