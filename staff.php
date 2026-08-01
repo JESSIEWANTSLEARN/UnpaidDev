@@ -1,4 +1,7 @@
 <?php
+require_once 'session.php';
+check_access('staff');
+
 
 ?>
 
