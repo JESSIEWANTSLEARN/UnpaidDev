@@ -36,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Administrative preferences saved successfully!";
         $message_type = "success";
     }
+         if ($action === 'update_password') {
+        $current_pass = $_POST['current_password'] ?? '';
+        $new_pass = $_POST['new_password'] ?? '';
+        $confirm_pass = $_POST['confirm_password'] ?? '';
 
 
 ?>
