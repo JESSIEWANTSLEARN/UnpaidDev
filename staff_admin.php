@@ -48,6 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } elseif ($new_pass !== $confirm_pass) {
             $message = "New passwords do not match.";
             $message_type = "error";
+               } elseif (strlen($new_pass) < 8) {
+            $message = "Password must be at least 8 characters long.";
+            $message_type = "error";
 
             
 
