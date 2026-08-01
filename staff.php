@@ -36,6 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message_type = "success";
     }
 
+             // 3. Update Password
+    if ($action === 'update_password') {
+        $current_pass = $_POST['current_password'] ?? '';
+        $new_pass = $_POST['new_password'] ?? '';
+        $confirm_pass = $_POST['confirm_password'] ?? '';
+
         
 ?>
 
