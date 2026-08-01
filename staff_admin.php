@@ -13,7 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $department = trim($_POST['department'] ?? '');
-
+        
+   if (!empty($name) && !empty($email)) {
+            if (isset($pdo)) {
+                $stmt = $pdo->prepare("UPDATE wbo_users SET name = ?, email = ? WHERE user_id = ?");
+                $stmt->execute([$name, $email, $_SESSION['user_id']]);
+            }
 
 
 
