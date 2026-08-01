@@ -8,6 +8,12 @@ $message_type = '';
 // Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
+    // 1. Update Staff Admin Profile Details
+    if ($action === 'update_profile') {
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $department = trim($_POST['department'] ?? '');
+
 
 
 
