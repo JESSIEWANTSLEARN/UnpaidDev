@@ -47,6 +47,9 @@ function check_access($required_role)
         if ($user_role === 'super_admin') {
         return true;
     }
-
+    if ($user_role !== $required_role) {
+        redirect_to_dashboard($user_role);
+    }
+}
 
 ?>
