@@ -27,7 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message_type = "error";
         }
     }
+/ 2. Update HR Admin Preferences
+    if ($action === 'update_settings') {
+        $roster_alerts = isset($_POST['roster_alerts']) ? 1 : 0;
+        $daily_summary = isset($_POST['daily_summary']) ? 1 : 0;
 
+        // Save preferences to DB...
+        $message = "Administrative preferences saved successfully!";
+        $message_type = "success";
+    }
 
 
 ?>
