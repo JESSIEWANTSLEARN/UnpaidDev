@@ -20,6 +20,17 @@ function normalize_role($role)
 
     return $map[$role] ?? $role;
 }
+function redirect_to_dashboard($role)
+{
+    $role = normalize_role($role);
+
+    $redirects = [
+        'super_admin' => 'super_admin.php',
+        'warehouse_admin' => 'warehouse_admin.php',
+        'staff_admin' => 'staff_admin.php',
+        'staff' => 'staff.php',
+        'user' => 'user.php'
+    ];
 
 
 
