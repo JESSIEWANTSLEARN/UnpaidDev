@@ -31,7 +31,10 @@ function redirect_to_dashboard($role)
         'staff' => 'staff.php',
         'user' => 'user.php'
     ];
-
+ $target = $redirects[$role] ?? 'user.php';
+    header('Location: ' . $target);
+    exit();
+}
 
 
 
