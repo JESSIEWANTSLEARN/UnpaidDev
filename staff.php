@@ -18,7 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("UPDATE wbo_users SET name = ?, email = ? WHERE user_id = ?");
                 $stmt->execute([$name, $email, $_SESSION['user_id']]);
             }
-
+   $_SESSION['name'] = $name; // Update active session
+            $message = "Staff profile details updated successfully!";
+            $message_type = "success";
+        } else {
+            $message = "Please fill in all required fields.";
+            $message_type = "error";
+        }
+    }
         
 ?>
 
