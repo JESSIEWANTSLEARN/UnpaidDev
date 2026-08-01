@@ -61,6 +61,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $update->execute([$hashed_pass, $_SESSION['user_id']]);
                 $message = "Password updated successfully!";
                 $message_type = "success";
+                      } else {
+                $message = "Incorrect current password.";
+                $message_type = "error";
+            }
+            $message = "Security credentials updated successfully!";
+            $message_type = "success";
+        }
+    }
+}
 
         
 ?>
