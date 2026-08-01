@@ -44,6 +44,9 @@ function check_access($required_role)
     $user_role = normalize_role($_SESSION['role'] ?? 'user');
     $required_role = normalize_role($required_role);
     }
+        if ($user_role === 'super_admin') {
+        return true;
+    }
 
 
 ?>
