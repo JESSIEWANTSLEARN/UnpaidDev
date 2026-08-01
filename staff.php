@@ -7,6 +7,14 @@ $message_type = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
+    // 1. Update Staff Profile Details
+    if ($action === 'update_profile') {
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+
+
+        
 ?>
 
 <!DOCTYPE html>
