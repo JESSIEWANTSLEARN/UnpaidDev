@@ -60,6 +60,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $update = $pdo->prepare("UPDATE wbo_users SET password_hash = ? WHERE user_id = ?");
                 $update->execute([$hashed_pass, $_SESSION['user_id']]);
                 $message = "Password updated successfully!";
+                   } else {
+                $message = "Incorrect current password.";
+                $message_type = "error";
+            }
+            $message = "Security credentials updated successfully!";
+            $message_type = "success";
+        }
+    }
+}
 
             
 
