@@ -44,7 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           if (empty($current_pass) || empty($new_pass) || empty($confirm_pass)) {
             $message = "All password fields are required.";
             $message_type = "error";
-
+ } elseif ($new_pass !== $confirm_pass) {
+            $message = "New passwords do not match.";
+            $message_type = "error";
         
 ?>
 
