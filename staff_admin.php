@@ -2,6 +2,13 @@
 require_once 'session.php';
 check_access('staff_admin');
 
+$message = '';
+$message_type = '';
+
+// Handle Form Submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+
 
 
 ?>
