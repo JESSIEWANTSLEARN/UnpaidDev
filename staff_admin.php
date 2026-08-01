@@ -40,6 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $current_pass = $_POST['current_password'] ?? '';
         $new_pass = $_POST['new_password'] ?? '';
         $confirm_pass = $_POST['confirm_password'] ?? '';
+             
+        if (empty($current_pass) || empty($new_pass) || empty($confirm_pass)) {
+            $message = "All password fields are required.";
+            $message_type = "error";
+
 
 
 ?>
