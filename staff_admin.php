@@ -51,6 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                } elseif (strlen($new_pass) < 8) {
             $message = "Password must be at least 8 characters long.";
             $message_type = "error";
+              } else {
+            $stmt = $pdo->prepare("SELECT password_hash FROM wbo_users WHERE user_id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $user = $stmt->fetch();
 
             
 
