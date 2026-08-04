@@ -29,7 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message_type = "error";
         }
     }
-    
+        // 2. Update System Settings
+    if ($action === 'update_settings') {
+        $site_title = trim($_POST['site_title'] ?? '');
+        $maintenance = isset($_POST['maintenance_mode']) ? 1 : 0;
                 
     
 
