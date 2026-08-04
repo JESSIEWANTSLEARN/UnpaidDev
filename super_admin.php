@@ -1,4 +1,6 @@
 <?php
+require_once 'session.php';
+check_access('super_admin');
 
 ?>
 
