@@ -24,6 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['email'] = $email;
             $message = "Profile updated successfully!";
             $message_type = "success";
+                      } else {
+            $message = "Please fill in all required fields.";
+            $message_type = "error";
+        }
+    }
     
                 
     
