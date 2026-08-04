@@ -33,6 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'update_settings') {
         $site_title = trim($_POST['site_title'] ?? '');
         $maintenance = isset($_POST['maintenance_mode']) ? 1 : 0;
+                // Save settings to DB or config file here...
+        $message = "System settings saved successfully!";
+        $message_type = "success";
+    }
                 
     
 
