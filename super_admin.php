@@ -14,6 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'update_profile') {
         $name = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
+                if (!empty($name) && !empty($email)) {
+            // Update database (Adjust table/column names to match your schema)
+            if (isset($pdo)) {
+                $stmt = $pdo->prepare("UPDATE wbo_users SET name = ?, email = ? WHERE user_id = ?");
+                $stmt->execute([$name, $email, $_SESSION['user_id']]);
+            }
 
     
 
