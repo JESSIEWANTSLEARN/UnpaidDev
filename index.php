@@ -475,9 +475,12 @@
     </main>
 
     <!-- Footer -->
-    <footer>
-        <p><strong>&copy; 2026 WalangBrownout. All rights reserved.</strong></p>
-    </footer>
+    <footer class="relative z-10 mt-10 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
+        <strong>&copy; 2026 WalangBrownOut.</strong>
+        All rights reserved.
+    </div>
+</footer>
 </body>
 </html>
 
