@@ -476,11 +476,176 @@
 
     <!-- Footer -->
     <footer class="relative z-10 mt-10 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
-    <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
-        <strong>&copy; 2026 WalangBrownOut.</strong>
-        All rights reserved.
-    </div>
-</footer>
+        <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
+            <strong>&copy; 2026 WalangBrownOut.</strong>
+            All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Interactive Calendar -->
+
+    <script>
+        const calendarHeader = document.getElementById('calendarHeader');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const selectedDateLabel = document.getElementById('selectedDateLabel');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+
+        if(calendarHeader){
+
+            const state = {
+                currentDate: new Date(),
+                selectedDate: new Date()
+            };
+
+            function formatMonthTitle(date){
+                return new Intl.DateTimeFormat(
+                    'en',
+                    {
+                        month:'long',
+                        year:'numeric'
+                    }
+                ).format(date);
+            }
+
+            function renderCalendar(){
+
+                const year = state.currentDate.getFullYear();
+                const month = state.currentDate.getMonth();
+
+                const firstDay = new Date(year,month,1);
+
+                const firstDayIndex = (firstDay.getDay()+6)%7;
+
+                const daysInMonth = new Date(year,month+1,0).getDate();
+
+                const prevMonthDays = new Date(year,month,0).getDate();
+
+                const today = new Date();
+
+                calendarHeader.textContent = formatMonthTitle(state.currentDate);
+
+                calendarGrid.innerHTML = "";
+
+                const cells = [];
+
+                for(let i=0;i<firstDayIndex;i++){
+
+                    cells.push({
+                        day:prevMonthDays-firstDayIndex+i+1,
+                        muted:true
+                    });
+
+                }
+
+                for(let day=1;day<=daysInMonth;day++){
+
+                    const isToday =
+                        day===today.getDate() &&
+                        month===today.getMonth() &&
+                        year===today.getFullYear();
+
+                    const isSelected =
+                        day===state.selectedDate.getDate() &&
+                        month===state.selectedDate.getMonth() &&
+                        year===state.selectedDate.getFullYear();
+
+                    cells.push({
+                        day,
+                        muted:false,
+                        isToday,
+                        isSelected
+                    });
+
+                }
+
+                while(cells.length<42){
+
+                    cells.push({
+                        day:cells.length-daysInMonth-firstDayIndex+1,
+                        muted:true
+                    });
+
+                }
+
+                cells.forEach(cell=>{
+
+                    const button=document.createElement("button");
+
+                    button.type="button";
+
+                    button.className=
+                        "calendar-cell"+
+                        (cell.muted?" muted":"")+
+                        (cell.isToday?" today":"")+
+                        (cell.isSelected?" selected":"");
+
+                    button.textContent=cell.day;
+
+                    if(!cell.muted){
+
+                        button.onclick=()=>{
+
+                            state.selectedDate=new Date(
+                                year,
+                                month,
+                                cell.day
+                            );
+
+                            renderCalendar();
+
+                        };
+
+                    }
+
+                    calendarGrid.appendChild(button);
+
+                });
+
+                selectedDateLabel.textContent =
+                    "Selected: "+
+                    state.selectedDate.toLocaleDateString(
+                        "en-US",
+                        {
+                            month:"short",
+                            day:"numeric",
+                            year:"numeric"
+                        }
+                    );
+
+            }
+
+            prevMonthBtn.onclick=()=>{
+
+                state.currentDate=
+                    new Date(
+                        state.currentDate.getFullYear(),
+                        state.currentDate.getMonth()-1,
+                        1
+                    );
+
+                renderCalendar();
+
+            };
+
+            nextMonthBtn.onclick=()=>{
+
+                state.currentDate=
+                    new Date(
+                        state.currentDate.getFullYear(),
+                        state.currentDate.getMonth()+1,
+                        1
+                    );
+
+                renderCalendar();
+
+            };
+
+            renderCalendar();
+
+        }
+    </script>
+
 </body>
 </html>
 
