@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
     $password = trim($_POST['password'] ?? '');
     $user = null;
 
- if ($pdo) {
+    if ($pdo) {
         try {
             $stmt = $pdo->prepare('SELECT user_id, name, email, password_hash, role FROM wbo_users WHERE email = ?');
             $stmt->execute([$email]);
@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
             $user = null;
         }
     }
-     if ($user && password_verify($password, $user['password_hash'])) {
+
+    if ($user && password_verify($password, $user['password_hash'])) {
         $otp = sprintf('%06d', mt_rand(100000, 999999));
 
         $_SESSION['temp_user'] = [
@@ -44,8 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
             'role' => normalize_role($user['role'])
         ];
         $_SESSION['otp_code'] = $otp;
-         
-              $success = "OTP sent! For demo purposes, your code is: <strong>$otp</strong>";
+        $success = "OTP sent! For demo purposes, your code is: <strong>$otp</strong>";
     } elseif (isset($demo_users[$email]) && $demo_users[$email]['password'] === $password) {
         $otp = sprintf('%06d', mt_rand(100000, 999999));
 
@@ -56,18 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_P
             'role' => $demo_users[$email]['role']
         ];
         $_SESSION['otp_code'] = $otp;
-
-        $success = "OTP sent! For demo purposes, your code is: <strong>$otp</strong>";
-         } else {
-        $error = 'Invalid email or password.';
-    }
-}
-     $_SESSION['otp_code'] = $otp;
-
         $success = "OTP sent! For demo purposes, your code is: <strong>$otp</strong>";
     } else {
         $error = 'Invalid email or password.';
     }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type']) && $_POST['action_type'] === 'verify_otp') {
     $user_otp = trim($_POST['otp'] ?? '');
