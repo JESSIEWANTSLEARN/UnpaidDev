@@ -2,6 +2,10 @@
 require_once 'session.php';
 check_access('user');
 
+if (!isset($pdo) || !$pdo instanceof PDO) {
+    die("Database connection not initialized.");
+}
+
 // Generate CSRF Token if not present
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
