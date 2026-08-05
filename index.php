@@ -646,6 +646,67 @@
         }
     </script>
 
+    <!-- Theme Toggle -->
+
+    <script>
+        (function(){
+
+            const savedTheme =
+                localStorage.getItem("wbo-theme");
+
+            const systemTheme =
+                window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light";
+
+            const initialTheme =
+                savedTheme || systemTheme;
+
+            document.documentElement.setAttribute(
+                "data-theme",
+                initialTheme
+            );
+
+            window.addEventListener("DOMContentLoaded",()=>{
+
+                const button =
+                    document.getElementById("themeToggle");
+
+                if(!button) return;
+
+                button.textContent =
+                    initialTheme==="dark"
+                        ? "☀️"
+                        : "🌙";
+
+                button.onclick=()=>{
+
+                    const next =
+                        document.documentElement.getAttribute("data-theme")==="dark"
+                            ? "light"
+                            : "dark";
+
+                    document.documentElement.setAttribute(
+                        "data-theme",
+                        next
+                    );
+
+                    localStorage.setItem(
+                        "wbo-theme",
+                        next
+                    );
+
+                    button.textContent =
+                        next==="dark"
+                            ? "☀️"
+                            : "🌙";
+
+                };
+
+            });
+
+        })();
+    </script>
 </body>
 </html>
 
