@@ -79,6 +79,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = "Password updated successfully!";
                 $message_type = "success";
                 $active_modal = ''; // Close modal on success
+                } else {
+                $message = "Incorrect current password.";
+                $message_type = "error";
+            }
+        }
+    }
 
 
 ?>
