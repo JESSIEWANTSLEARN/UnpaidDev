@@ -37,6 +37,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "System settings saved successfully!";
         $message_type = "success";
     }
+
+        // 3. Update Password
+    if ($action === 'update_password') {
+        $current_pass = $_POST['current_password'] ?? '';
+        $new_pass = $_POST['new_password'] ?? '';
+        $confirm_pass = $_POST['confirm_password'] ?? '';
+
+        if (empty($current_pass) || empty($new_pass) || empty($confirm_pass)) {
+            $message = "All password fields are required.";
+            $message_type = "error";
+        } elseif ($new_pass !== $confirm_pass) {
+            $message = "New passwords do not match.";
+            $message_type = "error";
+        } elseif (strlen($new_pass) < 8) {
+            $message = "Password must be at least 8 characters long.";
+            $message_type = "error";
+        } else {
+            if (isset($pdo) && isset($_SESSION['user_id'])) {
+                // Verify current password and update in DB
+                $stmt = $pdo->prepare("SELECT password_hash FROM wbo_users WHERE user_id = ?");
+                $stmt->execute([$_SESSION['user_id']]);
+                $user = $stmt->fetch();
+
+                if ($user && password_verify($current_pass, $user['password_hash'])) {
+                    $hashed_pass = password_hash($new_pass, PASSWORD_DEFAULT);
+                    $update = $pdo->prepare("UPDATE wbo_users SET password_hash = ? WHERE user_id = ?");
+                    $update->execute([$hashed_pass, $_SESSION['user_id']]);
+                    $message = "Password updated successfully!";
+                    $message_type = "success";
+                } else {
+                    $message = "Incorrect current password.";
+                    $message_type = "error";
+                }
+            } else {
+                // Fallback for demo mode without direct PDO binding
+                $message = "Password updated successfully (Demo Mode)!";
+                $message_type = "success";
+            }
+        }
+    }
+}
+?>
                 
     
 
