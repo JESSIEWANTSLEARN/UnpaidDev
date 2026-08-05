@@ -71,7 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("SELECT password_hash FROM wbo_users WHERE user_id = ?");
             $stmt->execute([$_SESSION['user_id']]);
             $user = $stmt->fetch();
+           if ($user && password_verify($current_pass, $user['password_hash'])) {
+                $hashed_pass = password_hash($new_pass, PASSWORD_DEFAULT);
+                $update = $pdo->prepare("UPDATE wbo_users SET password_hash = ? WHERE user_id = ?");
+                $update->execute([$hashed_pass, $_SESSION['user_id']]);
 
+                $message = "Password updated successfully!";
+                $message_type = "success";
+                $active_modal = ''; // Close modal on success
 
 
 ?>
