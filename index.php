@@ -15,45 +15,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WalangBrownout</title>
     <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
+    <link rel="stylesheet" href="index_style.css">
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #F2F2F2;
-            color: #0E5BA8;
-        }
-
-        header {
-            text-align: left;
-        }
-
-        footer {
-            text-align: center;
-        }
-
-        header nav {
-            background-color: #2C3E50;
-            padding: 10px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #0E5BA8;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #005fc5;
-        }
-    </style>
+    
 
 </head>
 <body>
