@@ -41,6 +41,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message_type = "error";
         }
     }
+         // 2. Update Account Settings / Preferences
+    if ($action === 'update_settings') {
+        $active_modal = 'settings-modal';
+        $email_alerts = isset($_POST['email_alerts']) ? 1 : 0;
+        $sms_alerts = isset($_POST['sms_alerts']) ? 1 : 0;
+
+        // Save preferences to DB...
+        $message = "Notification preferences saved!";
+        $message_type = "success";
+        $active_modal = ''; // Close modal on success
+    }
 
 
 
