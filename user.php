@@ -1,6 +1,5 @@
 <?php
 require_once 'session.php';
-global $pdo;
 check_access('user');
 
 // Generate CSRF Token if not present
