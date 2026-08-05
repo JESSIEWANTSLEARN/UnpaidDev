@@ -220,6 +220,54 @@
 
                     </div>
 
+                    <!-- Admin -->
+
+                    <div class="glass rounded-3xl p-5 fade-in-up-delay">
+
+                        <div class="flex justify-between">
+
+                            <div>
+
+                                <h3 class="font-bold text-slate-900">
+
+                                    Admin Workflow
+
+                                </h3>
+
+                                <p class="text-sm text-slate-500">
+
+                                    Fast approvals and routing
+
+                                </p>
+
+                            </div>
+
+                            <span class="text-blue-600 font-bold">
+
+                                Ready
+
+                            </span>
+
+                        </div>
+
+                        <div class="mt-4 flex items-center gap-3">
+
+                            <div class="flex-1 rounded-full bg-slate-100 p-1">
+
+                                <div class="h-2 w-3/4 rounded-full bg-slate-900"></div>
+
+                            </div>
+
+                            <span class="font-semibold">
+
+                                75%
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
             </div>
