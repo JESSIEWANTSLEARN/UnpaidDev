@@ -58,24 +58,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (strlen($new_pass) < 8) {
             $message = "Password must be at least 8 characters long.";
             $message_type = "error";
-        } else {
-            $stmt = $pdo->prepare("SELECT password_hash FROM wbo_users WHERE user_id = ?");
-            $stmt->execute([$_SESSION['user_id']]);
-            $user = $stmt->fetch();
+            //Handle password update logic here, including verifying the current password and updating it in the database.
 
-            if ($user && password_verify($current_pass, $user['password_hash'])) {
-                $hashed_pass = password_hash($new_pass, PASSWORD_DEFAULT);
-                $update = $pdo->prepare("UPDATE wbo_users SET password_hash = ? WHERE user_id = ?");
-                $update->execute([$hashed_pass, $_SESSION['user_id']]);
-                $message = "Password updated successfully!";
-                $message_type = "success";
-            } else {
-                $message = "Incorrect current password.";
-                $message_type = "error";
-            }
-            $message = "Security credentials updated successfully!";
-            $message_type = "success";
-        }
+            ////ISSUE IS HERE BUG ///
+       } elseif ($pdo instanceof PDO) {
+    $stmt = $pdo->prepare("SELECT password_hash FROM wbo_users WHERE user_id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($current_pass, $user['password_hash'])) {
+        $hashed_pass = password_hash($new_pass, PASSWORD_DEFAULT);
+        $update = $pdo->prepare("UPDATE wbo_users SET password_hash = ? WHERE user_id = ?");
+        $update->execute([$hashed_pass, $_SESSION['user_id']]);
+        $message = "Password updated successfully!";
+        $message_type = "success";
+    } else {
+        $message = "Incorrect current password.";
+        $message_type = "error";
+    }
+} else {
+    $message = "Service temporarily unavailable. Please try again later.";
+    $message_type = "error";
+}
+
+
     }
 }
 ?>
