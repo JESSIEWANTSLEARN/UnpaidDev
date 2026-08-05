@@ -6,6 +6,10 @@ check_access('user');
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+$message = '';
+$message_type = '';
+$active_modal = ''; // Tracks which modal to reopen on error
+
 
 
 
