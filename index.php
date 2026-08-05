@@ -18,29 +18,72 @@
     <link rel="stylesheet" href="index_style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     
-
 </head>
-<body>
+<body class="app-shell text-slate-800">
+
+    <div class="bg-aurora" aria-hidden="true">
+        <div class="aurora-orb one"></div>
+        <div class="aurora-orb two"></div>
+    </div>
+
     <!-- Header -->
-    <header>
+    <header class="relative z-10">
+
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+
             <div class="flex items-center space-x-3">
-                <img src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png" alt="Walang Brown Out Logo" width="45" height="45" loading="lazy" style="max-width:100%;height:auto;">
-                
+
+                <img src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png"
+                    alt="Walang Brown Out Logo"
+                    width="45"
+                    height="45">
+
                 <div class="hidden sm:block leading-tight">
-                    <span class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]">Republic of the Philippines</span>
-                    <div class="sss-text-blue text-lg font-extrabold">WALANG BROWN OUT</div>
+
+                    <span class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]">
+
+                        Republic of the Philippines
+
+                    </span>
+
+                    <div class="text-lg font-extrabold text-blue-700">
+
+                        WALANG BROWN OUT
+
+                    </div>
+
                 </div>
+
             </div>
 
-            <a href="login.php" class="btn">
-                Login to Portal
-            </a>
+            <div class="flex items-center gap-3">
+
+                <button id="themeToggle"
+                        type="button"
+                        class="theme-toggle hidden md:inline-flex items-center gap-2">
+
+                    🌙
+
+                </button>
+
+                <span class="hidden md:flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm text-slate-600 shadow-sm">
+
+                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+
+                    Live System
+
+                </span>
+
+                <a href="login.php" class="btn">
+
+                    Login to Portal
+
+                </a>
+
+            </div>
+
         </div>
-        
-        <nav>
-            
-        </nav>
+
     </header>
 
     <!-- Main Content -->
