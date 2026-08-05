@@ -151,7 +151,7 @@
                         <span class="accent-pill">Real-Time Dashboard</span>
 
                     </div>
-                    
+
                     <!-- ABOUT -->
 
                     <div class="mt-10">
@@ -182,7 +182,43 @@
 
                 <div class="space-y-4">
 
-                    
+                <!-- Warehouse -->
+
+                    <div class="glass rounded-3xl p-5 fade-in-up-delay">
+
+                        <div class="flex justify-between">
+
+                            <div>
+
+                                <h3 class="font-bold text-slate-900">
+
+                                    Warehouse Console
+
+                                </h3>
+
+                                <p class="text-sm text-slate-500">
+
+                                    Monitoring all warehouse zones
+
+                                </p>
+
+                            </div>
+
+                            <span class="text-emerald-600 font-bold">
+
+                                Active
+
+                            </span>
+
+                        </div>
+
+                        <div class="mt-5 h-2 rounded-full bg-slate-100">
+
+                            <div class="h-2 w-4/5 rounded-full bg-blue-600"></div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
