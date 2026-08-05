@@ -1,3 +1,9 @@
+<!--
+    Index.php - Main landing page for the WalangBrownout portal system.
+    This page serves as the entry point for users, providing an overview of the system's features
+    and a navigation menu to access different sections of the portal.
+-->
+
 <?php
 
 ?>
