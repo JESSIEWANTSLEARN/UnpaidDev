@@ -151,6 +151,30 @@
                         <span class="accent-pill">Real-Time Dashboard</span>
 
                     </div>
+                    
+                    <!-- ABOUT -->
+
+                    <div class="mt-10">
+
+                        <h2 class="text-2xl font-bold text-slate-900">
+
+                            About Us
+
+                        </h2>
+
+                        <p class="mt-3 text-slate-600 leading-relaxed">
+
+                            Walang Brown Out provides a centralized inventory,
+                            warehouse, supplier, and user management system built
+                            to improve operational efficiency. The portal enables
+                            businesses to securely manage stock movement,
+                            warehouse operations, employee workflows, and
+                            administrative tasks through a modern and intuitive
+                            interface.
+
+                        </p>
+
+                    </div>
 
                 </div>
 
