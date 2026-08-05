@@ -78,10 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-<<<<<<< HEAD
 ?>
-=======
->>>>>>> 3f1a6e3 (update files)
                 
     
 
