@@ -268,6 +268,78 @@
 
                     </div>
 
+                    <!-- Calendar -->
+
+                    <div class="glass rounded-3xl p-5 fade-in-up-delay">
+
+                        <div class="flex justify-between items-center">
+
+                            <div>
+
+                                <h3 class="font-bold text-slate-900">
+
+                                    Calendar
+
+                                </h3>
+
+                                <p class="text-xs text-slate-500">
+
+                                    Interactive Schedule
+
+                                </p>
+
+                            </div>
+
+                            <div class="flex gap-2">
+
+                                <button id="prevMonthBtn"
+                                    class="rounded-full border border-slate-200 px-3 py-1">
+
+                                    ←
+
+                                </button>
+
+                                <button id="nextMonthBtn"
+                                    class="rounded-full border border-slate-200 px-3 py-1">
+
+                                    →
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div id="calendarHeader"
+                            class="mt-4 text-center font-semibold">
+
+                        </div>
+
+                        <div
+                            class="grid grid-cols-7 gap-1 mt-3 text-center text-xs font-semibold text-slate-500">
+
+                            <span>Mo</span>
+                            <span>Tu</span>
+                            <span>We</span>
+                            <span>Th</span>
+                            <span>Fr</span>
+                            <span>Sa</span>
+                            <span>Su</span>
+
+                        </div>
+
+                        <div id="calendarGrid"
+                            class="grid grid-cols-7 gap-1 mt-2">
+
+                        </div>
+
+                        <div id="selectedDateLabel"
+                            class="mt-3 text-center text-xs text-slate-500">
+
+                        </div>
+
+                    </div>
+
                 </div>
 
             </div>
