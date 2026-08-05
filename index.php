@@ -100,7 +100,57 @@
 
                 <div>
 
+                    <span class="inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-700">
 
+                        Enterprise Portal
+
+                    </span>
+
+                    <h1 class="text-4xl font-extrabold mt-5 leading-tight text-slate-900">
+
+                        Walang Brown Out
+                        <br>
+                        Portal System
+
+                    </h1>
+                    
+                    <p class="text-slate-600 mt-5 max-w-2xl">
+
+                        A secure, role-based warehouse and inventory management
+                        platform designed for administrators, warehouse staff,
+                        suppliers, and employees.
+
+                    </p>
+
+                    <div class="flex flex-wrap gap-3 mt-6">
+
+                        <a href="login.php"
+                            class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold transition hover:scale-105">
+
+                            Sign In
+
+                        </a>
+
+                        <a href="#features"
+                            class="border border-slate-300 px-6 py-3 rounded-xl font-semibold hover:bg-slate-100">
+
+                            Explore Features
+
+                        </a>
+
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-2">
+
+                        <span class="accent-pill">Secure Access</span>
+
+                        <span class="accent-pill">Warehouse Control</span>
+
+                        <span class="accent-pill">Inventory Tracking</span>
+
+                        <span class="accent-pill">Real-Time Dashboard</span>
+
+                    </div>
 
                 </div>
 
