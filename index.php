@@ -5,7 +5,7 @@
 -->
 
 <?php
-
+    require_once 'session.php';
 ?>
 
 <!DOCTYPE html>
@@ -283,7 +283,7 @@
 
                             <div id="selectedDateLabel" class="mt-3 text-center text-xs text-slate-500"></div>
                         </div>
-                        
+
                     </div>
 
                 </div>

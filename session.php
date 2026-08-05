@@ -57,3 +57,4 @@ function check_access($required_role)
         redirect_to_dashboard($user_role);
     }
 }
+?>
