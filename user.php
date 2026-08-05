@@ -36,6 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "Account details updated successfully!";
             $message_type = "success";
             $active_modal = ''; // Close modal on success
+              } else {
+            $message = "Please fill in all required fields.";
+            $message_type = "error";
+        }
+    }
 
 
 
