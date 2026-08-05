@@ -94,7 +94,25 @@
 
         <section class="gradient-card rounded-[20px] p-6 md:p-8 border border-slate-200 fade-in-up hover-lift shadow-[0_14px_35px_rgba(15,23,42,0.05)]">
 
-            
+            <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-8">
+
+                <!-- LEFT -->
+
+                <div>
+
+
+
+                </div>
+
+                <!-- RIGHT SIDE -->
+
+                <div class="space-y-4">
+
+                    
+
+                </div>
+
+            </div>
 
         </section>
 
