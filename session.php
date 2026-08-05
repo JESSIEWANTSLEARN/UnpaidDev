@@ -1,9 +1,10 @@
-<?php   
+<?php
 // session.php
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 require_once __DIR__ . '/config.php';
 
 function normalize_role($role)
@@ -20,6 +21,7 @@ function normalize_role($role)
 
     return $map[$role] ?? $role;
 }
+
 function redirect_to_dashboard($role)
 {
     $role = normalize_role($role);
@@ -31,25 +33,27 @@ function redirect_to_dashboard($role)
         'staff' => 'staff.php',
         'user' => 'user.php'
     ];
- $target = $redirects[$role] ?? 'user.php';
+
+    $target = $redirects[$role] ?? 'user.php';
     header('Location: ' . $target);
     exit();
 }
+
 function check_access($required_role)
 {
     if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
         header('Location: login.php');
-        exit
-            
+        exit();
+    }
+
     $user_role = normalize_role($_SESSION['role'] ?? 'user');
     $required_role = normalize_role($required_role);
-    }
-        if ($user_role === 'super_admin') {
+
+    if ($user_role === 'super_admin') {
         return true;
     }
+
     if ($user_role !== $required_role) {
         redirect_to_dashboard($user_role);
     }
 }
-
-?>
