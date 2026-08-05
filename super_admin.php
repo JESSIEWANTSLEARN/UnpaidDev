@@ -37,8 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "System settings saved successfully!";
         $message_type = "success";
     }
-
-        // 3. Update Password
+    // 3. Update Password
     if ($action === 'update_password') {
         $current_pass = $_POST['current_password'] ?? '';
         $new_pass = $_POST['new_password'] ?? '';
@@ -78,11 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-?>
-                
-    
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

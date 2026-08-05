@@ -1,4 +1,5 @@
-<?php 
+<?php
+// config.php
 $host = 'localhost';
 $dbname = 'walangbrownout';
 $username = 'root';
@@ -20,5 +21,3 @@ try {
     error_log('Database connection failed: ' . $e->getMessage());
     $pdo = null;
 }
-
-?>
