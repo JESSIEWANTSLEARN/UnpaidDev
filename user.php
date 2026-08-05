@@ -85,6 +85,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+        // 4. Submit Support Ticket
+    if ($action === 'submit_support') {
+        $active_modal = 'support-modal';
+        $subject = trim($_POST['subject'] ?? '');
+        $message_text = trim($_POST['message'] ?? '');
+
+        if (!empty($subject) && !empty($message_text)) {
+            // Save ticket to DB...
+            $message = "Your support ticket has been submitted. Our team will get back to you shortly!";
+            $message_type = "success";
+            $active_modal = ''; // Close modal on success
+        } else {
+            $message = "Please fill in both the subject and message fields.";
+            $message_type = "error";
+        }
+    }
+}
 
 
 ?>
