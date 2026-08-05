@@ -88,7 +88,19 @@
 
     <!-- Main Content -->
     <main>
-        <aside class="w-64 bg-white rounded-3xl shadow-md border border-slate-200 p-5">
+        <div class="flex-1 space-y-6">
+
+        <!-- HERO -->
+
+        <section class="gradient-card rounded-[20px] p-6 md:p-8 border border-slate-200 fade-in-up hover-lift shadow-[0_14px_35px_rgba(15,23,42,0.05)]">
+
+            
+
+        </section>
+
+        <section id="features" class="grid md:grid-cols-3 gap-5">
+
+            <aside class="w-64 bg-white rounded-3xl shadow-md border border-slate-200 p-5">
             <h2 class="text-xs font-bold uppercase tracking-[0.3em] text-slate-500 mb-4">
                 Menu
             </h2>
@@ -166,9 +178,9 @@
                     <p class="text-sm text-slate-600">Monitor the system with clear, professional dashboards designed for daily use.</p>
                 </div>
             </section>
-        </div>
+            </div>
         
-        <aside class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4">
+            <aside class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4">
                 <div class="mb-4">
                     <div class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Calendar</div>
                     <div class="mt-2 flex items-center gap-2">
@@ -206,7 +218,12 @@
                     <div id="selected-date-event" class="text-slate-600 mt-1">Choose a highlighted date.</div>
                 </div>
             </aside>
+        </div>
+
         </section>
+
+    </div>
+        
     </main>
 
     <!-- Footer -->
