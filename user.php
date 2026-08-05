@@ -27,6 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = trim($_POST['email'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
 
+         if (!empty($name) && !empty($email)) {
+            $stmt = $pdo->prepare("UPDATE wbo_users SET name = ?, email = ? WHERE user_id = ?");
+            $stmt->execute([$name, $email, $_SESSION['user_id']]);
+            $_SESSION['name'] = $name;
+            $_SESSION['email'] = $email;
+
+            $message = "Account details updated successfully!";
+            $message_type = "success";
+            $active_modal = ''; // Close modal on success
 
 
 
