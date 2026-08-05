@@ -10,6 +10,16 @@ $message = '';
 $message_type = '';
 $active_modal = ''; // Tracks which modal to reopen on error
 
+// Handle Form Submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // CSRF Protection Check
+    $token = $_POST['csrf_token'] ?? '';
+    if (!hash_equals($_SESSION['csrf_token'], $token)) {
+        die("Invalid CSRF token submission.");
+    }
+
+    $action = $_POST['action'] ?? '';
 
 
 

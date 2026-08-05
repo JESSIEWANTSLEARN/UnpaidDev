@@ -86,12 +86,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Admin Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f4f7fb;
+            --panel: rgba(255, 255, 255, 0.8);
+            --panel-strong: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: rgba(148, 163, 184, 0.25);
+            --primary: #4f46e5;
+            --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #07111f;
+            --panel: rgba(15, 23, 42, 0.82);
+            --panel-strong: #0f172a;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(148, 163, 184, 0.18);
+            --primary: #818cf8;
+            --shadow: 0 18px 45px rgba(2, 6, 23, 0.45);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle {
+            border: 1px solid var(--border);
+            background: var(--panel-strong);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 0.45rem 0.8rem;
+        }
+
+        .bg-white, .bg-slate-50, .bg-gray-50, .bg-gray-100 {
+            background-color: var(--panel-strong) !important;
+        }
+
+        .text-gray-800, .text-gray-700, .text-slate-900 {
+            color: var(--text) !important;
+        }
+
+        .text-gray-500, .text-gray-400, .text-slate-500, .text-slate-400 {
+            color: var(--muted) !important;
+        }
+
+        .border-gray-200, .border-gray-100, .border-slate-200 {
+            border-color: var(--border) !important;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen">
+<body class="app-shell min-h-screen">
 
     <!-- HEADER / NAVBAR -->
-    <header class="bg-indigo-900 text-white sticky top-0 z-40 shadow">
+    <header class="glass sticky top-0 z-40 rounded-b-2xl">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
             <!-- BRANDING -->
@@ -101,7 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <!-- 3-LINE HAMBURGER BUTTON & DROPDOWN -->
-            <div class="relative">
+            <div class="flex items-center gap-2 relative">
+                <button id="themeToggle" type="button" class="theme-toggle">🌙</button>
                 <button id="hamburger-btn"
                     class="p-2 rounded-lg text-indigo-100 hover:bg-indigo-800 focus:outline-none flex items-center space-x-2 border border-indigo-800">
                     <span class="text-xs font-semibold text-indigo-200 hidden sm:inline">Menu</span>
@@ -359,6 +427,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById(id).classList.add('hidden');
         }
     </script>
+<script>
+    (function () {
+        const savedTheme = localStorage.getItem('wbo-theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const initialTheme = savedTheme || systemTheme;
+        document.documentElement.setAttribute('data-theme', initialTheme);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.getElementById('themeToggle');
+            if (button) {
+                button.textContent = initialTheme === 'dark' ? '☀️' : '🌙';
+                button.addEventListener('click', () => {
+                    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('wbo-theme', next);
+                    button.textContent = next === 'dark' ? '☀️' : '🌙';
+                });
+            }
+        });
+    })();
+</script>
 </body>
 
 </html>
