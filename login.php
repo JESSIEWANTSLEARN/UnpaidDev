@@ -7,13 +7,7 @@ if (!empty($_SESSION['logged_in']) && !empty($_SESSION['role'])) {
 //tester data can be change later on.
 $error = '';
 $success = '';
-$demo_users = [
-    'admin@wbo.ph' => ['id' => 1, 'password' => 'admin123', 'name' => 'Jerome Raymundo', 'role' => 'super_admin'],
-    'warehouse@wbo.ph' => ['id' => 2, 'password' => 'warehouse123', 'name' => 'Jessie Palarao', 'role' => 'warehouse_admin'],
-    'hr@wbo.ph' => ['id' => 3, 'password' => 'hr123', 'name' => 'Jhon Paul Villasanta', 'role' => 'staff_admin'],
-    'staff@wbo.ph' => ['id' => 4, 'password' => 'staff123', 'name' => 'Taironne James Sieteriales', 'role' => 'staff'],
-    'user@wbo.ph' => ['id' => 5, 'password' => 'user123', 'name' => 'John Lorena', 'role' => 'user']
-];
+
 
 if (isset($_GET['action']) && $_GET['action'] === 'reset_otp') {
     unset($_SESSION['temp_user'], $_SESSION['otp_code']);
