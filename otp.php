@@ -8,10 +8,27 @@ if (!isset($_SESSION['pending_user'])) {
 
 if (empty($_SESSION['generated_otp'])) {
     $_SESSION['generated_otp'] = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
-}
+
+
+    
+    require_once __DIR__ . '/mailer.php';
+    $sent = send_otp_email(
+        $_SESSION['pending_user']['email'] ?? '',
+        $_SESSION['pending_user']['name'] ?? '',
+        $_SESSION['generated_otp']
+    );
+    $_SESSION['otp_send_failed'] = !$sent;
+
     $otp_code = $_SESSION['generated_otp'];
-$user_email = $_SESSION['pending_user']['username'] ?? $_SESSION['pending_user']['email'] ?? 'user@wbo.ph';
+$user_email = $_SESSION['pending_user']['email'] ?? ($_SESSION['pending_user']['username'] ?? 'user@wbo.ph');
 $otp_error = '';
+
+
+}
+
+
+
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_pin = trim($_POST['otp_pin'] ?? '');
