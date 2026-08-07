@@ -21,3 +21,13 @@ try {
     error_log('Database connection failed: ' . $e->getMessage());
     $pdo = null;
 }
+
+// --- Gmail SMTP settings for sending OTP emails ---
+// SMTP_USERNAME must be a Gmail address with 2-Step Verification enabled.
+// SMTP_APP_PASSWORD must be a 16-character Google App Password (NOT your normal Gmail password).
+// Generate one at: https://myaccount.google.com/apppasswords
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USERNAME', 'yourwebsite@gmail.com');
+define('SMTP_APP_PASSWORD', 'xxxx xxxx xxxx xxxx');
+define('SMTP_FROM_NAME', 'WalangBrownout');
