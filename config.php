@@ -1,7 +1,7 @@
 <?php
 // config.php
 $host = 'localhost';
-$dbname = 'walangbrownout';
+$dbname = 'WalangBrownout';
 $username = 'root';
 $password = '';
 $charset = 'utf8mb4';
