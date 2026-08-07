@@ -27,3 +27,25 @@ function send_otp_email(string $toEmail, string $toName, string $otpCode): bool
  
     $mail = new PHPMailer(true);
  
+    try {
+        $mail->isSMTP();
+        $mail->Host = SMTP_HOST;
+        $mail->SMTPAuth = true;
+        $mail->Username = SMTP_USERNAME;
+        $mail->Password = SMTP_APP_PASSWORD;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = SMTP_PORT;
+ 
+        $mail->setFrom(SMTP_USERNAME, SMTP_FROM_NAME);
+        $mail->addAddress($toEmail, $toName);
+ 
+        $mail->isHTML(true);
+        $mail->Subject = 'Your WalangBrownout verification code';
+        $mail->Body = "Hi " . htmlspecialchars($toName ?: 'there') . ",<br><br>"
+            . "Your OTP code is: <strong style=\"font-size:20px;\">" . htmlspecialchars($otpCode) . "</strong><br><br>"
+            . "Enter this code to finish logging in. If you didn't request this, you can ignore this email.";
+        $mail->AltBody = "Your OTP code is: $otpCode";
+ 
+        $mail->send();
+        return true;
+ 
