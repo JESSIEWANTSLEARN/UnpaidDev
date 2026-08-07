@@ -10,7 +10,7 @@ require_once __DIR__ . '/config.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
  
-**
+/**
  * Sends a one-time password code to the given email address via Gmail SMTP.
  *
  * @param string $toEmail Recipient's own email address (not a hardcoded one).
