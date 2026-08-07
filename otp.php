@@ -1,141 +1,307 @@
 <?php
+
 require_once __DIR__ . '/session.php';
 
-if (!isset($_SESSION['pending_user'])) {
+
+// ==========================================
+// MAKE SURE USER CAME FROM LOGIN
+// ==========================================
+
+if (
+    !isset($_SESSION['pending_user']) ||
+    !isset($_SESSION['otp_code'])
+) {
     header('Location: login.php');
     exit();
 }
 
-if (empty($_SESSION['generated_otp'])) {
-    $_SESSION['generated_otp'] = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+
+$error = '';
 
 
-    
-    require_once __DIR__ . '/mailer.php';
-    $sent = send_otp_email(
-        $_SESSION['pending_user']['email'] ?? '',
-        $_SESSION['pending_user']['name'] ?? '',
-        $_SESSION['generated_otp']
-    );
-    $_SESSION['otp_send_failed'] = !$sent;
-
-    $otp_code = $_SESSION['generated_otp'];
-$user_email = $_SESSION['pending_user']['email'] ?? ($_SESSION['pending_user']['username'] ?? 'user@wbo.ph');
-$otp_error = '';
-
-
-}
-
-
-
-
+// ==========================================
+// VERIFY OTP
+// ==========================================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user_pin = trim($_POST['otp_pin'] ?? '');
-    
-     if ($user_pin === $otp_code) {
+
+    $enteredOtp = trim($_POST['otp'] ?? '');
+
+
+    // Check if OTP expired
+    if (
+        isset($_SESSION['otp_expiry']) &&
+        time() > $_SESSION['otp_expiry']
+    ) {
+
+        $error = 'Your OTP has expired. Please login again.';
+
+        unset(
+            $_SESSION['pending_user'],
+            $_SESSION['otp_code'],
+            $_SESSION['otp_expiry']
+        );
+
+    } elseif (
+        hash_equals(
+            (string) $_SESSION['otp_code'],
+            (string) $enteredOtp
+        )
+    ) {
+
+        // ==========================================
+        // OTP CORRECT - COMPLETE LOGIN
+        // ==========================================
+
         $_SESSION['logged_in'] = true;
-        $_SESSION['user_id'] = $_SESSION['pending_user']['id'] ?? 1;
-        $_SESSION['role'] = normalize_role($_SESSION['pending_user']['role'] ?? 'user');
-        $_SESSION['name'] = $_SESSION['pending_user']['name'] ?? '';
-        $_SESSION['username'] = $_SESSION['pending_user']['username'] ?? '';
 
-         
-        unset($_SESSION['pending_user'], $_SESSION['generated_otp']);
-        redirect_to_dashboard($_SESSION['role']);
+        $_SESSION['user_id'] =
+            $_SESSION['pending_user']['id'];
+
+        $_SESSION['name'] =
+            $_SESSION['pending_user']['name'];
+
+        $_SESSION['email'] =
+            $_SESSION['pending_user']['email'];
+
+        $_SESSION['role'] =
+            normalize_role(
+                $_SESSION['pending_user']['role']
+            );
+
+
+        // Remove temporary OTP data
+        unset(
+            $_SESSION['pending_user'],
+            $_SESSION['otp_code'],
+            $_SESSION['otp_expiry']
+        );
+
+
+        // Redirect based on role
+        redirect_to_dashboard(
+            $_SESSION['role']
+        );
+
+        exit();
+
     } else {
-        $otp_error = 'Invalid verification code. Please try again.';
-    }
-}
 
+        $error =
+            'Invalid OTP code. Please check your email and try again.';
+    }
+
+}
 
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WalangBrownout</title>
-    <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        WalangBrownout - Verify OTP
+    </title>
+
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: #F2F2F2;
             color: #0E5BA8;
+            margin: 0;
         }
 
         header {
-            margin-bottom: 20px;
             text-align: left;
-        }
-
-        footer {
-            text-align: center;
         }
 
         header nav {
             background-color: #2C3E50;
             padding: 10px;
         }
-        
+
+        footer {
+            text-align: center;
+        }
+
+        .sss-blue {
+            background-color: #0E5BA8;
+        }
+
     </style>
 
 </head>
+
+
 <body>
-    <!-- FLOATING TOP NOTIFICATION POP-UP -->
-    <div class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md animate-notification">
-        <div
-            class="bg-white border-l-4 border-blue-600 rounded-xl shadow-xl p-4 border border-gray-100 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div
-                    class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl shrink-0">
-                    📩
-                </div>
-                <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">New Message Notification
-                    </h4>
-                    <p class="text-xs text-gray-700 font-medium mt-0.5">
-                        Your OTP Code is: <span
-                            class="font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded text-sm tracking-wider"></span>
-                    </p>
-                </div>
+
+
+<header>
+
+    <div
+        class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between"
+    >
+
+        <div>
+
+            <span
+                class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]"
+            >
+                Republic of the Philippines
+            </span>
+
+            <div
+                class="text-blue-700 text-lg font-extrabold"
+            >
+                WALANG BROWN OUT
             </div>
-            <button onclick="this.parentElement.parentElement.remove()"
-                class="text-gray-400 hover:text-gray-600 text-sm font-bold pl-2">✕</button>
+
         </div>
+
     </div>
 
-    <header>
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <img src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png" alt="Walang Brown Out Logo" width="45" height="45" loading="lazy" style="max-width:100%;height:auto;">
-                
-                <div class="hidden sm:block leading-tight">
-                    <span class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]">Republic of the Philippines</span>
-                    <div class="sss-text-blue text-lg font-extrabold">WALANG BROWN OUT</div>
-                </div>
-            </div>
+    <nav></nav>
+
+</header>
+
+
+
+<main
+    class="max-w-md mx-auto mt-16 bg-white shadow-lg rounded-xl p-8"
+>
+
+
+    <div class="text-center mb-6">
+
+        <div class="text-4xl mb-3">
+            📩
         </div>
-        <nav>
-            
-        </nav>
-    </header>
 
-    <main>
-        
-    </main>
+        <h2
+            class="text-2xl font-bold text-gray-800"
+        >
+            Enter OTP Code
+        </h2>
 
-    <footer>
-        <p><strong>&copy; 2026 WalangBrownout. All rights reserved.</strong></p>
-    </footer>
+        <p
+            class="text-xs text-gray-500 mt-2"
+        >
+            We sent a 6-digit verification code to:
+        </p>
+
+        <p
+            class="text-sm font-bold text-blue-700 mt-1"
+        >
+            <?= htmlspecialchars(
+                $_SESSION['pending_user']['email']
+            ) ?>
+        </p>
+
+    </div>
+
+
+
+    <?php if (!empty($error)): ?>
+
+        <div
+            class="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-lg mb-4"
+        >
+
+            <?= htmlspecialchars($error) ?>
+
+        </div>
+
+    <?php endif; ?>
+
+
+
+    <form
+        action="otp.php"
+        method="POST"
+        class="space-y-4"
+    >
+
+
+        <div>
+
+            <label
+                class="block text-xs font-bold text-gray-700 mb-2 text-center"
+            >
+                6-Digit Verification Code
+            </label>
+
+
+            <input
+                type="text"
+                name="otp"
+                maxlength="6"
+                minlength="6"
+                pattern="[0-9]{6}"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                required
+                autofocus
+                placeholder="123456"
+                class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 border-2 border-blue-400 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+
+        </div>
+
+
+
+        <button
+            type="submit"
+            class="w-full sss-blue hover:bg-blue-800 text-white font-bold py-3 rounded-xl text-sm transition shadow"
+        >
+            Verify & Sign In
+        </button>
+
+
+    </form>
+
+
+
+    <div class="text-center mt-5">
+
+        <a
+            href="login.php?action=reset"
+            class="text-xs text-red-500 hover:underline"
+        >
+            Cancel / Use Different Account
+        </a>
+
+    </div>
+
+
+</main>
+
+
+
+<footer class="mt-10">
+
+    <p>
+
+        <strong>
+            &copy; 2026 WalangBrownout.
+            All rights reserved.
+        </strong>
+
+    </p>
+
+</footer>
+
+
 </body>
+
 </html>
-
-<?php
-
-?>
