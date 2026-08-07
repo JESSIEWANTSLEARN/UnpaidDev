@@ -48,4 +48,8 @@ function send_otp_email(string $toEmail, string $toName, string $otpCode): bool
  
         $mail->send();
         return true;
- 
+ } catch (Exception $e) {
+        error_log('OTP email failed: ' . $mail->ErrorInfo);
+        return false;
+    }
+}
