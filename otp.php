@@ -5,7 +5,9 @@ require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/audit.php';
 
-
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    die('Database connection is unavailable.');
+}
 // ==========================================
 // MAKE SURE USER CAME FROM LOGIN
 // ==========================================
