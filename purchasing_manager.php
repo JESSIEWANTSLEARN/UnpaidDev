@@ -1,7 +1,10 @@
 <?php
-require_once 'session.php';
-global $pdo;
-check_access('staff');
+
+require_once __DIR__ . '/session.php';
+
+check_access('Purchasing_Manager');
+
+
 
 // Database connection assumed via db.php or session.php
 // require_once 'db.php';

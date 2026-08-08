@@ -1,6 +1,8 @@
 <?php
-require_once 'session.php';
-check_access('staff_admin');
+require_once __DIR__ . '/session.php';
+
+check_access('Operations_Manager');
+?>
 
 // Database connection assumed via db.php or session.php
 // require_once 'db.php';
