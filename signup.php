@@ -588,7 +588,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
 
             <p class="text-center text-sm text-gray-600 mt-4">
-                Already have an account? <a href="#" class="text-blue-500 hover:underline">Login here</a>
+                Already have an account? <a href="login.php" class="text-blue-500 hover:underline">Login here</a>
             </p>
         </form>
 

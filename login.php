@@ -499,7 +499,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
 
             <p class="text-center text-sm text-gray-600 mt-4">
-                Sign up if you don't have an account <a href="#" class="text-blue-500 hover:underline">Create Account</a>
+                Sign up if you don't have an account <a href="signup.php" class="text-blue-500 hover:underline">Create Account</a>
             </p>
         </form>
 
