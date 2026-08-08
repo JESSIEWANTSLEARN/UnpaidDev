@@ -130,11 +130,262 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Passwords do not match.';
     }
 
+    else {
+
+        try {
+
+            // ==================================
+            // CHECK IF EMAIL ALREADY EXISTS
+            // ==================================
+
+            $stmt = $pdo->prepare(
+                "SELECT user_id
+                FROM WBO_Users
+                WHERE email = ?
+                LIMIT 1"
+            );
+
+            $stmt->execute([
+                $email
+            ]);
+
+            $existingUser =
+                $stmt->fetch();
 
 
+            if ($existingUser) {
 
+                $error =
+                    'This email address is already registered.';
+            }
+
+
+            else {
+
+                // ==================================
+                // HASH PASSWORD
+                // ==================================
+
+                $passwordHash =
+                    password_hash(
+                        $password,
+                        PASSWORD_DEFAULT
+                    );
+
+
+                // ==================================
+                // PUBLIC USERS ARE ALWAYS CLIENTS
+                // ==================================
+
+                $role =
+                    'System_User';
+
+                $accountStatus =
+                    'pending_verification';
+
+
+                // ==================================
+                // START DATABASE TRANSACTION
+                // ==================================
+
+                $pdo->beginTransaction();
+
+
+                // ==================================
+                // CREATE ACCOUNT
+                // ==================================
+
+                $stmt = $pdo->prepare(
+                    "INSERT INTO WBO_Users
+                    (
+                        name,
+                        email,
+                        contact_number,
+                        password_hash,
+                        role,
+                        account_status,
+                        email_verified_at
+                    )
+                    VALUES
+                    (
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        NULL
+                    )"
+                );
+
+
+                $stmt->execute([
+
+                    $name,
+
+                    $email,
+
+                    $contactNumber,
+
+                    $passwordHash,
+
+                    $role,
+
+                    $accountStatus
+
+                ]);
+
+
+                $userId =
+                    (int) $pdo->lastInsertId();
+
+
+                // ==================================
+                // GENERATE SIGNUP OTP
+                // ==================================
+
+                $otp =
+                    (string) random_int(
+                        100000,
+                        999999
+                    );
+
+
+                // ==================================
+                // SAVE TEMPORARY SIGNUP SESSION
+                // ==================================
+
+                $_SESSION['signup_pending_user'] = [
+
+                    'id' =>
+                        $userId,
+
+                    'name' =>
+                        $name,
+
+                    'email' =>
+                        $email,
+
+                    'role' =>
+                        $role
+
+                ];
+
+
+                $_SESSION['signup_otp_code'] =
+                    $otp;
+
+
+                // OTP expires after 5 minutes
+                $_SESSION['signup_otp_expiry'] =
+                    time() + 300;
+
+
+                // No resends used yet
+                $_SESSION['signup_otp_resend_count'] =
+                    0;
+
+
+                $_SESSION['signup_otp_last_sent'] =
+                    time();
+
+
+                // ==================================
+                // SEND VERIFICATION EMAIL
+                // ==================================
+
+                $sent =
+                    send_otp_email(
+                        $email,
+                        $name,
+                        $otp
+                    );
+
+
+                if ($sent) {
+
+                    // Save account permanently
+                    $pdo->commit();
+
+
+                    // ==================================
+                    // RECORD REGISTRATION
+                    // ==================================
+
+                    log_activity(
+                        $pdo,
+                        $userId,
+                        'REGISTER',
+                        'System user account registered and awaiting email verification'
+                    );
+
+
+                    // ==================================
+                    // GO TO SIGNUP OTP PAGE
+                    // ==================================
+
+                    header(
+                        'Location: signup_verify.php'
+                    );
+
+                    exit();
+                }
+
+
+                else {
+
+                    // Email failed, so do not leave
+                    // an unusable pending account.
+
+                    if ($pdo->inTransaction()) {
+
+                        $pdo->rollBack();
+                    }
+
+
+                    unset(
+                        $_SESSION['signup_pending_user'],
+                        $_SESSION['signup_otp_code'],
+                        $_SESSION['signup_otp_expiry'],
+                        $_SESSION['signup_otp_resend_count'],
+                        $_SESSION['signup_otp_last_sent']
+                    );
+
+
+                    $error =
+                        'Unable to send the verification OTP. Please try again.';
+                }
+            }
+
+        }
+
+        catch (PDOException $e) {
+
+            if ($pdo->inTransaction()) {
+
+                $pdo->rollBack();
+            }
+
+
+            error_log(
+                'Signup database error: ' .
+                $e->getMessage()
+            );
+
+
+            $error =
+                'Unable to create your account. Please try again.';
+        }
+    }
+}
 
 ?>
+
+
+
+
+
+
 <!DOCTYPE html>
 
 <html lang="en">
