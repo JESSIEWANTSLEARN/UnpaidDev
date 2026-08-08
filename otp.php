@@ -253,7 +253,6 @@ $userEmail =
     ?? '';
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -267,35 +266,362 @@ $userEmail =
     >
 
     <title>
-        WalangBrownout - Verify OTP
+        OTP Verification - WalangBrownout
     </title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #F2F2F2;
-            color: #0E5BA8;
-            margin: 0;
+        * {
+            box-sizing: border-box;
         }
+
+
+        body {
+
+            margin: 0;
+
+            font-family: Arial, sans-serif;
+
+            background-color: #F2F2F2;
+
+            color: #333;
+        }
+
+
+        /* =========================================
+           HEADER
+        ========================================= */
 
         header {
-            text-align: left;
+
+            background-color: white;
+
+            padding: 20px 30px;
+
+            border-bottom: 15px solid #2C3E50;
         }
 
-        header nav {
-            background-color: #2C3E50;
-            padding: 10px;
+
+        .header-small {
+
+            font-size: 11px;
+
+            font-weight: bold;
+
+            letter-spacing: 2px;
+
+            color: #666;
+
+            text-transform: uppercase;
         }
 
-        footer {
+
+        .header-title {
+
+            margin-top: 5px;
+
+            color: #0E5BA8;
+
+            font-size: 22px;
+
+            font-weight: bold;
+        }
+
+
+        /* =========================================
+           MAIN
+        ========================================= */
+
+        main {
+
+            min-height: calc(100vh - 100px);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            padding: 30px 20px;
+        }
+
+
+        /* =========================================
+           OTP CONTAINER
+        ========================================= */
+
+        .otp-box {
+
+            width: 100%;
+
+            max-width: 430px;
+
+            background-color: white;
+
+            padding: 35px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 4px 18px
+                rgba(0, 0, 0, 0.10);
+        }
+
+
+        .otp-box h2 {
+
+            margin-top: 0;
+
+            margin-bottom: 10px;
+
+            text-align: center;
+
+            font-size: 25px;
+
+            color: #222;
+        }
+
+
+        .description {
+
+            text-align: center;
+
+            font-size: 14px;
+
+            color: #666;
+
+            line-height: 1.6;
+
+            margin-bottom: 25px;
+        }
+
+
+        .email {
+
+            color: #0E5BA8;
+
+            font-weight: bold;
+        }
+
+
+        /* =========================================
+           ERROR MESSAGE
+        ========================================= */
+
+        .error {
+
+            padding: 12px;
+
+            margin-bottom: 20px;
+
+            background-color: #FFE5E5;
+
+            color: #B30000;
+
+            border-radius: 7px;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+
+        /* =========================================
+           SUCCESS MESSAGE
+        ========================================= */
+
+        .success {
+
+            padding: 12px;
+
+            margin-bottom: 20px;
+
+            background-color: #E7F8E7;
+
+            color: #197A19;
+
+            border-radius: 7px;
+
+            text-align: center;
+
+            font-size: 13px;
+        }
+
+
+        /* =========================================
+           LABEL
+        ========================================= */
+
+        label {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            color: #333;
+        }
+
+
+        /* =========================================
+           OTP INPUT
+        ========================================= */
+
+        input[type="text"] {
+
+            width: 100%;
+
+            padding: 14px;
+
+            border: 1px solid #CCC;
+
+            border-radius: 7px;
+
+            font-size: 22px;
+
+            text-align: center;
+
+            letter-spacing: 8px;
+        }
+
+
+        input[type="text"]:focus {
+
+            outline: none;
+
+            border-color: #0E5BA8;
+        }
+
+
+        /* =========================================
+           VERIFY BUTTON
+        ========================================= */
+
+        .verify-button {
+
+            width: 100%;
+
+            margin-top: 20px;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background-color: #0E5BA8;
+
+            color: white;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        .verify-button:hover {
+
+            background-color: #084A89;
+        }
+
+
+        /* =========================================
+           RESEND SECTION
+        ========================================= */
+
+        .resend-section {
+
+            margin-top: 25px;
+
+            padding-top: 20px;
+
+            border-top: 1px solid #DDD;
+
             text-align: center;
         }
 
-        .sss-blue {
-            background-color: #0E5BA8;
+
+        .resend-text {
+
+            margin-bottom: 10px;
+
+            color: #777;
+
+            font-size: 13px;
+        }
+
+
+        .resend-button {
+
+            background: none;
+
+            border: none;
+
+            color: #0E5BA8;
+
+            font-weight: bold;
+
+            font-size: 13px;
+
+            cursor: pointer;
+        }
+
+
+        .resend-button:hover {
+
+            text-decoration: underline;
+        }
+
+
+        /* =========================================
+           INFO
+        ========================================= */
+
+        .otp-info {
+
+            margin-top: 20px;
+
+            text-align: center;
+
+            color: #888;
+
+            font-size: 12px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =========================================
+           BACK TO LOGIN
+        ========================================= */
+
+        .back {
+
+            margin-top: 20px;
+
+            text-align: center;
+        }
+
+
+        .back a {
+
+            color: #0E5BA8;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            text-decoration: none;
+        }
+
+
+        .back a:hover {
+
+            text-decoration: underline;
         }
 
     </style>
@@ -306,159 +632,258 @@ $userEmail =
 <body>
 
 
-<header>
+    <!-- =========================================
+         HEADER
+    ========================================== -->
 
-    <div
-        class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between"
-    >
+    <header>
 
-        <div>
+        <div class="header-small">
 
-            <span
-                class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]"
+            Republic of the Philippines
+
+        </div>
+
+
+        <div class="header-title">
+
+            WALANG BROWN OUT
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main>
+
+
+        <div class="otp-box">
+
+
+            <h2>
+                OTP Verification
+            </h2>
+
+
+            <p class="description">
+
+                We sent a 6-digit verification code to
+
+                <br>
+
+                <span class="email">
+
+                    <?php
+
+                    echo htmlspecialchars(
+                        $userEmail,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
+
+                    ?>
+
+                </span>
+
+            </p>
+
+
+
+            <!-- =================================
+                 ERROR MESSAGE
+            ================================== -->
+
+            <?php if ($error !== ''): ?>
+
+
+                <div class="error">
+
+                    <?php
+
+                    echo htmlspecialchars(
+                        $error,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
+
+                    ?>
+
+                </div>
+
+
+            <?php endif; ?>
+
+
+
+            <!-- =================================
+                 SUCCESS MESSAGE
+            ================================== -->
+
+            <?php if ($success !== ''): ?>
+
+
+                <div class="success">
+
+                    <?php
+
+                    echo htmlspecialchars(
+                        $success,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
+
+                    ?>
+
+                </div>
+
+
+            <?php endif; ?>
+
+
+
+            <!-- =================================
+                 VERIFY OTP FORM
+            ================================== -->
+
+            <form
+                action="otp.php"
+                method="POST"
             >
-                Republic of the Philippines
-            </span>
 
-            <div
-                class="text-blue-700 text-lg font-extrabold"
-            >
-                WALANG BROWN OUT
+
+                <!-- Tell PHP this is VERIFY -->
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="verify"
+                >
+
+
+                <label for="otp">
+
+                    Enter OTP Code
+
+                </label>
+
+
+                <input
+                    type="text"
+                    id="otp"
+                    name="otp"
+                    maxlength="6"
+                    minlength="6"
+                    inputmode="numeric"
+                    pattern="[0-9]{6}"
+                    placeholder="000000"
+                    autocomplete="one-time-code"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    class="verify-button"
+                >
+
+                    Verify OTP
+
+                </button>
+
+
+            </form>
+
+
+
+            <!-- =================================
+                 OTP INFORMATION
+            ================================== -->
+
+            <div class="otp-info">
+
+                OTP expires after 5 minutes.
+
+                <br>
+
+                You may resend the OTP
+                a maximum of 2 times.
+
             </div>
 
-        </div>
-
-    </div>
-
-    <nav></nav>
-
-</header>
 
 
+            <!-- =================================
+                 RESEND OTP
+            ================================== -->
 
-<main
-    class="max-w-md mx-auto mt-16 bg-white shadow-lg rounded-xl p-8"
->
-
-
-    <div class="text-center mb-6">
-
-        <div class="text-4xl mb-3">
-            📩
-        </div>
-
-        <h2
-            class="text-2xl font-bold text-gray-800"
-        >
-            Enter OTP Code
-        </h2>
-
-        <p
-            class="text-xs text-gray-500 mt-2"
-        >
-            We sent a 6-digit verification code to:
-        </p>
-
-        <p
-            class="text-sm font-bold text-blue-700 mt-1"
-        >
-            <?= htmlspecialchars(
-                $_SESSION['pending_user']['email']
-            ) ?>
-        </p>
-
-    </div>
+            <div class="resend-section">
 
 
+                <div class="resend-text">
 
-    <?php if (!empty($error)): ?>
+                    Didn't receive the code?
 
-        <div
-            class="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-lg mb-4"
-        >
+                </div>
 
-            <?= htmlspecialchars($error) ?>
 
-        </div>
+                <form
+                    action="otp.php"
+                    method="POST"
+                >
 
-    <?php endif; ?>
+
+                    <!-- Tell PHP this is RESEND -->
+
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="resend"
+                    >
+
+
+                    <button
+                        type="submit"
+                        class="resend-button"
+                    >
+
+                        Resend OTP
+
+                    </button>
+
+
+                </form>
+
+
+            </div>
 
 
 
-    <form
-        action="otp.php"
-        method="POST"
-        class="space-y-4"
-    >
+            <!-- =================================
+                 BACK TO LOGIN
+            ================================== -->
+
+            <div class="back">
 
 
-        <div>
+                <a href="login.php?action=reset">
 
-            <label
-                class="block text-xs font-bold text-gray-700 mb-2 text-center"
-            >
-                6-Digit Verification Code
-            </label>
+                    ← Back to Login
+
+                </a>
 
 
-            <input
-                type="text"
-                name="otp"
-                maxlength="6"
-                minlength="6"
-                pattern="[0-9]{6}"
-                inputmode="numeric"
-                autocomplete="one-time-code"
-                required
-                autofocus
-                placeholder="123456"
-                class="w-full text-center text-2xl tracking-[0.4em] font-bold px-4 py-3 border-2 border-blue-400 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
+            </div>
+
 
         </div>
 
 
-
-        <button
-            type="submit"
-            class="w-full sss-blue hover:bg-blue-800 text-white font-bold py-3 rounded-xl text-sm transition shadow"
-        >
-            Verify & Sign In
-        </button>
-
-
-    </form>
-
-
-
-    <div class="text-center mt-5">
-
-        <a
-            href="login.php?action=reset"
-            class="text-xs text-red-500 hover:underline"
-        >
-            Cancel / Use Different Account
-        </a>
-
-    </div>
-
-
-</main>
-
-
-
-<footer class="mt-10">
-
-    <p>
-
-        <strong>
-            &copy; 2026 WalangBrownout.
-            All rights reserved.
-        </strong>
-
-    </p>
-
-</footer>
+    </main>
 
 
 </body>
