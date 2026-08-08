@@ -67,10 +67,18 @@ CREATE TABLE WBO_Batches (
 
 CREATE TABLE WBO_Orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_user_id INT NOT NULL,
     customer_name VARCHAR(150) NOT NULL,
     customer_contact VARCHAR(100),
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('PENDING', 'FULFILLED', 'UNFULFILLED', 'CANCELLED') NOT NULL DEFAULT 'PENDING'
+    status ENUM(
+        'PENDING',
+        'FULFILLED',
+        'UNFULFILLED',
+        'CANCELLED'
+    ) NOT NULL DEFAULT 'PENDING',
+    FOREIGN KEY (customer_user_id)
+        REFERENCES WBO_Users(user_id)
 );
 
 CREATE TABLE WBO_OrderDetails (
