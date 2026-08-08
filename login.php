@@ -35,7 +35,9 @@ if (
     unset(
         $_SESSION['pending_user'],
         $_SESSION['otp_code'],
-        $_SESSION['otp_expiry']
+        $_SESSION['otp_expiry'],
+        $_SESSION['otp_resend_count'],
+        $_SESSION['otp_last_sent']
     );
 
     header('Location: login.php');
@@ -113,17 +115,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     name,
                     email,
                     password_hash,
-                    role
+                    role,
+                    account_status
                 FROM WBO_Users
                 WHERE email = ?
                 LIMIT 1"
             );
 
-
             $stmt->execute([
                 $email
             ]);
-
 
             $user = $stmt->fetch();
 
@@ -140,98 +141,136 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 )
             ) {
 
-                // ======================================
-                // GENERATE OTP
-                // ======================================
+                // ==========================================
+                // CHECK ACCOUNT STATUS
+                // ==========================================
 
-                $otp = (string) random_int(
-                    100000,
-                    999999
-                );
+                if (
+                    $user['account_status'] ===
+                    'disabled'
+                ) {
 
-
-                // ======================================
-                // SAVE PENDING USER
-                // ======================================
-
-                $_SESSION['pending_user'] = [
-
-                    'id' =>
-                        (int) $user['user_id'],
-
-                    'name' =>
-                        $user['name'],
-
-                    'email' =>
-                        $user['email'],
-
-                    'role' =>
-                        normalize_role(
-                            $user['role']
-                        )
-
-                ];
+                    $error =
+                        'Your account has been disabled. Please contact support.';
+                }
 
 
-                // ======================================
-                // SAVE OTP
-                // ======================================
+                elseif (
+                    $user['account_status'] ===
+                    'pending_verification'
+                ) {
 
-                $_SESSION['otp_code'] =
-                    $otp;
-
-
-                // OTP expires after 5 minutes
-                $_SESSION['otp_expiry'] =
-                    time() + 300;
+                    $error =
+                        'Your account is not yet verified. Please complete email verification.';
+                }
 
 
-                // ======================================
-                // SEND OTP EMAIL
-                // ======================================
+                elseif (
+                    $user['account_status'] !==
+                    'active'
+                ) {
 
-                $sent = send_otp_email(
+                    $error =
+                        'Your account is currently unavailable.';
+                }
 
-                    $user['email'],
-
-                    $user['name'],
-
-                    $otp
-                );
-
-
-                // ======================================
-                // OTP SENT SUCCESSFULLY
-                // ======================================
-
-              if ($sent) {
-
-    // No resends have been used yet
-    $_SESSION['otp_resend_count'] = 0;
-
-    // Used for 30-second resend cooldown
-    $_SESSION['otp_last_sent'] = time();
-
-    header('Location: otp.php');
-    exit();
-}
-
-
-                // ======================================
-                // EMAIL FAILED
-                // ======================================
 
                 else {
 
-                    unset(
-                        $_SESSION['pending_user'],
-                        $_SESSION['otp_code'],
-                        $_SESSION['otp_expiry']
+                    // ======================================
+                    // ACCOUNT ACTIVE - GENERATE OTP
+                    // ======================================
+
+                    $otp = (string) random_int(
+                        100000,
+                        999999
                     );
 
 
-                    $error =
-                        'Unable to send OTP to your registered email address.';
+                    // ======================================
+                    // SAVE PENDING USER
+                    // ======================================
+
+                    $_SESSION['pending_user'] = [
+
+                        'id' =>
+                            (int) $user['user_id'],
+
+                        'name' =>
+                            $user['name'],
+
+                        'email' =>
+                            $user['email'],
+
+                        'role' =>
+                            normalize_role(
+                                $user['role']
+                            )
+
+                    ];
+
+
+                    // ======================================
+                    // SAVE OTP
+                    // ======================================
+
+                    $_SESSION['otp_code'] =
+                        $otp;
+
+                    // OTP expires after 5 minutes
+                    $_SESSION['otp_expiry'] =
+                        time() + 300;
+
+
+                    // ======================================
+                    // SEND OTP EMAIL
+                    // ======================================
+
+                    $sent = send_otp_email(
+                        $user['email'],
+                        $user['name'],
+                        $otp
+                    );
+
+
+                    // ======================================
+                    // OTP SENT SUCCESSFULLY
+                    // ======================================
+
+                    if ($sent) {
+
+                        // No resends have been used yet
+                        $_SESSION['otp_resend_count'] = 0;
+
+                        // 30-second resend cooldown
+                        $_SESSION['otp_last_sent'] =
+                            time();
+
+                        header(
+                            'Location: otp.php'
+                        );
+
+                        exit();
+                    }
+
+
+                    // ======================================
+                    // EMAIL FAILED
+                    // ======================================
+
+                    else {
+
+                        unset(
+                            $_SESSION['pending_user'],
+                            $_SESSION['otp_code'],
+                            $_SESSION['otp_expiry'],
+                            $_SESSION['otp_resend_count'],
+                            $_SESSION['otp_last_sent']
+                        );
+
+                        $error =
+                            'Unable to send OTP to your registered email address.';
+                    }
                 }
             }
 
@@ -256,7 +295,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $e->getMessage()
             );
 
-
             $error =
                 'A database error occurred. Please try again.';
         }
@@ -264,7 +302,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
-
 <!DOCTYPE html>
 
 <html lang="en">
