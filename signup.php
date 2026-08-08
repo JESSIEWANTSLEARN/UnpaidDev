@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/mailer.php';
@@ -13,8 +14,10 @@ if (
     !isset($pdo) ||
     !($pdo instanceof PDO)
 ) {
+
     die('Database connection is unavailable.');
 }
+
 
 // ==========================================
 // ALREADY LOGGED IN
@@ -29,6 +32,8 @@ if (
         $_SESSION['role']
     );
 }
+
+
 // ==========================================
 // DEFAULT VALUES
 // ==========================================
@@ -39,8 +44,9 @@ $name = '';
 $email = '';
 $contactNumber = '';
 
+
 // ==========================================
-// HANDLE SIGNUP
+// HANDLE SIGNUP FORM
 // ==========================================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -54,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contactNumber =
         trim($_POST['contact_number'] ?? '');
 
-    // Do not trim passwords
+    // Do NOT trim passwords
     $password =
         $_POST['password'] ?? '';
 
@@ -63,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     // ======================================
-    // EMPTY FIELDS
+    // EMPTY FIELD VALIDATION
     // ======================================
 
     if (
@@ -94,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Please enter a valid email address.';
     }
 
+
     // ======================================
     // CONTACT NUMBER VALIDATION
     // ======================================
@@ -109,11 +116,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Please enter a valid contact number.';
     }
 
+
     // ======================================
     // PASSWORD LENGTH
     // ======================================
 
-    elseif (strlen($password) < 6) {
+    elseif (
+        strlen($password) < 6
+    ) {
 
         $error =
             'Password must be at least 6 characters long.';
@@ -124,18 +134,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CONFIRM PASSWORD
     // ======================================
 
-    elseif ($password !== $confirmPassword) {
+    elseif (
+        $password !== $confirmPassword
+    ) {
 
         $error =
             'Passwords do not match.';
     }
+
 
     else {
 
         try {
 
             // ==================================
-            // CHECK IF EMAIL ALREADY EXISTS
+            // CHECK DUPLICATE EMAIL
             // ==================================
 
             $stmt = $pdo->prepare(
@@ -174,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
                 // ==================================
-                // PUBLIC USERS ARE ALWAYS CLIENTS
+                // PUBLIC SIGNUP ROLE
                 // ==================================
 
                 $role =
@@ -185,14 +198,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
                 // ==================================
-                // START DATABASE TRANSACTION
+                // START TRANSACTION
                 // ==================================
 
                 $pdo->beginTransaction();
 
 
                 // ==================================
-                // CREATE ACCOUNT
+                // INSERT USER
                 // ==================================
 
                 $stmt = $pdo->prepare(
@@ -252,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
                 // ==================================
-                // SAVE TEMPORARY SIGNUP SESSION
+                // SAVE SIGNUP SESSION
                 // ==================================
 
                 $_SESSION['signup_pending_user'] = [
@@ -276,22 +289,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $otp;
 
 
-                // OTP expires after 5 minutes
+                // OTP valid for 5 minutes
                 $_SESSION['signup_otp_expiry'] =
                     time() + 300;
 
 
-                // No resends used yet
+                // User has not resent OTP yet
                 $_SESSION['signup_otp_resend_count'] =
                     0;
 
 
+                // Used for 30 second cooldown
                 $_SESSION['signup_otp_last_sent'] =
                     time();
 
 
                 // ==================================
-                // SEND VERIFICATION EMAIL
+                // SEND OTP TO USER'S EMAIL
                 // ==================================
 
                 $sent =
@@ -302,6 +316,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
 
 
+                // ==================================
+                // OTP SENT SUCCESSFULLY
+                // ==================================
+
                 if ($sent) {
 
                     // Save account permanently
@@ -309,14 +327,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
                     // ==================================
-                    // RECORD REGISTRATION
+                    // AUDIT LOG
                     // ==================================
 
                     log_activity(
                         $pdo,
                         $userId,
                         'REGISTER',
-                        'System user account registered and awaiting email verification'
+                        'System user registered and is awaiting email verification'
                     );
 
 
@@ -332,11 +350,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
 
+                // ==================================
+                // EMAIL SENDING FAILED
+                // ==================================
+
                 else {
 
-                    // Email failed, so do not leave
-                    // an unusable pending account.
-
+                    // Do not leave an unusable
+                    // pending account in database
                     if ($pdo->inTransaction()) {
 
                         $pdo->rollBack();
@@ -376,15 +397,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error =
                 'Unable to create your account. Please try again.';
         }
+
+        catch (Throwable $e) {
+
+            if ($pdo->inTransaction()) {
+
+                $pdo->rollBack();
+            }
+
+
+            error_log(
+                'Signup error: ' .
+                $e->getMessage()
+            );
+
+
+            $error =
+                'Something went wrong while creating your account.';
+        }
     }
 }
 
 ?>
-
-
-
-
-
 
 <!DOCTYPE html>
 
@@ -403,34 +437,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         WalangBrownout - Signup
     </title>
 
-    <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
+    <link
+        rel="icon"
+        type="image/png"
+        href="image/Logo.png"
+    >
+
     <script src="https://cdn.tailwindcss.com"></script>
+
 
     <style>
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #F2F2F2;
-            color: #0E5BA8;
+
+            font-family:
+                Arial,
+                sans-serif;
+
+            background-color:
+                #F2F2F2;
+
+            color:
+                #0E5BA8;
+
             margin: 0;
         }
 
+
         header {
+
             text-align: left;
         }
 
+
         header nav {
-            background-color: #2C3E50;
-            padding: 20px;
-            margin-bottom: 20px;
+
+            background-color:
+                #2C3E50;
+
+            padding: 10px;
         }
 
+
         footer {
+
             text-align: center;
         }
 
+
         .sss-blue {
-            background-color: #0E5BA8;
+
+            background-color:
+                #0E5BA8;
         }
 
     </style>
@@ -438,169 +496,354 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 
-<body>
+<body class="min-h-screen flex flex-col">
 
-<!-- Header -->
-    <header class="relative z-10 border-b">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
 
-                <img src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png"
-                    alt="Walang Brown Out Logo"
-                    width="45"
-                    height="45">
+<!-- ==========================================
+     HEADER
+========================================== -->
 
-                <div class="hidden sm:block leading-tight">
+<header class="relative z-10 border-b bg-white">
 
-                    <span class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]">
-                        Republic of the Philippines
-                    </span>
+    <div
+        class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between"
+    >
 
-                    <div class="text-lg font-extrabold text-blue-700">
-                        WALANG BROWN OUT
-                    </div>
+        <div class="flex items-center space-x-3">
+
+            <img
+                src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png"
+                alt="Walang Brown Out Logo"
+                width="45"
+                height="45"
+            >
+
+
+            <div class="hidden sm:block leading-tight">
+
+                <span
+                    class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]"
+                >
+
+                    Republic of the Philippines
+
+                </span>
+
+
+                <div
+                    class="text-lg font-extrabold text-blue-700"
+                >
+
+                    WALANG BROWN OUT
 
                 </div>
 
             </div>
+
         </div>
-        
-        <nav>
-            
-        </nav>
 
-    </header>
+    </div>
 
-    <!-- Main Content --> 
-    <main class="max-w-md mx-auto mt-16 mb-16 bg-white shadow-lg rounded-xl p-8" >
 
-        <h1 class="text-2xl font-bold text-gray-700 mb-6">
+    <nav></nav>
+
+</header>
+
+
+
+<!-- ==========================================
+     SIGNUP
+========================================== -->
+
+<main
+    class="w-full max-w-md mx-auto mt-12 mb-12 bg-white shadow-lg rounded-xl p-8"
+>
+
+
+    <div class="text-center mb-6">
+
+        <h1
+            class="text-2xl font-bold text-gray-800"
+        >
+
             Create an Account
+
         </h1>
 
-        <form
-            action="signup.php"
-            method="POST"
-            class="space-y-4"
+
+        <p
+            class="text-xs text-gray-500 mt-2"
         >
-            <div>
 
-                <label
-                    class="block text-xs font-bold text-gray-700 mb-1"
-                >
-                    Username
-                </label>
+            Create your WalangBrownout customer account
 
-                <input
-                    type="text"
-                    name="username"
-                    required
-                    placeholder="Your_Username"
+        </p>
 
-                    class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-
-            </div>
-
-            <div>
-
-                <label
-                    class="block text-xs font-bold text-gray-700 mb-1"
-                >
-                    Email Address
-                </label>
-
-                <input
-                    type="email"
-                    name="email"
-                    required
-                    placeholder="name@example.com"
-
-                    class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-
-            </div>
-
-            <div>
-
-                <label
-                    class="block text-xs font-bold text-gray-700 mb-1"
-                >
-                    Contact Number
-                </label>
-
-                <input
-                    type="Number"
-                    name="contact_number"
-                    required
-                    placeholder="123-456-7890"
-
-                    class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-
-            </div>
-
-            <div>
-
-                <label
-                    class="block text-xs font-bold text-gray-700 mb-1"
-                >
-                    Password
-                </label>
+    </div>
 
 
-                <input
-                    type="password"
-                    name="password"
-                    required
-                    placeholder="••••••••"
 
-                    class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
+    <!-- ======================================
+         ERROR MESSAGE
+    ====================================== -->
 
-            </div>
+    <?php if ($error !== ''): ?>
 
-            <div>
+        <div
+            class="bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg p-3 mb-5"
+        >
 
-                <label
-                    class="block text-xs font-bold text-gray-700 mb-1"
-                >
-                    Confirm Password
-                </label>
+            <?= htmlspecialchars(
+                $error,
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>
 
-
-                <input
-                    type="password"
-                    name="confirm_password"
-                    required
-                    placeholder="••••••••"
-
-                    class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-
-            </div>
-
-            <button
-                type="submit"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-                Create Account
-            </button>
-
-            <p class="text-center text-sm text-gray-600 mt-4">
-                Already have an account? <a href="login.php" class="text-blue-500 hover:underline">Login here</a>
-            </p>
-        </form>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-slate-200 bg-#F2F2F2/80 backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
-            <strong>&copy; 2026 WalangBrownOut.</strong>
-            All rights reserved.
         </div>
-    </footer>
+
+    <?php endif; ?>
+
+
+
+    <!-- ======================================
+         SIGNUP FORM
+    ====================================== -->
+
+    <form
+        action="signup.php"
+        method="POST"
+        class="space-y-4"
+    >
+
+
+        <!-- ==================================
+             FULL NAME
+        ================================== -->
+
+        <div>
+
+            <label
+                class="block text-xs font-bold text-gray-700 mb-1"
+            >
+
+                Full Name
+
+            </label>
+
+
+            <input
+                type="text"
+                name="name"
+                required
+                autocomplete="name"
+                placeholder="Juan Dela Cruz"
+
+                value="<?= htmlspecialchars(
+                    $name,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+
+                class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+
+        </div>
+
+
+
+        <!-- ==================================
+             EMAIL
+        ================================== -->
+
+        <div>
+
+            <label
+                class="block text-xs font-bold text-gray-700 mb-1"
+            >
+
+                Email Address
+
+            </label>
+
+
+            <input
+                type="email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="name@example.com"
+
+                value="<?= htmlspecialchars(
+                    $email,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+
+                class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+
+        </div>
+
+
+
+        <!-- ==================================
+             CONTACT NUMBER
+        ================================== -->
+
+        <div>
+
+            <label
+                class="block text-xs font-bold text-gray-700 mb-1"
+            >
+
+                Contact Number
+
+            </label>
+
+
+            <input
+                type="tel"
+                name="contact_number"
+                required
+                autocomplete="tel"
+                placeholder="09123456789"
+
+                value="<?= htmlspecialchars(
+                    $contactNumber,
+                    ENT_QUOTES,
+                    'UTF-8'
+                ) ?>"
+
+                class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+
+        </div>
+
+
+
+        <!-- ==================================
+             PASSWORD
+        ================================== -->
+
+        <div>
+
+            <label
+                class="block text-xs font-bold text-gray-700 mb-1"
+            >
+
+                Password
+
+            </label>
+
+
+            <input
+                type="password"
+                name="password"
+                required
+                minlength="6"
+                autocomplete="new-password"
+                placeholder="••••••••"
+
+                class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+
+        </div>
+
+
+
+        <!-- ==================================
+             CONFIRM PASSWORD
+        ================================== -->
+
+        <div>
+
+            <label
+                class="block text-xs font-bold text-gray-700 mb-1"
+            >
+
+                Confirm Password
+
+            </label>
+
+
+            <input
+                type="password"
+                name="confirm_password"
+                required
+                minlength="6"
+                autocomplete="new-password"
+                placeholder="••••••••"
+
+                class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+
+        </div>
+
+
+
+        <!-- ==================================
+             CREATE ACCOUNT
+        ================================== -->
+
+        <button
+            type="submit"
+            class="w-full sss-blue hover:bg-blue-800 text-white font-bold py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+        >
+
+            Create Account
+
+        </button>
+
+
+
+        <!-- ==================================
+             LOGIN
+        ================================== -->
+
+        <p
+            class="text-center text-sm text-gray-600 mt-4"
+        >
+
+            Already have an account?
+
+            <a
+                href="login.php"
+                class="text-blue-600 hover:underline font-semibold"
+            >
+
+                Login here
+
+            </a>
+
+        </p>
+
+    </form>
+
+</main>
+
+
+
+<!-- ==========================================
+     FOOTER
+========================================== -->
+
+<footer
+    class="mt-auto border-t border-slate-200 bg-white"
+>
+
+    <div
+        class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm"
+    >
+
+        <strong>
+            &copy; 2026 WalangBrownOut.
+        </strong>
+
+        All rights reserved.
+
+    </div>
+
+</footer>
 
 
 </body>
