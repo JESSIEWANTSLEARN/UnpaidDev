@@ -319,6 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         WalangBrownout - Login
     </title>
 
+    <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
     <script src="https://cdn.tailwindcss.com"></script>
 
 
@@ -355,173 +356,163 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
 
+    <!-- Header -->
+    <header class="relative z-10 border-b">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
 
-<header>
+                <img src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png"
+                    alt="Walang Brown Out Logo"
+                    width="45"
+                    height="45">
 
-    <div
-        class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between"
-    >
+                <div class="hidden sm:block leading-tight">
 
-        <div class="flex items-center space-x-3">
+                    <span class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]">
+                        Republic of the Philippines
+                    </span>
 
-            <div>
+                    <div class="text-lg font-extrabold text-blue-700">
+                        WALANG BROWN OUT
+                    </div>
 
-                <span
-                    class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]"
-                >
-                    Republic of the Philippines
-                </span>
-
-                <div
-                    class="text-blue-700 text-lg font-extrabold"
-                >
-                    WALANG BROWN OUT
                 </div>
 
             </div>
-
         </div>
+        
+        <nav>
+            
+        </nav>
 
-    </div>
-
-
-    <nav></nav>
-
-</header>
-
-
-
-<main
-    class="max-w-md mx-auto mt-16 bg-white shadow-lg rounded-xl p-8"
->
-
-
-    <div class="text-center mb-6">
-
-        <h2
-            class="text-2xl font-bold text-gray-800"
-        >
-            Welcome Back
-        </h2>
-
-        <p
-            class="text-xs text-gray-500 mt-1"
-        >
-            Sign in to access your account portal
-        </p>
-
-    </div>
+    </header>
 
 
 
-    <!--
-        ERROR ONLY SHOWS AFTER FORM SUBMISSION
-    -->
-
-    <?php if (
-        $_SERVER['REQUEST_METHOD'] === 'POST' &&
-        !empty($error)
-    ): ?>
-
-        <div
-            class="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-lg mb-4"
-        >
-
-            <?= htmlspecialchars($error) ?>
-
-        </div>
-
-    <?php endif; ?>
-
-
-
-    <form
-        action="login.php"
-        method="POST"
-        class="space-y-4"
+    <main
+        class="max-w-md mx-auto mt-16 mb-16 bg-white shadow-lg rounded-xl p-8"
     >
 
 
-        <div>
+        <div class="text-center mb-6">
 
-            <label
-                class="block text-xs font-bold text-gray-700 mb-1"
+            <h2
+                class="text-2xl font-bold text-gray-800"
             >
-                Email Address
-            </label>
+                Welcome Back
+            </h2>
 
-
-            <input
-                type="email"
-                name="email"
-                required
-                placeholder="name@example.com"
-
-                value="<?=
-                    htmlspecialchars(
-                        $_POST['email'] ?? ''
-                    )
-                ?>"
-
-                class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            <p
+                class="text-xs text-gray-500 mt-1"
             >
+                Sign in to access your account portal
+            </p>
 
         </div>
 
+        <!--
+            ERROR ONLY SHOWS AFTER FORM SUBMISSION
+        -->
 
+        <?php if (
+            $_SERVER['REQUEST_METHOD'] === 'POST' &&
+            !empty($error)
+        ): ?>
 
-        <div>
-
-            <label
-                class="block text-xs font-bold text-gray-700 mb-1"
-            >
-                Password
-            </label>
-
-
-            <input
-                type="password"
-                name="password"
-                required
-                placeholder="••••••••"
-
-                class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            <div
+                class="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-lg mb-4"
             >
 
-        </div>
+                <?= htmlspecialchars($error) ?>
+
+            </div>
+
+        <?php endif; ?>
 
 
 
-        <button
-            type="submit"
-
-            class="w-full sss-blue hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg text-xs transition shadow"
+        <form
+            action="login.php"
+            method="POST"
+            class="space-y-4"
         >
 
-            Continue to OTP
 
-        </button>
+            <div>
 
-
-    </form>
-
-
-</main>
-
+                <label
+                    class="block text-xs font-bold text-gray-700 mb-1"
+                >
+                    Email Address
+                </label>
 
 
-<footer class="mt-10">
+                <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="name@example.com"
 
-    <p>
+                    value="<?=
+                        htmlspecialchars(
+                            $_POST['email'] ?? ''
+                        )
+                    ?>"
 
-        <strong>
-            &copy; 2026 WalangBrownout.
+                    class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+
+            </div>
+
+
+
+            <div>
+
+                <label
+                    class="block text-xs font-bold text-gray-700 mb-1"
+                >
+                    Password
+                </label>
+
+
+                <input
+                    type="password"
+                    name="password"
+                    required
+                    placeholder="••••••••"
+
+                    class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+
+            </div>
+
+
+
+            <button
+                type="submit"
+
+                class="w-full sss-blue hover:bg-blue-800 text-white font-bold py-2.5 rounded-lg text-xs transition shadow"
+            >
+
+                Continue to OTP
+
+            </button>
+
+            <p class="text-center text-sm text-gray-600 mt-4">
+                Sign up if you don't have an account <a href="#" class="text-blue-500 hover:underline">Create Account</a>
+            </p>
+        </form>
+
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-slate-200 bg-#F2F2F2/80 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
+            <strong>&copy; 2026 WalangBrownOut.</strong>
             All rights reserved.
-        </strong>
-
-    </p>
-
-</footer>
+        </div>
+    </footer>
 
 
 </body>
