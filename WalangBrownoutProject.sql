@@ -121,6 +121,18 @@ CREATE TABLE WBO_Notifications (
     FOREIGN KEY (recipient_user_id) REFERENCES WBO_Users(user_id)
 );
 
+CREATE TABLE WBO_AuditLogs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(100) NOT NULL,
+    description VARCHAR(255) NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)
+        REFERENCES WBO_Users(user_id)
+        ON DELETE SET NULL
+);
+
 -- dummy data
 
 INSERT INTO WBO_Users (
@@ -156,6 +168,27 @@ INSERT INTO WBO_Batches (product_id, batch_number, quantity_received, current_qu
 (2, 'BATCH-002', 50, 50, NOW(), NULL),
 (3, 'BATCH-003', 20, 20, NOW(), '2027-12-31');
 
+SELECT
+    user_id,
+    name,
+    email,
+    contact_number,
+    role,
+    account_status,
+    email_verified_at
+FROM WBO_Users
+ORDER BY user_id DESC;
+
+UPDATE WBO_Users
+SET
+    account_status = 'active',
+    email_verified_at = NOW()
+WHERE user_id = ?;
+
+
+SELECT *
+FROM WBO_AuditLogs
+ORDER BY created_at DESC;
 
 SELECT * FROM WBO_Users;
 
