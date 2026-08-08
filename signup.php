@@ -16,6 +16,19 @@ if (
     die('Database connection is unavailable.');
 }
 
+// ==========================================
+// ALREADY LOGGED IN
+// ==========================================
+
+if (
+    !empty($_SESSION['logged_in']) &&
+    !empty($_SESSION['role'])
+) {
+
+    redirect_to_dashboard(
+        $_SESSION['role']
+    );
+}
 
 
 
