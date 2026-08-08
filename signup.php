@@ -94,6 +94,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Please enter a valid email address.';
     }
 
+    // ======================================
+    // CONTACT NUMBER VALIDATION
+    // ======================================
+
+    elseif (
+        !preg_match(
+            '/^[0-9+\-\s]{7,20}$/',
+            $contactNumber
+        )
+    ) {
+
+        $error =
+            'Please enter a valid contact number.';
+    }
+
 
 
 
