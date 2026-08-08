@@ -204,14 +204,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // OTP SENT SUCCESSFULLY
                 // ======================================
 
-                if ($sent) {
+              if ($sent) {
 
-                    header(
-                        'Location: otp.php'
-                    );
+    // No resends have been used yet
+    $_SESSION['otp_resend_count'] = 0;
 
-                    exit();
-                }
+    // Used for 30-second resend cooldown
+    $_SESSION['otp_last_sent'] = time();
+
+    header('Location: otp.php');
+    exit();
+}
 
 
                 // ======================================
