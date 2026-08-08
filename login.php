@@ -8,8 +8,14 @@ require_once __DIR__ . '/mailer.php';
 // ALREADY LOGGED IN
 // ==========================================
 
-if (!empty($_SESSION['logged_in']) && !empty($_SESSION['role'])) {
-    redirect_to_dashboard($_SESSION['role']);
+if (
+    !empty($_SESSION['logged_in']) &&
+    !empty($_SESSION['role'])
+) {
+
+    redirect_to_dashboard(
+        $_SESSION['role']
+    );
 }
 
 
@@ -43,29 +49,44 @@ if (
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $email = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
+    $email = trim(
+        $_POST['email'] ?? ''
+    );
+
+    // Do not trim passwords
+    $password =
+        $_POST['password'] ?? '';
 
 
     // ------------------------------------------
     // EMPTY FIELDS
     // ------------------------------------------
 
-    if ($email === '' || $password === '') {
+    if (
+        $email === '' ||
+        $password === ''
+    ) {
 
-        $error = 'Please enter your email and password.';
-
+        $error =
+            'Please enter your email and password.';
     }
+
 
     // ------------------------------------------
     // EMAIL FORMAT
     // ------------------------------------------
 
-    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    elseif (
+        !filter_var(
+            $email,
+            FILTER_VALIDATE_EMAIL
+        )
+    ) {
 
-        $error = 'Please enter a valid email address.';
-
+        $error =
+            'Please enter a valid email address.';
     }
+
 
     // ------------------------------------------
     // DATABASE CHECK
@@ -73,9 +94,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     elseif (!$pdo instanceof PDO) {
 
-        $error = 'Database connection is unavailable.';
-
+        $error =
+            'Database connection is unavailable.';
     }
+
 
     else {
 
@@ -97,28 +119,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 LIMIT 1"
             );
 
-            $stmt->execute([$email]);
+
+            $stmt->execute([
+                $email
+            ]);
+
 
             $user = $stmt->fetch();
 
 
             // ==========================================
-            // CHECK EMAIL + PASSWORD
-            // ==========================================
-            //
-            // For your current project:
-            // password_hash contains plain passwords
-            // such as:
-            //
-            // warehouse123
-            // admin123
-            // etc.
-            //
+            // CHECK EMAIL + HASHED PASSWORD
             // ==========================================
 
             if (
                 $user &&
-                $password === $user['password_hash']
+                password_verify(
+                    $password,
+                    $user['password_hash']
+                )
             ) {
 
                 // ======================================
@@ -137,21 +156,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $_SESSION['pending_user'] = [
 
-                    'id' => (int) $user['user_id'],
+                    'id' =>
+                        (int) $user['user_id'],
 
-                    'name' => $user['name'],
+                    'name' =>
+                        $user['name'],
 
-                    'email' => $user['email'],
+                    'email' =>
+                        $user['email'],
 
-                    'role' => normalize_role(
-                        $user['role']
-                    )
+                    'role' =>
+                        normalize_role(
+                            $user['role']
+                        )
 
                 ];
 
 
-                // Save generated OTP
-                $_SESSION['otp_code'] = $otp;
+                // ======================================
+                // SAVE OTP
+                // ======================================
+
+                $_SESSION['otp_code'] =
+                    $otp;
 
 
                 // OTP expires after 5 minutes
@@ -164,21 +191,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // ======================================
 
                 $sent = send_otp_email(
+
                     $user['email'],
+
                     $user['name'],
+
                     $otp
                 );
 
 
                 // ======================================
-                // OTP SENT
+                // OTP SENT SUCCESSFULLY
                 // ======================================
 
                 if ($sent) {
 
-                    header('Location: otp.php');
-                    exit();
+                    header(
+                        'Location: otp.php'
+                    );
 
+                    exit();
                 }
 
 
@@ -194,24 +226,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['otp_expiry']
                     );
 
+
                     $error =
                         'Unable to send OTP to your registered email address.';
                 }
-
             }
 
 
             // ==========================================
-            // WRONG LOGIN
+            // WRONG EMAIL OR PASSWORD
             // ==========================================
 
             else {
 
-                $error = 'Invalid email or password.';
-
+                $error =
+                    'Invalid email or password.';
             }
 
         }
+
 
         catch (PDOException $e) {
 
@@ -220,6 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $e->getMessage()
             );
 
+
             $error =
                 'A database error occurred. Please try again.';
         }
@@ -227,7 +261,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
-
 
 <!DOCTYPE html>
 
