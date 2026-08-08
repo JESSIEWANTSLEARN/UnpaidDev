@@ -310,21 +310,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
 
             }
-
             catch (PDOException $e) {
 
                 error_log(
                     'Signup verification database error: ' .
                     $e->getMessage()
                 );
-
-
                 $error =
                     'Unable to activate your account. Please try again.';
             }
         }
-
-
         // ==================================
         // WRONG OTP
         // ==================================
@@ -336,7 +331,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
 
 // ==========================================
 // EMAIL DISPLAY
