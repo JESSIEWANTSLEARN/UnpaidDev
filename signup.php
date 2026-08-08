@@ -39,6 +39,28 @@ $name = '';
 $email = '';
 $contactNumber = '';
 
+// ==========================================
+// HANDLE SIGNUP
+// ==========================================
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $name =
+        trim($_POST['name'] ?? '');
+
+    $email =
+        trim($_POST['email'] ?? '');
+
+    $contactNumber =
+        trim($_POST['contact_number'] ?? '');
+
+    // Do not trim passwords
+    $password =
+        $_POST['password'] ?? '';
+
+    $confirmPassword =
+        $_POST['confirm_password'] ?? '';
+
 
 
 ?>
