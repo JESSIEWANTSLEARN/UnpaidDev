@@ -32,3 +32,21 @@ if (
     );
 }
 
+
+// ==========================================
+// MAKE SURE USER CAME FROM SIGNUP
+// ==========================================
+
+if (
+    !isset($_SESSION['signup_pending_user']) ||
+    !isset($_SESSION['signup_otp_code'])
+) {
+
+    header('Location: signup.php');
+    exit();
+}
+
+
+$error = '';
+$success = '';
+
