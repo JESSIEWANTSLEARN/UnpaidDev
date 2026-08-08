@@ -62,6 +62,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_POST['confirm_password'] ?? '';
 
 
+    // ======================================
+    // EMPTY FIELDS
+    // ======================================
+
+    if (
+        $name === '' ||
+        $email === '' ||
+        $contactNumber === '' ||
+        $password === '' ||
+        $confirmPassword === ''
+    ) {
+
+        $error =
+            'Please complete all required fields.';
+    }
+
+
+    // ======================================
+    // EMAIL VALIDATION
+    // ======================================
+
+    elseif (
+        !filter_var(
+            $email,
+            FILTER_VALIDATE_EMAIL
+        )
+    ) {
+
+        $error =
+            'Please enter a valid email address.';
+    }
+
+
+
 
 ?>
 <!DOCTYPE html>
