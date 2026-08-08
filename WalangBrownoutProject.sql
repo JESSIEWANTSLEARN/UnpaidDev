@@ -1,37 +1,26 @@
--- Active: 1785947696841@@127.0.0.1@3306@walangbrownout
 drop database WalangBrownout;
-CREATE DATABASE  WalangBrownout;
-USE WalangBrownout;
 
-DROP TABLE IF EXISTS WBO_Notifications;
-DROP TABLE IF EXISTS WBO_PurchaseOrders;
-DROP TABLE IF EXISTS WBO_Transactions;
-DROP TABLE IF EXISTS WBO_OrderDetails;
-DROP TABLE IF EXISTS WBO_Orders;
-DROP TABLE IF EXISTS WBO_Batches;
-DROP TABLE IF EXISTS WBO_Products;
-DROP TABLE IF EXISTS WBO_Suppliers;
-DROP TABLE IF EXISTS WBO_Users;
+CREATE DATABASE IF NOT EXISTS WalangBrownout;
+USE WalangBrownout;
 
 CREATE TABLE WBO_Users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE, 
+        contact_number VARCHAR(20) NULL,
     password_hash VARCHAR(255) NOT NULL,
-     role ENUM(
-    'super_admin',
-    'Operations_Manager',
-    'Purchasing_Manager',
-    'Warehouse_Admin',
-    'Sales_Manager',
-    'Purchasing_Staff',
-    'Inventory_Controller',
-    'Sales_Staff',
-    'Warehouse_Staff',
-    'System_User'
-   ) NOT NULL,
+    role ENUM('super_admin','Operations_Manager','Purchasing_Manager','Warehouse_Admin','Sales_Manager','Purchasing_Staff',
+    'Inventory_Controller','Sales_Staff','Warehouse_Staff','System_User'
+) NOT NULL,
+    account_status ENUM(
+        'pending_verification',
+        'active',
+        'disabled'
+    ) NOT NULL DEFAULT 'pending_verification',
+    email_verified_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE WBO_Suppliers (
     supplier_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -76,7 +65,8 @@ CREATE TABLE WBO_Orders (
         'FULFILLED',
         'UNFULFILLED',
         'CANCELLED'
-    ) NOT NULL DEFAULT 'PENDING',
+    )
+    NOT NULL DEFAULT 'PENDING',
     FOREIGN KEY (customer_user_id)
         REFERENCES WBO_Users(user_id)
 );
@@ -131,11 +121,26 @@ CREATE TABLE WBO_Notifications (
     FOREIGN KEY (recipient_user_id) REFERENCES WBO_Users(user_id)
 );
 
-INSERT INTO WBO_Users (name, email, password_hash, role) VALUES
-('Jerome Raymundo', 'admin@wbo.ph', '$2y$10$EYIYoocFVd6VS8atOr1rL.zlneVWG9CaXTamfXraccqni5jAZRcC6', 'Admin'),
-('Jessie Palarao', 'warehouse@wbo.ph', '$2y$10$pISxe0iqLFYHby3TFw3f6eUVqd1hdk1S3kjNnRC1tb1ik1cQZWTWC', 'Warehouse_Staff'),
-('Jhon Paul Villasanta', 'hr@wbo.ph', '$2y$10$N0HAiY88zaPMelMpQIzudObZxeOYJSCI4JLcZnE/qQfgqQlUZz0ru', 'Operations_Manager'),
-('Taironne James Sieteriales', 'staff@wbo.ph', '$2y$10$wBqzqIp0V.WlgUxgpq9rqOHa9WZuKLx1pYf4ND.F.7qdfLtBwS1wO', 'Purchasing_Manager');
+-- dummy data
+
+INSERT INTO WBO_Users (
+    name,
+    email,
+    contact_number,
+    password_hash,
+    role,
+    account_status,
+    email_verified_at
+)
+VALUES
+('Jerome Raymundo','admin@wbo.ph','0911','admin123','super_admin','active',NOW()),
+
+('Jessie Palarao','palaraojessie19@gmail.com','0911','warehouse123','Warehouse_Admin','active',NOW()),
+
+('Jhon Paul Villasanta','jhonpaulvillasanta937@gmail.com','0911','operations123','Operations_Manager','active',NOW()),
+
+('Taironne James Sieteriales','staff@wbo.ph','0911','purchasing123','Purchasing_Manager','active',NOW());
+
 
 INSERT INTO WBO_Suppliers (name, contact_number, email, lead_time_days) VALUES
 ('Global Appliance Supply', '0917-000-1111', 'supplier1@example.com', 7),
@@ -150,3 +155,15 @@ INSERT INTO WBO_Batches (product_id, batch_number, quantity_received, current_qu
 (1, 'BATCH-001', 30, 30, NOW(), NULL),
 (2, 'BATCH-002', 50, 50, NOW(), NULL),
 (3, 'BATCH-003', 20, 20, NOW(), '2027-12-31');
+
+
+SELECT * FROM WBO_Users;
+
+UPDATE WBO_Users
+SET email = 'yourrealgmail@gmail.com'
+WHERE user_id = 1;
+
+
+SELECT user_id, name, email, password_hash, role
+FROM wbo_users
+WHERE email = ?
