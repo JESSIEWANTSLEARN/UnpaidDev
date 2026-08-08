@@ -58,7 +58,7 @@ define(
 // Gmail account that sends the OTP
 define(
     'SMTP_USERNAME',
-    'ENTER YOUR GMAIL ACCOUNT HERE'
+    'palaraojessie19@gmail.com'
 );
 
 
@@ -80,7 +80,7 @@ define(
 
 define(
     'SMTP_APP_PASSWORD',
-    'ENTER YOUT PASSWORD HERE
+    'zlqe xedr jynq vrpb
 '
 );
 
