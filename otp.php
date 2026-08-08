@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/session.php';
+require_once __DIR__ . '/mailer.php';
 
 
 // ==========================================
@@ -11,87 +12,245 @@ if (
     !isset($_SESSION['pending_user']) ||
     !isset($_SESSION['otp_code'])
 ) {
+
     header('Location: login.php');
     exit();
 }
 
 
 $error = '';
+$success = '';
 
 
 // ==========================================
-// VERIFY OTP
+// DEFAULT RESEND VALUES
+// ==========================================
+
+$_SESSION['otp_resend_count'] =
+    $_SESSION['otp_resend_count'] ?? 0;
+
+$_SESSION['otp_last_sent'] =
+    $_SESSION['otp_last_sent'] ?? time();
+
+
+// ==========================================
+// HANDLE FORM
 // ==========================================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $enteredOtp = trim($_POST['otp'] ?? '');
+    $action =
+        $_POST['action'] ?? 'verify';
 
 
-    // Check if OTP expired
-    if (
-        isset($_SESSION['otp_expiry']) &&
-        time() > $_SESSION['otp_expiry']
-    ) {
+    // ======================================
+    // RESEND OTP
+    // ======================================
 
-        $error = 'Your OTP has expired. Please login again.';
+    if ($action === 'resend') {
 
-        unset(
-            $_SESSION['pending_user'],
-            $_SESSION['otp_code'],
-            $_SESSION['otp_expiry']
-        );
+        $resendCount =
+            (int) $_SESSION['otp_resend_count'];
 
-    } elseif (
-        hash_equals(
-            (string) $_SESSION['otp_code'],
-            (string) $enteredOtp
-        )
-    ) {
 
-        // ==========================================
-        // OTP CORRECT - COMPLETE LOGIN
-        // ==========================================
+        // Maximum 2 resends
+        if ($resendCount >= 2) {
 
-        $_SESSION['logged_in'] = true;
+            $error =
+                'You have reached the maximum of 2 OTP resends.';
+        }
 
-        $_SESSION['user_id'] =
-            $_SESSION['pending_user']['id'];
+        else {
 
-        $_SESSION['name'] =
-            $_SESSION['pending_user']['name'];
+            // ==================================
+            // 30 SECOND COOLDOWN
+            // ==================================
 
-        $_SESSION['email'] =
-            $_SESSION['pending_user']['email'];
+            $secondsPassed =
+                time() -
+                (int) $_SESSION['otp_last_sent'];
 
-        $_SESSION['role'] =
-            normalize_role(
-                $_SESSION['pending_user']['role']
+
+            if ($secondsPassed < 30) {
+
+                $secondsRemaining =
+                    30 - $secondsPassed;
+
+
+                $error =
+                    "Please wait {$secondsRemaining} seconds before requesting another OTP.";
+            }
+
+            else {
+
+                // ==================================
+                // GENERATE NEW OTP
+                // ==================================
+
+                $newOtp =
+                    (string) random_int(
+                        100000,
+                        999999
+                    );
+
+
+                $pendingUser =
+                    $_SESSION['pending_user'];
+
+
+                // ==================================
+                // SEND NEW OTP
+                // ==================================
+
+                $sent =
+                    send_otp_email(
+                        $pendingUser['email'],
+                        $pendingUser['name'],
+                        $newOtp
+                    );
+
+
+                if ($sent) {
+
+                    // Replace old OTP
+                    $_SESSION['otp_code'] =
+                        $newOtp;
+
+
+                    // Give new OTP another 5 minutes
+                    $_SESSION['otp_expiry'] =
+                        time() + 300;
+
+
+                    // Increase resend count
+                    $_SESSION['otp_resend_count']++;
+
+
+                    // Reset cooldown
+                    $_SESSION['otp_last_sent'] =
+                        time();
+
+
+                    $remaining =
+                        2 -
+                        $_SESSION['otp_resend_count'];
+
+
+                    $success =
+                        "A new OTP has been sent. Resends remaining: {$remaining}.";
+                }
+
+                else {
+
+                    $error =
+                        'Unable to resend OTP. Please try again.';
+                }
+            }
+        }
+    }
+
+
+    // ======================================
+    // VERIFY OTP
+    // ======================================
+
+    elseif ($action === 'verify') {
+
+        $enteredOtp =
+            trim($_POST['otp'] ?? '');
+
+
+        if ($enteredOtp === '') {
+
+            $error =
+                'Please enter the OTP code.';
+        }
+
+
+        // ==================================
+        // OTP EXPIRED
+        // ==================================
+
+        elseif (
+            isset($_SESSION['otp_expiry']) &&
+            time() > $_SESSION['otp_expiry']
+        ) {
+
+            $error =
+                'Your OTP has expired. Please request a new OTP.';
+        }
+
+
+        // ==================================
+        // OTP CORRECT
+        // ==================================
+
+        elseif (
+            hash_equals(
+                (string) $_SESSION['otp_code'],
+                (string) $enteredOtp
+            )
+        ) {
+
+            $_SESSION['logged_in'] =
+                true;
+
+
+            $_SESSION['user_id'] =
+                $_SESSION['pending_user']['id'];
+
+
+            $_SESSION['name'] =
+                $_SESSION['pending_user']['name'];
+
+
+            $_SESSION['email'] =
+                $_SESSION['pending_user']['email'];
+
+
+            $_SESSION['role'] =
+                normalize_role(
+                    $_SESSION['pending_user']['role']
+                );
+
+
+            // ==================================
+            // REMOVE TEMPORARY OTP DATA
+            // ==================================
+
+            unset(
+                $_SESSION['pending_user'],
+                $_SESSION['otp_code'],
+                $_SESSION['otp_expiry'],
+                $_SESSION['otp_resend_count'],
+                $_SESSION['otp_last_sent']
             );
 
 
-        // Remove temporary OTP data
-        unset(
-            $_SESSION['pending_user'],
-            $_SESSION['otp_code'],
-            $_SESSION['otp_expiry']
-        );
+            redirect_to_dashboard(
+                $_SESSION['role']
+            );
+
+            exit();
+        }
 
 
-        // Redirect based on role
-        redirect_to_dashboard(
-            $_SESSION['role']
-        );
+        // ==================================
+        // WRONG OTP
+        // ==================================
 
-        exit();
+        else {
 
-    } else {
-
-        $error =
-            'Invalid OTP code. Please check your email and try again.';
+            $error =
+                'Invalid OTP code. Please check your email and try again.';
+        }
     }
-
 }
+
+
+$userEmail =
+    $_SESSION['pending_user']['email']
+    ?? '';
 
 ?>
 
