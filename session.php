@@ -1,60 +1,187 @@
 <?php
 // session.php
 
+
+// ==========================================
+// START SESSION
+// ==========================================
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+
 require_once __DIR__ . '/config.php';
+
+
+// ==========================================
+// NORMALIZE / VALIDATE ROLE
+// ==========================================
 
 function normalize_role($role)
 {
-    $role = $role ?? 'user';
+    $valid_roles = [
 
-    $map = [
-        'warehouse_manager' => 'warehouse_admin',
-        'Warehouse_Staff' => 'warehouse_admin',
-        'Operations_Manager' => 'staff_admin',
-        'Purchasing_Manager' => 'staff',
-        'Admin' => 'super_admin',
+        'super_admin',
+
+        'Operations_Manager',
+
+        'Purchasing_Manager',
+
+        'Warehouse_Admin',
+
+        'Sales_Manager',
+
+        'Purchasing_Staff',
+
+        'Inventory_Controller',
+
+        'Sales_Staff',
+
+        'Warehouse_Staff',
+
+        'System_User'
+
     ];
 
-    return $map[$role] ?? $role;
+
+    if (in_array($role, $valid_roles, true)) {
+        return $role;
+    }
+
+
+    // Safe fallback
+    return 'System_User';
 }
+
+
+// ==========================================
+// REDIRECT USER TO DASHBOARD
+// ==========================================
 
 function redirect_to_dashboard($role)
 {
     $role = normalize_role($role);
 
+
     $redirects = [
-        'super_admin' => 'super_admin.php',
-        'warehouse_admin' => 'warehouse_admin.php',
-        'staff_admin' => 'staff_admin.php',
-        'staff' => 'staff.php',
-        'user' => 'user.php'
+
+        'super_admin' =>
+            'super_admin.php',
+
+        'Operations_Manager' =>
+            'operations_manager.php',
+
+        'Purchasing_Manager' =>
+            'purchasing_manager.php',
+
+        'Warehouse_Admin' =>
+            'warehouse_admin.php',
+
+        'Sales_Manager' =>
+            'sales_manager.php',
+
+        'Purchasing_Staff' =>
+            'purchasing_staff.php',
+
+        'Inventory_Controller' =>
+            'inventory_controller.php',
+
+        'Sales_Staff' =>
+            'sales_staff.php',
+
+        'Warehouse_Staff' =>
+            'warehouse_staff.php',
+
+        'System_User' =>
+            'user.php'
+
     ];
 
-    $target = $redirects[$role] ?? 'user.php';
-    header('Location: ' . $target);
+
+    $target =
+        $redirects[$role] ?? 'user.php';
+
+
+    header(
+        'Location: ' . $target
+    );
+
     exit();
 }
 
-function check_access($required_role)
+
+// ==========================================
+// CHECK IF USER IS LOGGED IN
+// ==========================================
+
+function check_login()
 {
-    if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
-        header('Location: login.php');
+    if (
+        empty($_SESSION['logged_in']) ||
+        empty($_SESSION['user_id'])
+    ) {
+
+        header(
+            'Location: login.php'
+        );
+
         exit();
     }
 
-    $user_role = normalize_role($_SESSION['role'] ?? 'user');
-    $required_role = normalize_role($required_role);
+
+    return true;
+}
+
+
+// ==========================================
+// CHECK ROLE ACCESS
+// ==========================================
+
+function check_access($required_role)
+{
+    // User must be logged in
+    check_login();
+
+
+    $user_role =
+        normalize_role(
+            $_SESSION['role'] ?? ''
+        );
+
+
+    $required_role =
+        normalize_role(
+            $required_role
+        );
+
+
+    // ======================================
+    // SUPER ADMIN
+    // ======================================
+    //
+    // Super admin can access every page.
+    //
+    // ======================================
 
     if ($user_role === 'super_admin') {
+
         return true;
     }
 
+
+    // ======================================
+    // ROLE MUST MATCH
+    // ======================================
+
     if ($user_role !== $required_role) {
-        redirect_to_dashboard($user_role);
+
+        redirect_to_dashboard(
+            $user_role
+        );
     }
+
+
+    return true;
 }
 ?>
