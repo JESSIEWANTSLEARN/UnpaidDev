@@ -18,7 +18,18 @@ CREATE TABLE WBO_Users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('Purchasing_Manager', 'Warehouse_Staff', 'Operations_Manager', 'Admin') NOT NULL,
+     role ENUM(
+    'super_admin',
+    'Operations_Manager',
+    'Purchasing_Manager',
+    'Warehouse_Admin',
+    'Sales_Manager',
+    'Purchasing_Staff',
+    'Inventory_Controller',
+    'Sales_Staff',
+    'Warehouse_Staff',
+    'System_User'
+   ) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
