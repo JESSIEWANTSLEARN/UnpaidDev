@@ -28,3 +28,25 @@ function log_activity(
                 description,
                 ip_address
             )
+                        VALUES (?, ?, ?, ?)"
+        );
+
+
+        $stmt->execute([
+            $userId,
+            $action,
+            $description,
+            $ipAddress
+        ]);
+
+    }
+
+    catch (PDOException $e) {
+
+        // Audit failure should not crash the whole system
+        error_log(
+            'Audit log error: ' .
+            $e->getMessage()
+        );
+    }
+}
