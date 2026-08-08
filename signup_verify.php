@@ -50,3 +50,16 @@ if (
 $error = '';
 $success = '';
 
+
+
+// ==========================================
+// DEFAULT RESEND VALUES
+// ==========================================
+
+$_SESSION['signup_otp_resend_count'] =
+    $_SESSION['signup_otp_resend_count'] ?? 0;
+
+$_SESSION['signup_otp_last_sent'] =
+    $_SESSION['signup_otp_last_sent'] ?? time();
+
+
