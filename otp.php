@@ -1,7 +1,9 @@
 <?php
 
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/audit.php';
 
 
 // ==========================================
@@ -76,7 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $secondsRemaining =
                     30 - $secondsPassed;
 
-
                 $error =
                     "Please wait {$secondsRemaining} seconds before requesting another OTP.";
             }
@@ -92,7 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         100000,
                         999999
                     );
-
 
                 $pendingUser =
                     $_SESSION['pending_user'];
@@ -116,25 +116,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['otp_code'] =
                         $newOtp;
 
-
                     // Give new OTP another 5 minutes
                     $_SESSION['otp_expiry'] =
                         time() + 300;
 
-
                     // Increase resend count
                     $_SESSION['otp_resend_count']++;
-
 
                     // Reset cooldown
                     $_SESSION['otp_last_sent'] =
                         time();
 
-
                     $remaining =
                         2 -
                         $_SESSION['otp_resend_count'];
-
 
                     $success =
                         "A new OTP has been sent. Resends remaining: {$remaining}.";
@@ -160,6 +155,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             trim($_POST['otp'] ?? '');
 
 
+        // ==================================
+        // EMPTY OTP
+        // ==================================
+
         if ($enteredOtp === '') {
 
             $error =
@@ -172,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ==================================
 
         elseif (
-            isset($_SESSION['otp_expiry']) &&
+            !isset($_SESSION['otp_expiry']) ||
             time() > $_SESSION['otp_expiry']
         ) {
 
@@ -192,26 +191,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             )
         ) {
 
+            // Protect against session fixation
+            session_regenerate_id(true);
+
+
+            // ==================================
+            // CREATE LOGGED-IN SESSION
+            // ==================================
+
             $_SESSION['logged_in'] =
                 true;
 
-
             $_SESSION['user_id'] =
-                $_SESSION['pending_user']['id'];
-
+                (int) $_SESSION['pending_user']['id'];
 
             $_SESSION['name'] =
                 $_SESSION['pending_user']['name'];
 
-
             $_SESSION['email'] =
                 $_SESSION['pending_user']['email'];
-
 
             $_SESSION['role'] =
                 normalize_role(
                     $_SESSION['pending_user']['role']
                 );
+
+
+            // ==================================
+            // RECORD SUCCESSFUL LOGIN
+            // ==================================
+
+            log_activity(
+                $pdo,
+                $_SESSION['user_id'],
+                'LOGIN',
+                'User successfully logged in'
+            );
 
 
             // ==================================
@@ -226,6 +241,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['otp_last_sent']
             );
 
+
+            // ==================================
+            // REDIRECT TO USER DASHBOARD
+            // ==================================
 
             redirect_to_dashboard(
                 $_SESSION['role']
@@ -247,6 +266,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+
+// ==========================================
+// EMAIL DISPLAYED ON OTP PAGE
+// ==========================================
 
 $userEmail =
     $_SESSION['pending_user']['email']
