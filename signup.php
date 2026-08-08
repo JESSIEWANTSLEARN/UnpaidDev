@@ -109,6 +109,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Please enter a valid contact number.';
     }
 
+    // ======================================
+    // PASSWORD LENGTH
+    // ======================================
+
+    elseif (strlen($password) < 6) {
+
+        $error =
+            'Password must be at least 6 characters long.';
+    }
+
+
+    // ======================================
+    // CONFIRM PASSWORD
+    // ======================================
+
+    elseif ($password !== $confirmPassword) {
+
+        $error =
+            'Passwords do not match.';
+    }
+
+
 
 
 
