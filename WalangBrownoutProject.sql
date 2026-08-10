@@ -135,14 +135,7 @@ CREATE TABLE WBO_AuditLogs (
 
 -- dummy data
 
-INSERT INTO WBO_Users (
-    name,
-    email,
-    contact_number,
-    password_hash,
-    role,
-    account_status,
-    email_verified_at
+INSERT INTO WBO_Users ( name,  email,  contact_number,   password_hash,  role,  account_status,  email_verified_at
 )
 VALUES
 ('Jerome Raymundo','admin@wbo.ph','0911','admin123','super_admin','active',NOW()),
