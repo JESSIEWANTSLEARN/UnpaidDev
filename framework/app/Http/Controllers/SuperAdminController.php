@@ -2,9 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\WBOUser;
 
 class SuperAdminController extends Controller
 {
-    //
+    public function index()
+    {
+        $users = WBOUser::orderBy(
+            'user_id',
+            'desc'
+        )->get();
+
+        return response()->json([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
 }
