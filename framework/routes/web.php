@@ -8,3 +8,7 @@ Route::get('/', function () {
 Route::get('/react-test', function () {
     return view('react');
 });
+Route::get(
+    '/api/super-admin/users',
+    [SuperAdminController::class, 'index']
+);
