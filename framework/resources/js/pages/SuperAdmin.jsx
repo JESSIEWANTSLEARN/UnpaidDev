@@ -10,3 +10,62 @@ function SuperAdmin() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // ==========================================
+    // LOAD USERS FROM LARAVEL
+    // ==========================================
+
+    useEffect(() => {
+
+        fetch('/api/super-admin/users')
+
+            .then((response) => {
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Unable to load users.'
+                    );
+                }
+
+                return response.json();
+            })
+
+            .then((data) => {
+
+                if (data.success) {
+
+                    setUsers(data.users);
+
+                } else {
+
+                    setError(
+                        'Unable to retrieve users.'
+                    );
+                }
+
+            })
+
+            .catch((error) => {
+
+                console.error(error);
+
+                setError(
+                    'An error occurred while loading users.'
+                );
+
+            })
+
+            .finally(() => {
+
+                setLoading(false);
+
+            });
+
+    }, []);
+
+
+    // ==========================================
+    // PAGE
+    // ==========================================
+
+    return (
+
