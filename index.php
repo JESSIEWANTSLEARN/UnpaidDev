@@ -82,74 +82,54 @@
     </main>
 
     <!-- Footer -->
-    <footer class="relative z-10 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
-            <strong>&copy; 2026 WalangBrownOut.</strong> All rights reserved.
+    <footer class="site-footer reveal-up">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="brand">Walang BrownOut</div>
+                <p>
+                    A secure, role-based warehouse and inventory management
+                    platform designed for administrators, warehouse staff,
+                    suppliers, and employees.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Shop</h4>
+
+                <a href="#">New arrivals</a>
+                <a href="#">Best sellers</a>
+                <a href="#">Accessories</a>
+                <a href="#">Sale</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>Company</h4>
+
+                <a href="#">About us</a>
+                <a href="#">Journal</a>
+                <a href="#">Careers</a>
+                <a href="#">Contact</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>Support</h4>
+
+                <a href="#">Shipping</a>
+                <a href="#">Returns</a>
+                <a href="#">FAQs</a>
+                <a href="#">Privacy</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span><strong>&copy; 2026 WalangBrownOut.</strong> All rights reserved.</span>
+
+            <div class="social-links">
+                <a href="#">Instagram</a>
+                <a href="#">Facebook</a>
+                <a href="#">X</a>
+            </div>
         </div>
     </footer>
 </body>
 </html>
-
-
-<!-- Footer
-<div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
-    <strong>&copy; 2026 WalangBrownOut.</strong> All rights reserved.
-</div>
--->
-
-<!-- LEFT 
-                    <div>
-                        <span class="inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-700">
-                            Enterprise Portal
-                        </span>
-
-                        <h1 class="text-4xl font-extrabold mt-5 leading-tight text-slate-900">
-                            Walang Brown Out
-                            <br>
-                            Portal System
-                        </h1>
-                        
-                        <p class="text-slate-600 mt-5 max-w-2xl">
-                            A secure, role-based warehouse and inventory management
-                            platform designed for administrators, warehouse staff,
-                            suppliers, and employees.
-                        </p>
-
-                        <div class="flex flex-wrap gap-3 mt-6">
-                            <a href="login.php" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold transition hover:scale-105">
-                                Sign In
-                            </a>
-
-                            <a href="#features" class="border border-slate-300 px-6 py-3 rounded-xl font-semibold hover:bg-slate-100">
-                                Explore Features
-                            </a>
-                        </div>
-
-                        <div class="mt-6 flex flex-wrap gap-2">
-                            <span class="accent-pill">Secure Access</span>
-                            <span class="accent-pill">Warehouse Control</span>
-                            <span class="accent-pill">Inventory Tracking</span>
-                            <span class="accent-pill">Real-Time Dashboard</span>
-                        </div>
-
-ABOUT 
-
-                        <div class="mt-10">
-
-                            <h2 class="text-2xl font-bold text-slate-900">
-                                About Us
-                            </h2>
-
-                            <p class="mt-3 text-slate-600 leading-relaxed">
-                                Walang Brown Out provides a centralized inventory,
-                                warehouse, supplier, and user management system built
-                                to improve operational efficiency. The portal enables
-                                businesses to securely manage stock movement,
-                                warehouse operations, employee workflows, and
-                                administrative tasks through a modern and intuitive
-                                interface.
-                            </p>
-
-                        </div>
-                    </div>
--->
