@@ -22,7 +22,7 @@
 <body class="page-shell">
 
     <!-- Header -->
-    <header class="relative z-10 border-b">
+    <header class="site-header">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <img src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png"
@@ -60,9 +60,7 @@
     <main class="storefront">
         <section class="promo-banner reveal-up">
             <div class="promo-copy">
-                <span class="promo-tag">Reliable cooling solutions</span>
-                
-                <h1>Comfort at home, all year round.</h1>
+                <strong><h1>Comfort at home, all year round.</h1></strong>
                 <p>Walang BrownOut Appliances helps homes and businesses stay cool, clean, and efficient with trusted portable AC units, air purifiers, smart thermostats, and replacement filters.</p>
                     
                 <div class="promo-actions">
@@ -75,7 +73,7 @@
 
         <section class="categories-section">
             <div class="section-heading">
-                <h2>About Walang BrownOut</h2>
+                <strong><h2>About Walang BrownOut</h2></strong>
                 
                 <a href="#">Learn more</a>
 
@@ -93,7 +91,7 @@
 
         <section class="categories-section">
             <div class="section-heading">
-                <h2>Our services</h2>
+                <strong><h2>Our services</h2></strong>
                     
                 <a href="#">Explore</a>
                     
@@ -105,29 +103,29 @@
             <div class="category-grid">
                 <article class="category-card reveal-up">
                     <div class="category-thumb thumb-one"></div>
-                    <h3>Portable AC Units</h3>
+                    <strong><h3>Portable AC Units</h3></strong>
                 </article>
 
                 <article class="category-card reveal-up stagger-2">
                     <div class="category-thumb thumb-two"></div>
-                    <h3>Air Purifiers</h3>
+                    <strong><h3>Air Purifiers</h3></strong>
                 </article>
 
                 <article class="category-card reveal-up stagger-3">
                     <div class="category-thumb thumb-three"></div>
-                    <h3>Replacement Filters</h3>
+                    <strong><h3>Replacement Filters</h3></strong>
                 </article>
 
                 <article class="category-card reveal-up stagger-4">
                     <div class="category-thumb thumb-four"></div>
-                    <h3>Smart Thermostats</h3>
+                    <strong><h3>Smart Thermostats</h3></strong>
                 </article>
             </div>
         </section>
 
         <section class="products-section">
             <div class="section-heading">
-                <h2>Featured home comfort essentials</h2>
+                <strong><h2>Featured home comfort essentials</h2></strong>
                 
                 <a href="#">View all</a>
                 
@@ -141,7 +139,7 @@
                     <div class="product-image image-one"></div>
                     
                     <div class="product-info">
-                        <h3>Portable AC Pro</h3>
+                        <strong><h3>Portable AC Pro</h3></strong>
                         
                         <p>Cool rooms fast and quietly</p>
                         
@@ -156,7 +154,7 @@
                     <div class="product-image image-two"></div>
                     
                     <div class="product-info">
-                        <h3>Air Purifier Plus</h3>
+                        <strong><h3>Air Purifier Plus</h3></strong>
                         
                         <p>Cleaner indoor air</p>
                         
@@ -171,7 +169,7 @@
                     <div class="product-image image-three"></div>
                     
                     <div class="product-info">
-                        <h3>Carbon Filter Pack</h3>
+                        <strong><h3>Carbon Filter Pack</h3></strong>
                         
                         <p>High-efficiency replacement</p>
                         
@@ -183,10 +181,10 @@
                 </article>
 
                 <article class="product-card reveal-up stagger-4">
-                    <div class="product-image image-four"></div>
+                    <strong><div class="product-image image-four"></div></strong>
                     
                     <div class="product-info">
-                        <h3>Smart Thermostat</h3>
+                        <strong><h3>Smart Thermostat</h3></strong>
 
                         <p>Energy-saving control</p>
                         
@@ -202,24 +200,24 @@
         <section class="promo-strip reveal-up">
             <div>
                 <span class="promo-badge">Free shipping</span>
-                <h3>On orders over $100</h3>
+                <strong><h3>On orders over $100</h3></strong>
             </div>
 
             <div>
                 <span class="promo-badge">Easy returns</span>
-                <h3>30-day guarantee</h3>
+                <strong><h3>30-day guarantee</h3></strong>
             </div>
 
             <div>
                 <span class="promo-badge">Secure payment</span>
-                <h3>Protected checkout</h3>
+                <strong><h3>Protected checkout</h3></strong>
             </div>
         </section>
 
         <section class="newsletter-box reveal-up">
             <div>
-                <span class="newsletter-tag">Newsletter</span>
-                <h2>Save 15% on your first order.</h2>
+                <strong><span class="newsletter-tag">Newsletter</span></strong>
+                <strong><h2>Save 15% on your first order.</h2></strong>
             </div>
             
             <form class="newsletter-form">
