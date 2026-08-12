@@ -1,3 +1,122 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Global list styles and variants */
+ul,
+ol {
+  margin: 0 0 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Default list item card look for readability */
+ul li,
+ol li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(17, 17, 17, 0.04);
+  color: #111;
+  margin-bottom: 10px;
+}
+
+/* Simple bullet for unordered lists */
+ul li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #111;
+  margin-top: 6px;
+  flex: 0 0 auto;
+}
+
+/* Numbered circular markers for ordered lists */
+ol {
+  counter-reset: wbo-list;
+}
+ol li {
+  counter-increment: wbo-list;
+  position: relative;
+  padding-left: 48px;
+}
+ol li::before {
+  content: counter(wbo-list);
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Compact variant for tight lists (use class="list-compact") */
+.list-compact li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  gap: 8px;
+}
+.list-compact ul li::before,
+.list-compact li::before {
+  width: 8px;
+  height: 8px;
+}
+
+@media (max-width: 640px) {
+  ul li,
+  ol li {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  ul li::before {
+    width: 8px;
+    height: 8px;
+    margin-top: 6px;
+  }
+
+  ol li::before {
+    width: 24px;
+    height: 24px;
+    left: 10px;
+    font-size: 0.78rem;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #e9e7e2;
+  color: #1e1e1e;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input {
+  font: inherit;
+}
+
 body {
     background: var(--bg);
     color: var(--text);

@@ -13,7 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WalangBrownout</title>
+    <title>Walang Brown Out Portal</title>
     <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
     <link rel="stylesheet" href="index_style.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,88 +21,43 @@
 </head>
 <body class="app-shell text-slate-800">
 
-    <div class="bg-aurora" aria-hidden="true">
-        <div class="aurora-orb one"></div>
-        <div class="aurora-orb two"></div>
-    </div>
-
     <!-- Header -->
     <header class="relative z-10 border-b">
-
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-
             <div class="flex items-center space-x-3">
-
                 <img src="https://img.sanishtech.com/u/6559c6ed2b30023d94b79a0932f09814.png"
                     alt="Walang Brown Out Logo"
                     width="45"
                     height="45">
 
                 <div class="hidden sm:block leading-tight">
-
                     <span class="font-bold text-gray-700 text-[11px] uppercase tracking-[0.18em]">
-
                         Republic of the Philippines
-
                     </span>
 
                     <div class="text-lg font-extrabold text-blue-700">
-
                         WALANG BROWN OUT
-
                     </div>
-
                 </div>
-
             </div>
 
             <div class="flex items-center gap-3">
-
-                <button id="themeToggle" type="button" class="theme-toggle hidden md:inline-flex items-center gap-2">
-                    🌙
-                </button>
-
-                <span class="hidden md:flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm text-slate-600 shadow-sm">
-                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Live System
-                </span>
-
-                <a href="login.php" class="btn">
-                    Login to Portal
-                </a>
-
+                <a href="login.php" class="nav-button">Login</a>
+                <a href="signin.php" class="nav-button primary-nav-button">Sign in</a>
             </div>
-
         </div>
 
+        <nav class="main-nav" aria-label="Main navigation">
+            <a href="#">Home</a>
+            <a href="#">Solutions</a>
+            <a href="#">Features</a>
+            <a href="#">Inventory</a>
+            <a href="#">About</a>
+        </nav>
     </header>
 
     <!-- Main Content -->
     <main class="flex min-h-screen">
-
-        <!-- SIDEBAR -->
-        <aside class="w-24 flex-shrink-0 bg-white border-r border-slate-200 fade-in-up shadow-sm sticky top-0 h-screen">
-            <div class="flex flex-col items-center py-8">
-                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shadow-sm">
-                    ⚡
-                </div>
-
-                <div class="mt-10 space-y-5">
-                    <div class="sidebar-icon w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center shadow-sm">
-                        🏠
-                    </div>
-                    <div class="sidebar-icon w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center shadow-sm">
-                        📦
-                    </div>
-                    <div class="sidebar-icon w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center shadow-sm">
-                        👤
-                    </div>
-                    <div class="sidebar-icon w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center shadow-sm">
-                        📊
-                    </div>
-                </div>
-            </div>
-        </aside>
 
         <div class="flex-1 space-y-6 p-6 overflow-y-auto">
             <!-- HERO -->
@@ -128,7 +83,9 @@
 
     <!-- Footer -->
     <footer class="relative z-10 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
-        
+        <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
+            <strong>&copy; 2026 WalangBrownOut.</strong> All rights reserved.
+        </div>
     </footer>
 </body>
 </html>
