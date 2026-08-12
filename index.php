@@ -113,6 +113,35 @@
                     <!-- LEFT -->
 
                     <div>
+                        
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+
+                    <div class="space-y-4">
+
+                    </div>
+            </section>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
+        
+    </footer>
+</body>
+</html>
+
+
+<!-- Footer
+<div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
+    <strong>&copy; 2026 WalangBrownOut.</strong> All rights reserved.
+</div>
+-->
+
+<!-- LEFT 
+                    <div>
                         <span class="inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-700">
                             Enterprise Portal
                         </span>
@@ -146,7 +175,7 @@
                             <span class="accent-pill">Real-Time Dashboard</span>
                         </div>
 
-                        <!-- ABOUT -->
+ABOUT 
 
                         <div class="mt-10">
 
@@ -166,76 +195,4 @@
 
                         </div>
                     </div>
-
-                    <!-- RIGHT SIDE -->
-
-                    <div class="space-y-4">
-
-                        <!-- Warehouse -->
-
-                        <div class="glass rounded-3xl p-5 fade-in-up-delay">
-                            <div class="flex justify-between">
-                                <div>
-                                    <h3 class="font-bold text-slate-900">
-                                        Warehouse Console
-                                    </h3>
-
-                                    <p class="text-sm text-slate-500">
-                                        Monitoring all warehouse zones
-                                    </p>
-                                </div>
-
-                                <span class="text-emerald-600 font-bold">
-                                    Active
-                                </span>
-                            </div>
-
-                            <div class="mt-5 h-2 rounded-full bg-slate-100">
-                                <div class="h-2 w-4/5 rounded-full bg-blue-600"></div>
-                            </div>
-                        </div>
-
-                        <!-- Admin -->
-
-                        <div class="glass rounded-3xl p-5 fade-in-up-delay">
-                            <div class="flex justify-between">
-                                <div>
-                                    <h3 class="font-bold text-slate-900">
-                                        Admin Workflow
-                                    </h3>
-
-                                    <p class="text-sm text-slate-500">
-                                        Fast approvals and routing
-                                    </p>
-                                </div>
-
-                                <span class="text-blue-600 font-bold">
-                                    Ready
-                                </span>
-
-                            </div>
-
-                            <div class="mt-4 flex items-center gap-3">
-                                <div class="flex-1 rounded-full bg-slate-100 p-1">
-                                    <div class="h-2 w-3/4 rounded-full bg-slate-900"></div>
-                                </div>
-
-                                <span class="font-semibold">
-                                    75%
-                                </span>
-                            </div>
-                        </div>
-            </section>
-        </div>
-        
-    </main>
-
-    <!-- Footer -->
-    <footer class="relative z-10 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto px-6 py-6 text-center text-slate-600 text-sm">
-            <strong>&copy; 2026 WalangBrownOut.</strong>
-            All rights reserved.
-        </div>
-    </footer>
-</body>
-</html>
+-->
