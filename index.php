@@ -19,7 +19,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
 </head>
-<body class="app-shell text-slate-800">
+<body class="page-shell">
 
     <!-- Header -->
     <header class="relative z-10 border-b">
@@ -57,28 +57,176 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex min-h-screen">
-
-        <div class="flex-1 space-y-6 p-6 overflow-y-auto">
-            <!-- HERO -->
-
-            <section class="gradient-card rounded-[20px] p-6 md:p-8 border border-slate-200 fade-in-up hover-lift shadow-[0_14px_35px_rgba(15,23,42,0.05)]">
-                <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-8">
+    <main class="storefront">
+        <section class="promo-banner reveal-up">
+            <div class="promo-copy">
+                <span class="promo-tag">Reliable cooling solutions</span>
+                
+                <h1>Comfort at home, all year round.</h1>
+                <p>Walang BrownOut Appliances helps homes and businesses stay cool, clean, and efficient with trusted portable AC units, air purifiers, smart thermostats, and replacement filters.</p>
                     
-                    <!-- LEFT -->
+                <div class="promo-actions">
+                    <a href="#" class="primary-link">Explore Solutions</a>
+                    <a href="#" class="secondary-link">View Dashboard</a>
+                </div>
+            </div>
+            <div class="promo-visual" aria-label="Appliance display image"></div>
+        </section>
 
-                    <div>
+        <section class="categories-section">
+            <div class="section-heading">
+                <h2>About Walang BrownOut</h2>
+                
+                <a href="#">Learn more</a>
+
+                <button class="section-toggle" aria-expanded="true" aria-label="Toggle section">
+                    <span class="chev">▾</span>
+                </button>
+            </div>
+
+            <div class="about-box reveal-up">
+                <p>
+                    Walang BrownOut Appliances is a regional distributor of home comfort products dedicated to improving everyday living through dependable cooling, clean air, and smarter energy use. We serve households, offices, and retail partners with efficient solutions built for comfort, health, and performance.
+                </p>
+            </div>
+        </section>
+
+        <section class="categories-section">
+            <div class="section-heading">
+                <h2>Our services</h2>
+                    
+                <a href="#">Explore</a>
+                    
+                <button class="section-toggle" aria-expanded="true" aria-label="Toggle section">
+                    <span class="chev">▾</span>
+                </button>
+            </div>
+
+            <div class="category-grid">
+                <article class="category-card reveal-up">
+                    <div class="category-thumb thumb-one"></div>
+                    <h3>Portable AC Units</h3>
+                </article>
+
+                <article class="category-card reveal-up stagger-2">
+                    <div class="category-thumb thumb-two"></div>
+                    <h3>Air Purifiers</h3>
+                </article>
+
+                <article class="category-card reveal-up stagger-3">
+                    <div class="category-thumb thumb-three"></div>
+                    <h3>Replacement Filters</h3>
+                </article>
+
+                <article class="category-card reveal-up stagger-4">
+                    <div class="category-thumb thumb-four"></div>
+                    <h3>Smart Thermostats</h3>
+                </article>
+            </div>
+        </section>
+
+        <section class="products-section">
+            <div class="section-heading">
+                <h2>Featured home comfort essentials</h2>
+                
+                <a href="#">View all</a>
+                
+                <button class="section-toggle" aria-expanded="true" aria-label="Toggle section">
+                    <span class="chev">▾</span>
+                </button>
+            </div>
+
+            <div class="product-grid">
+                <article class="product-card reveal-up">
+                    <div class="product-image image-one"></div>
+                    
+                    <div class="product-info">
+                        <h3>Portable AC Pro</h3>
                         
+                        <p>Cool rooms fast and quietly</p>
+                        
+                        <div class="product-meta">
+                            <span class="price">₱18,500</span>
+                            <button>Add to cart</button>
+                        </div>
                     </div>
+                </article>
 
-                    <!-- RIGHT SIDE -->
-
-                    <div class="space-y-4">
-
+                <article class="product-card reveal-up stagger-2">
+                    <div class="product-image image-two"></div>
+                    
+                    <div class="product-info">
+                        <h3>Air Purifier Plus</h3>
+                        
+                        <p>Cleaner indoor air</p>
+                        
+                        <div class="product-meta">
+                            <span class="price">₱12,900</span>
+                            <button>Add to cart</button>
+                        </div>
                     </div>
-            </section>
-        </div>
-        
+                </article>
+
+                <article class="product-card reveal-up stagger-3">
+                    <div class="product-image image-three"></div>
+                    
+                    <div class="product-info">
+                        <h3>Carbon Filter Pack</h3>
+                        
+                        <p>High-efficiency replacement</p>
+                        
+                        <div class="product-meta">
+                            <span class="price">₱2,400</span>
+                            <button>Add to cart</button>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="product-card reveal-up stagger-4">
+                    <div class="product-image image-four"></div>
+                    
+                    <div class="product-info">
+                        <h3>Smart Thermostat</h3>
+
+                        <p>Energy-saving control</p>
+                        
+                        <div class="product-meta">
+                            <span class="price">₱8,750</span>
+                            <button>Add to cart</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="promo-strip reveal-up">
+            <div>
+                <span class="promo-badge">Free shipping</span>
+                <h3>On orders over $100</h3>
+            </div>
+
+            <div>
+                <span class="promo-badge">Easy returns</span>
+                <h3>30-day guarantee</h3>
+            </div>
+
+            <div>
+                <span class="promo-badge">Secure payment</span>
+                <h3>Protected checkout</h3>
+            </div>
+        </section>
+
+        <section class="newsletter-box reveal-up">
+            <div>
+                <span class="newsletter-tag">Newsletter</span>
+                <h2>Save 15% on your first order.</h2>
+            </div>
+            
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email">
+                <button type="submit">Join now</button>
+            </form>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -131,5 +279,61 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        const revealItems = document.querySelectorAll('.reveal-up');
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const item = entry.target;
+                    item.classList.remove('is-visible');
+                    void item.offsetWidth;
+                    item.classList.add('is-visible');
+                } else {
+                    entry.target.classList.remove('is-visible');
+                }
+            });
+        }, {
+            threshold: 0.18,
+            rootMargin: '0px 0px -8% 0px'
+        });
+
+        revealItems.forEach((item) => revealObserver.observe(item));
+        
+        // Section collapse/expand toggles for small screens
+        const sectionToggles = document.querySelectorAll('.section-toggle');
+
+        sectionToggles.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const section = btn.closest('section');
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', (!expanded).toString());
+                if (expanded) {
+                    section.classList.add('collapsed');
+                } else {
+                    section.classList.remove('collapsed');
+                }
+            });
+        });
+
+        function applyInitialCollapse() {
+            const isSmall = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+            sectionToggles.forEach((btn) => {
+                const section = btn.closest('section');
+                if (isSmall) {
+                    // collapse large content areas by default on phones
+                    section.classList.add('collapsed');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    section.classList.remove('collapsed');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            });
+        }
+
+        applyInitialCollapse();
+        window.addEventListener('resize', applyInitialCollapse);
+    </script>
 </body>
 </html>
