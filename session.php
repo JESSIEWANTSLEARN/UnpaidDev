@@ -23,14 +23,16 @@ if (!empty($_SESSION['logged_in'])) {
 
         if ($inactive_time >= $idle_timeout) {
 
-    session_unset();
+             session_unset();
             session_destroy();
 
             header("Location: login.php?timeout=1");
             exit;
         }
     }
-
+    // User is still active
+    $_SESSION['last_activity'] = time();
+}
 
 
 
