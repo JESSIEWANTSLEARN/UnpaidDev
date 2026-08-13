@@ -12,6 +12,24 @@ if (
     die('Database connection is unavailable.');
 }
 
+if (isset($_GET['timeout']) && $_GET['timeout'] == '1') {
+
+    log_activity(
+        $pdo,
+        (int) $_SESSION['user_id'],
+        'SESSION_TIMEOUT',
+        'User automatically logged out due to inactivity'
+    );
+
+} else {
+
+    log_activity(
+        $pdo,
+        (int) $_SESSION['user_id'],
+        'LOGOUT',
+        'User logged out manually'
+    );
+}
 
 // ==========================================
 // RECORD LOGOUT
