@@ -114,16 +114,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>WalangBrownout</title>
-    <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
+
+    <link rel="icon" type="image/png" href="image/Logo.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -142,25 +150,198 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 10px;
             text-align: center;
         }
+
+
+        /* IMAGE CSS */
+
+        .my-image {
+            width: 300px;
+            height: auto;
+            border-radius: 10px;
+
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+             .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 50px;
+        }
+        .image-box {
+            display: inline-block;
+            text-align: center;
+        }
+        img {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
         
+        /* Hover Zoom Effect */
+        .zoom img:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Fade In on Hover */
+        .fade img {
+            opacity: 0.7;
+        }
+        .fade img:hover {
+            opacity: 1;
+        }
+        
+        /* Rotate Effect */
+        .rotate img:hover {
+            transform: rotate(15deg);
+        }
+        
+        /* Moving (Slide-Up) on Hover */
+        .slide-up img:hover {
+            transform: translateY(-10px);
+        }
+        
+        /* Shake Effect */
+        .shake img:hover {
+            animation: shake 0.5s infinite;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        erwr
+        /* Flip Effect */
+        .flip img, .test1 {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip img:hover {
+            transform: rotateY(180deg);
+        }
+        
+        /* Glowing Border Effect */
+        .glow img {
+            border: 3px solid transparent;
+            transition: border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        .glow img:hover {
+            border-color: blue;
+            box-shadow: 0 0 15px blue;
+        }
+
+
+
     </style>
 
 </head>
+
+
 <body>
+
     <header>
+
         <nav>
-            
+
         </nav>
+
     </header>
 
+
+    <!-- IMAGE -->
+
+    <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLX5EQYeKkqr9Nmg4goaFeRKP1Ps0bV5SkICFTDA-pog&s=10"
+        alt="Image"
+        class="my-image"
+    >
+
+   <img accesskey="
+" src="https://media.tenor.com/el4CnBiSEyUAAAAM/shore-keeper-shorekeeper-eating.gif" alt="Image" class="my-image">
+
+
+ 
+ 
+   <img accesskey="
+" src="https://media.tenor.com/el4CnBiSEyUAAAAM/shore-keeper-shorekeeper-eating.gif" alt="Image" class="my-image">
+
+
+   <img accesskey="
+" src="https://media.tenor.com/frhCxo6PhVEAAAAM/phoebe-wuwa.giff" alt="Image" class="my-Image">
+
+
+   <img accesskey="
+" src="https://media.tenor.com/KABxYqmd0ywAAAA1/wuwa-carlotta.webp" alt="Image" class="my-iImage">
+
+
+   <img accesskey="
+" src="https://media.tenor.com/42R4JLGBrOEAAAAM/carlotta-carlotta-shocked.giff" alt="Image" class="my-iIImage">
+
+ 
+         <div class=" test1"> 
+         <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="flip affects">
+    </div>
+    <h1>Image Hover Effects</h1>
+    <div class="container">
+        <div class="image-box zoom">
+            <p>Zoom Effect</p>
+            <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="Zoom Effect">
+        </div>
+        <div class="image-box fade">
+            <p>Fade In Effect</p>
+            <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="Fade Effect">
+        </div>
+        <div class="image-box rotate">
+            <p>Rotate Effect</p>
+            <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="Rotate Effect">
+        </div>
+        <div class="image-box slide-up">
+            <p>Slide-Up Effect</p>
+            <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="Slide-Up Effect">
+        </div>
+        <div class="image-box shake">
+            <p>Shake Effect</p>
+            <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="Shake Effect">
+        </div>
+        <div class="image-box flip">
+            <p>Flip Effect</p>
+            <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="Flip Effect">
+        </div>
+        <div class="image-box glow">
+            <p>Glowing Border</p>
+            <img src="https://media1.tenor.com/m/KdIR-Rgzb5wAAAAd/blue-archive-misono-mika.gif" alt="Glowing Border Effect">
+        </div>
+    </div>
+
+
+     
+
     <main>
-        
+
     </main>
 
+
     <footer>
-        <p><strong>&copy; 2026 WalangBrownout. All rights reserved.</strong></p>
+
+        <p>
+            <strong>
+                &copy; 2026 WalangBrownout. All rights reserved BUAHAHAHAHAHAHHAHHAHAHAHA
+                .
+            </strong>
+        </p>
+
     </footer>
+
+
 </body>
+
 </html>
 
 <?php
