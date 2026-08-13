@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Idle timeout: 20 minutes
-$idle_timeout = 20 * 60;
+$idle_timeout = 1 * 60;
 
 if (!empty($_SESSION['logged_in'])) {
 
