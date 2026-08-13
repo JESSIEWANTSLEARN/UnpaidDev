@@ -12,24 +12,6 @@ if (
     die('Database connection is unavailable.');
 }
 
-if (isset($_GET['timeout']) && $_GET['timeout'] == '1') {
-
-    log_activity(
-        $pdo,
-        (int) $_SESSION['user_id'],
-        'SESSION_TIMEOUT',
-        'User automatically logged out due to inactivity'
-    );
-
-} else {
-
-    log_activity(
-        $pdo,
-        (int) $_SESSION['user_id'],
-        'LOGOUT',
-        'User logged out manually'
-    );
-}
 
 // ==========================================
 // RECORD LOGOUT
@@ -40,12 +22,29 @@ if (
     !empty($_SESSION['user_id'])
 ) {
 
-    log_activity(
-        $pdo,
-        (int) $_SESSION['user_id'],
-        'LOGOUT',
-        'User logged out'
-    );
+    // Idle timeout logout
+    if (
+        isset($_GET['timeout']) &&
+        $_GET['timeout'] === '1'
+    ) {
+
+        log_activity(
+            $pdo,
+            (int) $_SESSION['user_id'],
+            'SESSION_TIMEOUT',
+            'User automatically logged out due to inactivity'
+        );
+
+    } else {
+
+        // Normal/manual logout
+        log_activity(
+            $pdo,
+            (int) $_SESSION['user_id'],
+            'LOGOUT',
+            'User logged out manually'
+        );
+    }
 }
 
 
@@ -62,8 +61,7 @@ $_SESSION = [];
 
 if (ini_get('session.use_cookies')) {
 
-    $params =
-        session_get_cookie_params();
+    $params = session_get_cookie_params();
 
     setcookie(
         session_name(),
@@ -90,3 +88,4 @@ session_destroy();
 
 header('Location: login.php');
 exit();
+?>
