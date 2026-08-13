@@ -320,8 +320,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+  
+      <script>
+    const IDLE_LIMIT = 60 * 1000; // 1 minute
 
-     
+    let idleTimer;
+
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+
+        idleTimer = setTimeout(() => {
+            window.location.href = 'logout.php?timeout=1';
+        }, IDLE_LIMIT);
+    }
+
+    // These count as user activity
+    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(event => {
+        document.addEventListener(event, resetIdleTimer, true);
+    });
+
+    // Start counting as soon as the page loads
+    resetIdleTimer();
+</script>
 
     <main>
 
