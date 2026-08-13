@@ -116,8 +116,8 @@ function redirect_to_dashboard($role)
         'Sales_Staff' =>
             'sales_staff.php',
 
-        'Warehouse_Staff' =>
-            'warehouse_staff.php',
+        'User_Admin' =>
+            'user_admin.php',
 
         'System_User' =>
             'user.php'
