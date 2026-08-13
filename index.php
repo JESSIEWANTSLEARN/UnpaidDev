@@ -11,13 +11,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Walang Brown Out Portal</title>
-    <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
-    <link rel="stylesheet" href="index_style.css">
+
+    <link rel="icon" type="image/png" href="image/Logo.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
+    <link rel="stylesheet" href="index_style.css?v=20260813">
+</head>
 </head>
 <body class="page-shell">
 
