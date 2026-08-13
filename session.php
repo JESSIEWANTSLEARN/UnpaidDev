@@ -11,6 +11,17 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Idle timeout: 20 minutes
+$idle_timeout = 20 * 60;
+
+
+
+
+
+
+
+
+
 
 require_once __DIR__ . '/config.php';
 
