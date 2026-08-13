@@ -21,6 +21,7 @@ if (!empty($_SESSION['logged_in'])) {
 
         $inactive_time = time() - $_SESSION['last_activity'];
 
+        if ($inactive_time >= $idle_timeout) {
 
 
 
