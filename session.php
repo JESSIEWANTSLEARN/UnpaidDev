@@ -64,7 +64,7 @@ function normalize_role($role)
 
         'Sales_Staff',
 
-        'Warehouse_Staff',
+        'User_Admin',
 
         'System_User'
 
