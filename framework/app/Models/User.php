@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -19,3 +21,17 @@ class User extends Authenticatable
         'account_status',
         'email_verified_at',
     ];
+
+    protected $hidden = [
+        'password_hash',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
+    }
+}
