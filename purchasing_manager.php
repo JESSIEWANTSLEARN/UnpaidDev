@@ -229,6 +229,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                 </div>
+                
+                <!-- Supplier Summary -->
+                <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"></section>
+                
+                <!-- Record of Purchase Order from Purchasing_Staff -->
+                <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
             </main>
 
             <!-- Footer -->
