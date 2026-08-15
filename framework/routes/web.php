@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\StoreProductController;
 
 // ==========================================
 // REACT PUBLIC PAGES
@@ -42,4 +43,9 @@ Route::post(
 Route::get(
     '/api/super-admin/users',
     [SuperAdminController::class, 'index']
+);
+
+Route::get(
+    '/api/store/products',
+    [StoreProductController::class, 'index']
 );
