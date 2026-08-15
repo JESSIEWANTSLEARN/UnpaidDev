@@ -14,7 +14,7 @@ Supplier Management Page -
     <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="min-h-screen flex">
     <!-- Aside -->
     <aside class="w-64 bg-[#2C3E50] text-white flex-shrink-0 min-h-screen hidden md:flex flex-col">
 
@@ -107,7 +107,27 @@ Supplier Management Page -
 
             <!-- Main Content -->
             <main class="flex-1 bg-[#FFFFFF] px-6 py-10">
+                <!-- Page Introduction -->
+                <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#1D4ED8]">
+                            Purchasing Manager
+                        </p>
+                        <h1 class="mt-1 text-3xl font-bold text-[#2C3E50]">
+                            Supplier Management
+                        </h1>
+                        <p class="mt-2 max-w-3xl text-sm leading-6 text-[#374151]">
+                            Maintain supplier records, compare delivery performance, and identify the best supplier
+                            for every product that needs replenishment.
+                        </p>
+                    </div>
+                </div>
 
+                <!-- Supplier Summary -->
+                <section class="#"></section>
+
+                <!-- Supplier Directory -->
+                <section class="#"></section>
             </main>
 
             <!-- Footer -->

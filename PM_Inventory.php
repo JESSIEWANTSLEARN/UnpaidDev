@@ -14,7 +14,7 @@ Inventory Request Page -
     <link rel="icon" type="image/png" href="image/Logo.png"> <!-- Placeholder for client icon -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="min-h-screen flex">
     <!-- Aside -->
     <aside class="w-64 bg-[#2C3E50] text-white flex-shrink-0 min-h-screen hidden md:flex flex-col">
 
