@@ -5,8 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../css/Signup.css";
 
 // Change this path if your Logo.png is somewhere else
-import Logo from "./assets/Logo.png";
-
+const Logo = "/storage/site/Logo.png";
 
 function Signup() {
 
