@@ -108,7 +108,166 @@ Inventory Request Page -
             <!-- Main Content -->
             <main class="flex-1 bg-[#FFFFFF] px-6 py-10">
                 <!-- Inventory Request form for Product Restock -->
-                <section class="mb-8 overflow-hidden rounded-md border-2 border-[#374151] bg-[#FFFFFF]"></section>
+                <section class="mb-8 overflow-hidden rounded-md border-2 border-[#374151] bg-[#FFFFFF]">
+
+                    <div class="border-b border-[#374151] px-6 py-5">
+                        <h1 class="text-xl font-bold text-[#2C3E50]">
+                            Request Inventory Product
+                        </h1>
+
+                        <p class="mt-1 text-sm text-[#374151]">
+                            Complete this form to request additional stock from the purchasing department.
+                            All submitted requests will be reviewed before an order is created.
+                        </p>
+                    </div>
+
+                    <form action="" method="POST" class="p-6">
+
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+                            <!-- Product Name -->
+                            <div>
+                                <label for="product_name" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Product Name <span class="text-red-600">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="product_name"
+                                    name="product_name"
+                                    required
+                                    placeholder="Example: Portable Air Conditioner"
+                                    class="w-full rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm text-[#374151] outline-none transition focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                                >
+                            </div>
+
+                            <!-- Product Category -->
+                            <div>
+                                <label for="category" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Product Category <span class="text-red-600">*</span>
+                                </label>
+
+                                <select
+                                    id="category"
+                                    name="category"
+                                    required
+                                    class="w-full rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm text-[#374151] outline-none transition focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                                >
+                                    <option value="" selected disabled>Select a category</option>
+                                    <option value="portable_ac">Portable AC Unit</option>
+                                    <option value="air_purifier">Air Purifier</option>
+                                    <option value="replacement_filter">Replacement Filter</option>
+                                    <option value="smart_thermostat">Smart Thermostat</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div>
+                                <label for="quantity" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Requested Quantity <span class="text-red-600">*</span>
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="quantity"
+                                    name="quantity"
+                                    min="1"
+                                    required
+                                    placeholder="Enter quantity"
+                                    class="w-full rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm text-[#374151] outline-none transition focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                                >
+                            </div>
+
+                            <!-- Priority -->
+                            <div>
+                                <label for="priority" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Priority Level <span class="text-red-600">*</span>
+                                </label>
+
+                                <select
+                                    id="priority"
+                                    name="priority"
+                                    required
+                                    class="w-full rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm text-[#374151] outline-none transition focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                                >
+                                    <option value="" selected disabled>Select priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+
+                            <!-- Required Date -->
+                            <div>
+                                <label for="required_date" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Date Needed <span class="text-red-600">*</span>
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="required_date"
+                                    name="required_date"
+                                    required
+                                    class="w-full rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm text-[#374151] outline-none transition focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                                >
+                            </div>
+
+                            <!-- Preferred Supplier -->
+                            <div>
+                                <label for="supplier" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Preferred Supplier
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="supplier"
+                                    name="supplier"
+                                    placeholder="Enter supplier name (optional)"
+                                    class="w-full rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm text-[#374151] outline-none transition focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                                >
+                            </div>
+
+                            <!-- Request Reason -->
+                            <div class="md:col-span-2">
+                                <label for="request_reason" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Reason for Request <span class="text-red-600">*</span>
+                                </label>
+
+                                <textarea
+                                    id="request_reason"
+                                    name="request_reason"
+                                    rows="4"
+                                    required
+                                    placeholder="Explain why this product and quantity are needed..."
+                                    class="w-full resize-none rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm text-[#374151] outline-none transition focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"
+                                ></textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-6 flex flex-col-reverse gap-3 border-t border-[#374151] pt-6 sm:flex-row sm:justify-end">
+
+                            <button
+                                type="reset"
+                                class="rounded-lg border border-[#374151] bg-[#FFFFFF] px-6 py-3 text-sm font-bold text-[#374151] transition hover:bg-[#374151]/5"
+                            >
+                                Clear Form
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="rounded-lg border border-[#1D4ED8] bg-[#1D4ED8] px-6 py-3 text-sm font-bold text-[#FFFFFF] transition hover:bg-blue-800"
+                            >
+                                Submit Request
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </section>
 
                 <!-- Record of Product to be Restock -->
                 <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
