@@ -159,7 +159,109 @@ Supplier Management Page -
                 </section>
 
                 <!-- Supplier Directory -->
-                <section class="overflow-hidden rounded-lg border-2 border-[#374151] bg-[#FFFFFF]"></section>
+                <section class="overflow-hidden rounded-lg border-2 border-[#374151] bg-[#FFFFFF]">
+                    <div class="flex flex-col gap-4 border-b border-[#374151] p-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-[#2C3E50]">Supplier Directory</h2>
+                            <p class="mt-1 text-sm text-[#374151]">Compare supplier availability, performance, and delivery time.</p>
+                        </div>
+
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <input type="search" placeholder="Search supplier..."
+                                   class="rounded-lg border border-[#374151] px-4 py-2.5 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20">
+                            <select class="rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-2.5 text-sm text-[#374151] outline-none">
+                                <option>All statuses</option>
+                                <option>Active</option>
+                                <option>Pending Review</option>
+                                <option>Suspended</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-[1050px] w-full text-sm">
+                            <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                                <tr>
+                                    <th class="px-5 py-4 font-semibold">Supplier</th>
+                                    <th class="px-5 py-4 font-semibold">Products</th>
+                                    <th class="px-5 py-4 font-semibold">Contact</th>
+                                    <th class="px-5 py-4 font-semibold">Lead Time</th>
+                                    <th class="px-5 py-4 font-semibold">On-Time Rate</th>
+                                    <th class="px-5 py-4 font-semibold">Rating</th>
+                                    <th class="px-5 py-4 font-semibold">Status</th>
+                                    <th class="px-5 py-4 font-semibold">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-[#374151]">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-5 py-4">
+                                        <p class="font-bold text-[#2C3E50]">NorthCool Appliances Inc.</p>
+                                        <p class="mt-1 text-xs text-slate-500">SUP-001</p>
+                                    </td>
+                                    <td class="px-5 py-4">Portable AC Units</td>
+                                    <td class="px-5 py-4">
+                                        <p>Maria Santos</p>
+                                        <p class="text-xs text-slate-500">0917 234 5681</p>
+                                    </td>
+                                    <td class="px-5 py-4 font-semibold">4 days</td>
+                                    <td class="px-5 py-4"><span class="font-bold text-emerald-700">96%</span></td>
+                                    <td class="px-5 py-4"><span class="text-amber-500">★★★★★</span> 4.8</td>
+                                    <td class="px-5 py-4"><span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">Active</span></td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex gap-2">
+                                            <button class="rounded-md border border-[#374151] px-3 py-2 text-xs font-bold hover:bg-slate-100">View</button>
+                                            <button class="rounded-md bg-[#1D4ED8] px-3 py-2 text-xs font-bold text-white hover:bg-blue-800">Select</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-5 py-4">
+                                        <p class="font-bold text-[#2C3E50]">PureAir Distribution Corp.</p>
+                                        <p class="mt-1 text-xs text-slate-500">SUP-002</p>
+                                    </td>
+                                    <td class="px-5 py-4">Purifiers & Filters</td>
+                                    <td class="px-5 py-4">
+                                        <p>Jose Reyes</p>
+                                        <p class="text-xs text-slate-500">0928 441 9073</p>
+                                    </td>
+                                    <td class="px-5 py-4 font-semibold">6 days</td>
+                                    <td class="px-5 py-4"><span class="font-bold text-emerald-700">91%</span></td>
+                                    <td class="px-5 py-4"><span class="text-amber-500">★★★★</span><span class="text-slate-300">★</span> 4.3</td>
+                                    <td class="px-5 py-4"><span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">Active</span></td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex gap-2">
+                                            <button class="rounded-md border border-[#374151] px-3 py-2 text-xs font-bold hover:bg-slate-100">View</button>
+                                            <button class="rounded-md bg-[#1D4ED8] px-3 py-2 text-xs font-bold text-white hover:bg-blue-800">Select</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-5 py-4">
+                                        <p class="font-bold text-[#2C3E50]">SmartHome Technologies</p>
+                                        <p class="mt-1 text-xs text-slate-500">SUP-003</p>
+                                    </td>
+                                    <td class="px-5 py-4">Smart Thermostats</td>
+                                    <td class="px-5 py-4">
+                                        <p>Anna Lim</p>
+                                        <p class="text-xs text-slate-500">0998 127 6504</p>
+                                    </td>
+                                    <td class="px-5 py-4 font-semibold">8 days</td>
+                                    <td class="px-5 py-4"><span class="font-bold text-amber-700">78%</span></td>
+                                    <td class="px-5 py-4"><span class="text-amber-500">★★★★</span><span class="text-slate-300">★</span> 3.9</td>
+                                    <td class="px-5 py-4"><span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Under Review</span></td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex gap-2">
+                                            <button class="rounded-md border border-[#374151] px-3 py-2 text-xs font-bold hover:bg-slate-100">View</button>
+                                            <button class="rounded-md border border-[#1D4ED8] px-3 py-2 text-xs font-bold text-[#1D4ED8] hover:bg-blue-50">Review</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </main>
 
             <!-- Footer -->
