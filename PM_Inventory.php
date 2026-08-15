@@ -107,6 +107,17 @@ Inventory Request Page -
 
             <!-- Main Content -->
             <main class="flex-1 bg-[#FFFFFF] px-6 py-10">
+                <!-- Inventory Request form for Product Restock -->
+                <section class="mb-8 overflow-hidden rounded-md border-2 border-[#374151] bg-[#FFFFFF]"></section>
+
+                <!-- Record of Product to be Restock -->
+                <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
+
+                <!-- Record and Review Product in Stock -->
+                <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
+
+                <!-- Record of Purchase Order from Purchasing_Staff -->
+                <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
             </main>
 
             <!-- Footer -->
