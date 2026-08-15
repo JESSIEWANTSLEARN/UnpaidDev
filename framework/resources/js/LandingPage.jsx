@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import "../css/LandingPage.css";
 
+const Logo = "/storage/site/Logo.png";
+const mainpic = "/storage/site/mainpic.jpg";
 
+const PortableACUnits =
+  "/storage/products/PortableAcUnits.jpg";
 
-function LandingPage() {
-  const [products, setProducts] = useState([]);
-  const [cartCount, setCartCount] = useState(0);
+const AirPurifier =
+  "/storage/products/AirPurifier.jpg";
 
-  const [loading, setLoading] = useState(true);
-  const [productError, setProductError] = useState("");
+const ReplacementFilter =
+  "/storage/products/ReplacementFilter.webp";
 
-  const [collapsed, setCollapsed] = useState({
-    about: false,
-    products: false,
-  });
+const SmartThermostat =
+  "/storage/products/SmartThermostat.jpg";
 
   // =====================================================
   // LOAD PRODUCTS FROM LARAVEL

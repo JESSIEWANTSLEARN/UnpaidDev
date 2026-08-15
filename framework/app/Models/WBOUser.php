@@ -10,7 +10,12 @@ class WBOUser extends Model
 
     protected $primaryKey = 'user_id';
 
-    public $timestamps = false;
+    public $incrementing = true;
+
+    protected $keyType = 'int';
+
+    // WBO_Users has created_at but no updated_at
+    public const UPDATED_AT = null;
 
     protected $fillable = [
         'name',
