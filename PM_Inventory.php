@@ -340,7 +340,87 @@ Inventory Request Page -
                 </section>
 
                 <!-- Record and Review Product in Stock -->
-                <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
+                <section id="home" class="border-2 border-[#374151] rounded-md mb-8">
+                    <div class="p-6 flex justify-between items-center border-b border-[#374151]">
+                            
+                            <h2 class="text-xl font-bold text-[#2C3E50]">
+                                Product In Storage
+                            </h2>
+
+                            <button class="font-bold text-xs text-[#374151] text-slate-600 px-4 py-3 border-t border-b border-l border-r border-[#374151] rounded-lg hover:bg-[#374151]/5">
+                                View All
+                            </button>
+                    </div>
+                        
+                    <div class="border-t border-[#374151]">
+                        <table class="w-full text-sm">
+                            <thead class="border-t border-b border-slate-100">
+                                <tr class="text-left text-xs text-slate-500">
+                                    <th class="px-5 py-4 font-medium">
+                                        Product
+                                    </th>
+                                    
+                                    <th class="px-5 py-4 font-medium">
+                                        ID
+                                    </th>
+
+                                    <th class="px-5 py-4 font-medium">
+                                        Date
+                                    </th>
+
+                                    <th class="px-5 py-4 font-medium">
+                                        Stock
+                                    </th>
+                                    
+                                    <th class="px-5 py-4 font-medium">
+                                        Status
+                                    </th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+                                <tr class="border-b border-slate-50">
+                                    <td class="px-5 py-4 text-slate-400">
+                                            <div class="flex items-center gap-3">
+                                                <span class="text-xl">
+                                                    <img src="image/Logo.png"
+                                                        alt="Walang Brown Out Logo"
+                                                        width="45"
+                                                        height="45">
+                                                </span>
+
+                                                <span>
+                                                    Name
+                                                </span>
+
+                                            </div>
+                                    </td>
+
+                                    <td class="px-5 py-4 text-slate-400">
+                                            #1234567
+                                    </td>
+
+                                    <td class="px-5 py-4 text-slate-400">
+                                        27 Jun 2025
+                                    </td>
+
+                                    <td class="px-5 py-4 text-slate-400">
+                                        120
+                                    </td>
+
+                                    <td class="px-5 py-4">
+                                        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                                            ● Full
+                                        </span>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </section>
 
                 <!-- Record of Purchase Order from Purchasing_Staff -->
                 <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
