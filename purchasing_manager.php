@@ -199,7 +199,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Main Content -->
             <main class="flex-1 bg-[#FFFFFF] px-6 py-10">
-                
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mb-7">
+                    <!-- PAGE TITLE -->
+                    <div class="mb-7">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#1D4ED8]">
+                                Purchasing Manager
+                            </p>
+                            <h1 class="mt-1 text-3xl font-bold text-[#2C3E50]">
+                                Dashboard
+                            </h1>
+                            <p class="mt-2 max-w-3xl text-sm leading-6 text-[#374151]">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae dolore est voluptatum voluptates! Tempora nulla, ex deleniti dolores dolor a, quam vitae commodi doloremque voluptates fugit illo, autem explicabo aperiam.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+
+                        <button class="bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-sm">
+                            Previous Year
+                            <span class="ml-4">⌄</span>
+                        </button>
+
+                        <button class="text-white rounded-lg px-5 py-2.5 text-sm bg-[#1D4ED8] px-5 py-3 text-sm font-bold transition hover:bg-blue-800">
+                            View All Time
+                        </button>
+
+                    </div>
+
+                </div>
             </main>
 
             <!-- Footer -->
