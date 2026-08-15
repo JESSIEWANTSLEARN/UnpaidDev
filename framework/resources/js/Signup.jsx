@@ -1,35 +1,24 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-// If you have Signup.css inside resources/css:
 import "../css/Signup.css";
 
-// Change this path if your Logo.png is somewhere else
 const Logo = "/storage/site/Logo.png";
 
 function Signup() {
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
+    // ==========================================
+    // FORM DATA
+    // ==========================================
 
-  // ==========================================
-  // FORM DATA
-  // ==========================================
-
-  const [formData, setFormData] = useState({
-
-    name: "",
-
-    email: "",
-
-    contactNumber: "",
-
-    password: "",
-
-    confirmPassword: "",
-
-  });
-
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        contactNumber: "",
+        password: "",
+        confirmPassword: "",
+    });
 
   // ==========================================
   // PAGE STATE
