@@ -1,18 +1,30 @@
-import './bootstrap';
+import { Routes, Route } from "react-router-dom";
+import LandingPage from "./LandingPage.jsx";
+import LogIn from "./LogIn.jsx";
+import Signup from "./Signup.jsx";
+import SignupVerify from "./SignupVerify.jsx";
+import LoginOtp from "./LoginOtp.jsx";
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
 
-import SuperAdmin from './pages/SuperAdmin';
+      <Route path="/login" element={<LogIn />} />
 
+      <Route path="/signup" element={<Signup />} />
 
-const rootElement =
-    document.getElementById('root');
+      <Route
+        path="/signup-verify"
+        element={<SignupVerify />}
+      />
 
-
-if (rootElement) {
-
-    createRoot(rootElement).render(
-        <SuperAdmin />
-    );
+      <Route
+        path="/login-otp"
+        element={<LoginOtp />}
+      />
+    </Routes>
+  );
 }
+
+export default App;
