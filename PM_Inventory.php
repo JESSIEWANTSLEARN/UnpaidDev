@@ -270,7 +270,74 @@ Inventory Request Page -
                 </section>
 
                 <!-- Record of Product to be Restock -->
-                <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
+                <section id="home" class="border-2 border-[#374151] rounded-md mb-8">
+                    <div class="p-6 flex justify-between items-center border-b border-[#374151]">
+                            
+                            <h2 class="text-xl font-bold text-[#2C3E50]">
+                                Product To Restock
+                            </h2>
+
+                            <button class="font-bold text-xs text-[#374151] text-slate-600 px-4 py-3 border-t border-b border-l border-r border-[#374151] rounded-lg hover:bg-[#374151]/5">
+                                View All
+                            </button>
+                    </div>
+
+                    <div class="overflow-x-auto border-t border-[#374151]">
+                        <table class="min-w-[1250px] w-full text-sm">
+                            <thead class="border-t border-b border-slate-100">
+                                <tr class="text-left text-xs text-slate-500">
+                                    <th class="px-5 py-4 font-medium">
+                                        Product
+                                    </th>
+                                    <th class="px-5 py-4 font-medium">SKU</th>
+                                    <th class="px-5 py-4 font-medium">Current Stock</th>
+                                    <th class="px-5 py-4 font-medium">Reorder Point</th>
+                                    <th class="px-5 py-4 font-medium">Recommended Qty.</th>
+                                    <th class="px-5 py-4 font-medium">Preferred Supplier</th>
+                                    <th class="px-5 py-4 font-medium">Need By</th>
+                                    <th class="px-5 py-4 font-medium">Priority</th>
+                                    <th class="px-5 py-4 font-medium">Request Status</th>
+                                    <th class="px-5 py-4 font-medium">Action</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                    <td class="px-5 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <span class="text-xl">
+                                                    <img src="image/Logo.png"
+                                                        alt="Portable Air Conditioner"
+                                                        width="45"
+                                                        height="45">
+                                                </span>
+
+                                                <div>
+                                                    <p class="font-bold text-[#2C3E50]">Portable AC 1.0 HP</p>
+                                                    <p class="text-xs text-slate-500">Portable AC Unit</p>
+                                                </div>
+
+                                            </div>
+                                    </td>
+                                    <td class="px-5 py-4 text-slate-500">PAC-1001</td>
+                                    <td class="px-5 py-4"><span class="font-bold text-red-700">8</span> units</td>
+                                    <td class="px-5 py-4 text-slate-500">20 units</td>
+                                    <td class="px-5 py-4 font-bold text-[#2C3E50]">60 units</td>
+                                    <td class="px-5 py-4">
+                                        <p class="font-semibold text-[#374151]">NorthCool Appliances</p>
+                                        <p class="text-xs text-slate-500">4-day lead time</p>
+                                    </td>
+                                    <td class="px-5 py-4 text-slate-500">20 Aug 2026</td>
+                                    <td class="px-5 py-4"><span class="rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">Urgent</span></td>
+                                    <td class="px-5 py-4"><span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Pending Request</span></td>
+                                    <td class="px-5 py-4"><button class="rounded-md bg-[#1D4ED8] px-3 py-2 text-xs font-bold text-white hover:bg-blue-800">Create PO</button></td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </section>
 
                 <!-- Record and Review Product in Stock -->
                 <section id="home" class="border-2 border-[#374151] rounded-md mb-8"></section>
