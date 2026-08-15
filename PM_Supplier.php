@@ -124,10 +124,42 @@ Supplier Management Page -
                 </div>
 
                 <!-- Supplier Summary -->
-                <section class="#"></section>
+                <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">Total Suppliers</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">18</p>
+                            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[#1D4ED8]">All records</span>
+                        </div>
+                    </article>
+
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">Active Suppliers</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">14</p>
+                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">Available</span>
+                        </div>
+                    </article>
+
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">Pending Review</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">3</p>
+                            <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Needs action</span>
+                        </div>
+                    </article>
+
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">Average Lead Time</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">5.4</p>
+                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-[#374151]">Days</span>
+                        </div>
+                    </article>
+                </section>
 
                 <!-- Supplier Directory -->
-                <section class="#"></section>
+                <section class="overflow-hidden rounded-lg border-2 border-[#374151] bg-[#FFFFFF]"></section>
             </main>
 
             <!-- Footer -->
