@@ -1,3 +1,12 @@
+<!--
+Sales Staff Dashboard -
+    This webpage serves as the operational workspace for the Sales Staff to
+    manage customer orders and sales transactions. It enables staff to review
+    incoming orders, process and confirm orders, update order status, coordinate
+    order fulfillment with the warehouse, and assist customers with order-related
+    concerns. All work is assigned and supervised by the Sales Manager.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

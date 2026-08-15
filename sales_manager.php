@@ -1,5 +1,10 @@
 <!--
 Sales Manager Dashboard -
+    This webpage provides an overview of sales operations and order processing
+    performance. It allows the Sales Manager to monitor sales metrics, oversee
+    customer orders, supervise Sales Staff activities, review sales reports,
+    and coordinate order fulfillment with the warehouse to ensure timely
+    delivery and customer satisfaction.
 -->
 
 <!DOCTYPE html>

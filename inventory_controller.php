@@ -1,3 +1,13 @@
+<!--
+Inventory Controller Dashboard -
+    This webpage serves as the operational workspace for the Inventory Controller
+    to manage and maintain accurate inventory records and stock levels. It enables
+    the controller to check stock quantities, receive and release inventory, update
+    stock records, perform stock adjustments, monitor low and overstock conditions,
+    track batches and FEFO movements, and investigate discrepancies to ensure
+    inventory accuracy.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

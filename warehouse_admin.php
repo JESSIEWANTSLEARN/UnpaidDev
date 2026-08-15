@@ -1,3 +1,12 @@
+<!--
+Warehouse Admin Dashboard -
+    This webpage provides an overview of warehouse operations and inventory
+    management. It allows the Warehouse Admin to monitor warehouse inventory
+    levels, oversee receiving and releasing operations, review stock
+    discrepancies, coordinate with the Inventory Controller, and ensure
+    warehouse records remain accurate and up-to-date.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
