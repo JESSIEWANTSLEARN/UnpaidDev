@@ -1,373 +1,235 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../css/Signup.css";
+import "../css/Otp.css";
 
 const Logo = "/storage/site/Logo.png";
 
-function LoginOtp() {
-    const navigate = useNavigate();
-
-    const [email, setEmail] = useState("");
-
-    const [otp, setOtp] = useState("");
-
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-
-    const [loading, setLoading] = useState(false);
-    const [resending, setResending] = useState(false);
-
-
-    useEffect(() => {
-
-        const loadOtpStatus = async () => {
-
-            try {
-
-                const response = await fetch(
-                    "/api/login-otp/status",
-                    {
-                        headers: {
-                            Accept: "application/json",
-                        },
-
-                        credentials: "same-origin",
-                    }
-                );
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    navigate("/login");
-                    return;
-                }
-
-                setEmail(result.email ?? "");
-
-            } catch (error) {
-
-                console.error(error);
-
-            }
-
-        };
-
-        loadOtpStatus();
-
-    }, [navigate]);
-
-
-    const handleOtpChange = (event) => {
-
-        const value = event.target.value
-            .replace(/\D/g, "")
-            .slice(0, 6);
-
-        setOtp(value);
-    };
-
-
-    const verifyOtp = async (event) => {
-
-        event.preventDefault();
-
-        setError("");
-        setSuccess("");
-
-        if (!/^\d{6}$/.test(otp)) {
-            setError(
-                "OTP must contain exactly 6 digits."
-            );
-
-            return;
-        }
-
-        try {
-
-            setLoading(true);
-
-            const csrfToken = document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content");
-
-            const response = await fetch(
-                "/login-otp/verify",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        "X-CSRF-TOKEN": csrfToken ?? "",
-                    },
-
-                    credentials: "same-origin",
-
-                    body: JSON.stringify({
-                        otp,
-                    }),
-                }
-            );
-
-            const result = await response.json();
-
-            if (!response.ok) {
-
-                setError(
-                    result.message ??
-                    "Invalid OTP code."
-                );
-
-                return;
-            }
-
-            /*
-             * Role/dashboard migration is intentionally
-             * separate from authentication migration.
-             */
-            window.location.href =
-                result.redirect ?? "/";
-
-        } catch (error) {
-
-            console.error(error);
-
-            setError(
-                "Unable to verify OTP. Please try again."
-            );
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    };
-
-
-    const resendOtp = async () => {
-
-        setError("");
-        setSuccess("");
-
-        try {
-
-            setResending(true);
-
-            const csrfToken = document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute("content");
-
-            const response = await fetch(
-                "/login-otp/resend",
-                {
-                    method: "POST",
-
-                    headers: {
-                        Accept: "application/json",
-                        "X-CSRF-TOKEN": csrfToken ?? "",
-                    },
-
-                    credentials: "same-origin",
-                }
-            );
-
-            const result = await response.json();
-
-            if (!response.ok) {
-
-                setError(
-                    result.message ??
-                    "Unable to resend OTP."
-                );
-
-                return;
-            }
-
-            setSuccess(result.message);
-
-        } catch (error) {
-
-            console.error(error);
-
-            setError(
-                "Unable to resend OTP. Please try again."
-            );
-
-        } finally {
-
-            setResending(false);
-
-        }
-    };
-
-
-    return (
-        <div className="auth-page">
-
-            <header className="auth-header">
-
-                <div className="auth-header-content">
-
-                    <Link to="/" className="auth-brand">
-
-                        <img
-                            src={Logo}
-                            alt="Walang Brown Out Logo"
-                            width="45"
-                            height="45"
-                        />
-
-                        <div>
-
-                            <span className="auth-republic">
-                                Republic of the Philippines
-                            </span>
-
-                            <div className="auth-brand-title">
-                                WALANG BROWN OUT
-                            </div>
-
-                        </div>
-
-                    </Link>
-
-                </div>
-
-                <div className="auth-header-bar"></div>
-
-            </header>
-
-
-            <main className="auth-main">
-
-                <div className="auth-card">
-
-                    <div className="auth-title">
-
-                        <div className="otp-icon">
-                            🔑
-                        </div>
-
-                        <h1>
-                            OTP Verification
-                        </h1>
-
-                        <p>
-                            We sent a 6-digit verification
-                            code to
-                        </p>
-
-                        <div className="auth-email">
-                            {email}
-                        </div>
-
-                    </div>
-
-
-                    {error && (
-                        <div className="auth-error">
-                            {error}
-                        </div>
-                    )}
-
-
-                    {success && (
-                        <div className="auth-success">
-                            {success}
-                        </div>
-                    )}
-
-
-                    <form onSubmit={verifyOtp}>
-
-                        <div className="auth-field">
-
-                            <label htmlFor="login-otp">
-                                6-Digit Verification Code
-                            </label>
-
-                            <input
-                                id="login-otp"
-                                type="text"
-                                className="otp-input"
-                                inputMode="numeric"
-                                autoComplete="one-time-code"
-                                placeholder="000000"
-                                maxLength="6"
-                                value={otp}
-                                onChange={handleOtpChange}
-                                autoFocus
-                            />
-
-                        </div>
-
-
-                        <button
-                            type="submit"
-                            className="auth-primary-button"
-                            disabled={loading}
-                        >
-                            {loading
-                                ? "Verifying..."
-                                : "Verify OTP"}
-                        </button>
-
-                    </form>
-
-
-                    <div className="otp-information">
-
-                        OTP expires after 5 minutes.
-
-                        <br />
-
-                        You may resend the OTP
-                        a maximum of 2 times.
-
-                    </div>
-
-
-                    <div className="auth-resend">
-
-                        <span>
-                            Didn't receive the code?
-                        </span>
-
-                        <button
-                            type="button"
-                            onClick={resendOtp}
-                            disabled={resending}
-                        >
-                            {resending
-                                ? "Sending..."
-                                : "Resend OTP"}
-                        </button>
-
-                    </div>
-
-
-                    <div className="auth-back">
-
-                        <Link to="/login">
-                            ← Back to Login
-                        </Link>
-
-                    </div>
-
-                </div>
-
-            </main>
-
-
-            <footer className="auth-footer">
-                <strong>
-                    © 2026 WalangBrownOut.
-                </strong>{" "}
-                All rights reserved.
-            </footer>
-
-        </div>
-    );
+function csrfToken() {
+  return (
+    document
+      .querySelector('meta[name="csrf-token"]')
+      ?.getAttribute("content") ?? ""
+  );
 }
 
-export default LoginOtp;
+async function readJson(response) {
+  const text = await response.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
+}
+
+function SignupVerify() {
+  const navigate = useNavigate();
+
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  const email =
+    sessionStorage.getItem("wbo_signup_email") || "your registered email";
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const timer = window.setInterval(() => {
+      setCooldown((value) => Math.max(0, value - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
+
+  const handleOtpChange = (event) => {
+    const value = event.target.value.replace(/\D/g, "").slice(0, 6);
+    setOtp(value);
+  };
+
+  const verifyOtp = async (event) => {
+    event.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (!/^\d{6}$/.test(otp)) {
+      setError("OTP must contain exactly 6 digits.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch("/signup/verify-otp", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-CSRF-TOKEN": csrfToken(),
+        },
+        body: JSON.stringify({ otp }),
+      });
+
+      const data = await readJson(response);
+
+      if (!response.ok || data.success === false) {
+        setError(data.message || "Unable to verify the OTP.");
+        if (data.redirect) {
+          window.setTimeout(() => navigate(data.redirect), 900);
+        }
+        return;
+      }
+
+      sessionStorage.removeItem("wbo_signup_email");
+      setMessage(data.message || "Your account has been verified.");
+
+      window.setTimeout(() => {
+        if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          navigate("/login");
+        }
+      }, 600);
+    } catch {
+      setError("Unable to connect to the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    setError("");
+    setMessage("");
+
+    try {
+      setResending(true);
+
+      const response = await fetch("/signup/resend-otp", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-CSRF-TOKEN": csrfToken(),
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await readJson(response);
+
+      if (!response.ok || data.success === false) {
+        setError(data.message || "Unable to resend the OTP.");
+
+        if (Number(data.seconds_remaining) > 0) {
+          setCooldown(Number(data.seconds_remaining));
+        }
+
+        if (data.redirect) {
+          window.setTimeout(() => navigate(data.redirect), 900);
+        }
+
+        return;
+      }
+
+      setOtp("");
+      setCooldown(30);
+      setMessage(data.message || "A new OTP has been sent.");
+    } catch {
+      setError("Unable to connect to the server. Please try again.");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  return (
+    <div className="otp-page">
+      <header className="otp-header">
+        <div className="otp-header-inner">
+          <Link to="/" className="otp-brand">
+            <img src={Logo} alt="Walang Brown Out Logo" />
+
+            <div className="otp-brand-text">
+              <span>Republic of the Philippines</span>
+              <strong>WALANG BROWN OUT</strong>
+            </div>
+          </Link>
+        </div>
+      </header>
+
+      <main className="otp-container">
+        <Link to="/signup" className="otp-back">
+          ← Back to Signup
+        </Link>
+
+        <div className="otp-title">
+          <h2>Verify Your Account</h2>
+          <p>
+            We sent a 6-digit verification code to
+            <br />
+            <strong>{email}</strong>
+          </p>
+        </div>
+
+        {error && <div className="otp-error">{error}</div>}
+        {message && <div className="otp-message">{message}</div>}
+
+        <form className="otp-form" onSubmit={verifyOtp}>
+          <label htmlFor="otp">Enter OTP Code</label>
+
+          <input
+            id="otp"
+            className="otp-input"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="000000"
+            value={otp}
+            onChange={handleOtpChange}
+            disabled={loading}
+            maxLength={6}
+            required
+          />
+
+          <button
+            className="otp-primary"
+            type="submit"
+            disabled={loading || otp.length !== 6}
+          >
+            {loading ? "Verifying..." : "Verify OTP"}
+          </button>
+        </form>
+
+        <div className="otp-info">
+          OTP expires after 5 minutes.
+          <br />
+          You may resend the OTP a maximum of 2 times.
+        </div>
+
+        <div className="otp-resend">
+          <button
+            className="otp-secondary"
+            type="button"
+            onClick={resendOtp}
+            disabled={resending || cooldown > 0}
+          >
+            {resending
+              ? "Sending..."
+              : cooldown > 0
+                ? `Resend OTP in ${cooldown}s`
+                : "Resend OTP"}
+          </button>
+        </div>
+      </main>
+
+      <footer className="otp-footer">
+        <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
+      </footer>
+    </div>
+  );
+}
+
+export default SignupVerify;

@@ -5,118 +5,197 @@ import "../css/LandingPage.css";
 const Logo = "/storage/site/Logo.png";
 const mainpic = "/storage/site/mainpic.jpg";
 
-const PortableACUnits =
-  "/storage/products/PortableAcUnits.jpg";
+const services = [
+  {
+    title: "Portable AC Units",
+    image: "/storage/products/PortableAcUnits.jpg",
+    className: "thumb-one",
+  },
+  {
+    title: "Air Purifiers",
+    image: "/storage/products/AirPurifier.jpg",
+    className: "thumb-two",
+  },
+  {
+    title: "Replacement Filters",
+    image: "/storage/products/ReplacementFilter.webp",
+    className: "thumb-three",
+  },
+  {
+    title: "Smart Thermostats",
+    image: "/storage/products/SmartThermostat.jpg",
+    className: "thumb-four",
+  },
+];
 
-const AirPurifier =
-  "/storage/products/AirPurifier.jpg";
+const fallbackProducts = [
+  {
+    product_id: "fallback-1",
+    name: "Portable AC Pro",
+    description: "Cool rooms fast and quietly",
+    unit_price: 18500,
+    image_url: "/storage/products/PortableAcUnits.jpg",
+    available_stock: 30,
+  },
+  {
+    product_id: "fallback-2",
+    name: "Air Purifier Plus",
+    description: "Cleaner indoor air",
+    unit_price: 12900,
+    image_url: "/storage/products/AirPurifier.jpg",
+    available_stock: 50,
+  },
+  {
+    product_id: "fallback-3",
+    name: "Carbon Filter Pack",
+    description: "High-efficiency replacement",
+    unit_price: 2400,
+    image_url: "/storage/products/ReplacementFilter.webp",
+    available_stock: 100,
+  },
+  {
+    product_id: "fallback-4",
+    name: "Smart Thermostat",
+    description: "Energy-saving control",
+    unit_price: 8750,
+    image_url: "/storage/products/SmartThermostat.jpg",
+    available_stock: 20,
+  },
+];
 
-const ReplacementFilter =
-  "/storage/products/ReplacementFilter.webp";
+function normalizeImagePath(value) {
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  if (value.startsWith("/storage/")) return value;
+  if (value.startsWith("storage/")) return `/${value}`;
+  if (value.startsWith("/")) return value;
+  return `/storage/${value}`;
+}
 
-const SmartThermostat =
-  "/storage/products/SmartThermostat.jpg";
+function normalizeProduct(product, index) {
+  return {
+    product_id:
+      product.product_id ??
+      product.id ??
+      product.sku ??
+      `product-${index}`,
+    name: product.name ?? product.product_name ?? "Unnamed Product",
+    description: product.description ?? "",
+    unit_price: Number(
+      product.unit_price ??
+      product.price ??
+      product.selling_price ??
+      0
+    ),
+    available_stock: Number(
+      product.available_stock ??
+      product.current_stock ??
+      product.stock ??
+      product.current_quantity ??
+      0
+    ),
+    image_url: normalizeImagePath(
+      product.image_url ??
+      product.image_path ??
+      product.primary_image ??
+      product.image
+    ),
+  };
+}
 
-  // =====================================================
-  // LOAD PRODUCTS FROM LARAVEL
-  // =====================================================
+function formatPeso(value) {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: 2,
+  }).format(Number(value || 0));
+}
+
+function LandingPage() {
+  const [cartCount, setCartCount] = useState(0);
+  const [products, setProducts] = useState(fallbackProducts);
+  const [collapsed, setCollapsed] = useState({
+    about: false,
+    services: false,
+    products: false,
+  });
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        setProductError("");
+    let active = true;
 
+    async function loadProducts() {
+      try {
         const response = await fetch("/api/store/products", {
+          method: "GET",
+          credentials: "same-origin",
           headers: {
             Accept: "application/json",
           },
         });
 
-        if (!response.ok) {
-          throw new Error("Unable to load products.");
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const list = Array.isArray(payload)
+          ? payload
+          : payload.products ?? payload.data ?? [];
+
+        if (active && Array.isArray(list) && list.length > 0) {
+          setProducts(list.map(normalizeProduct));
         }
-
-        const data = await response.json();
-
-        if (!data.success) {
-          throw new Error(
-            data.message || "Unable to load products."
-          );
-        }
-
-        setProducts(data.products || []);
-      } catch (error) {
-        console.error("Product loading error:", error);
-
-        setProductError(
-          "Products are temporarily unavailable."
-        );
-      } finally {
-        setLoading(false);
+      } catch {
+        // Keep the design visible with fallback cards if the API is temporarily unavailable.
       }
-    };
+    }
 
     loadProducts();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  // =====================================================
-  // REVEAL ANIMATION
-  // =====================================================
-
   useEffect(() => {
-    const revealItems =
-      document.querySelectorAll(".reveal-up");
+    const revealItems = document.querySelectorAll(".reveal-up");
 
-    const observer = new IntersectionObserver(
+    const revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
+            const item = entry.target;
+            item.classList.remove("is-visible");
+            void item.offsetWidth;
+            item.classList.add("is-visible");
+          } else {
+            entry.target.classList.remove("is-visible");
           }
         });
       },
       {
         threshold: 0.18,
+        rootMargin: "0px 0px -8% 0px",
       }
     );
 
-    revealItems.forEach((item) => {
-      observer.observe(item);
-    });
+    revealItems.forEach((item) => revealObserver.observe(item));
 
-    return () => observer.disconnect();
+    return () => revealObserver.disconnect();
   }, [products]);
-
-  // =====================================================
-  // MOBILE SECTIONS
-  // =====================================================
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 640) {
-        setCollapsed({
-          about: true,
-          products: true,
-        });
-      } else {
-        setCollapsed({
-          about: false,
-          products: false,
-        });
-      }
+      const mobile = window.innerWidth <= 640;
+      setCollapsed({
+        about: mobile,
+        services: mobile,
+        products: mobile,
+      });
     };
 
     handleResize();
-
     window.addEventListener("resize", handleResize);
 
-    return () => {
-      window.removeEventListener(
-        "resize",
-        handleResize
-      );
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleSection = (section) => {
@@ -126,41 +205,22 @@ const SmartThermostat =
     }));
   };
 
-  // =====================================================
-  // TEMPORARY CART COUNTER
-  // Real order/cart logic comes later.
-  // =====================================================
-
   const addToCart = (product) => {
-    if (product.available_stock <= 0) {
-      return;
-    }
-
+    if (Number(product.available_stock) <= 0) return;
     setCartCount((count) => count + 1);
   };
 
-  // =====================================================
-  // PRICE FORMAT
-  // =====================================================
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency: "PHP",
-    }).format(price);
+  const handleNewsletter = (event) => {
+    event.preventDefault();
+    alert("Thank you for joining our newsletter!");
+    event.currentTarget.reset();
   };
 
   return (
     <div className="page-shell">
-
-      {/* =================================================
-          HEADER
-      ================================================= */}
-
       <header className="site-header">
         <div className="max-width-container header-top">
-
-          <Link to="/" className="header-brand">
+          <div className="header-brand">
             <img
               src={Logo}
               alt="Walang Brown Out Logo"
@@ -172,111 +232,62 @@ const SmartThermostat =
               <span className="republic-text">
                 Republic of the Philippines
               </span>
-
-              <div className="brand-title">
-                WALANG BROWN OUT
-              </div>
+              <div className="brand-title">WALANG BROWN OUT</div>
             </div>
-          </Link>
+          </div>
 
           <div className="nav-actions">
-            <Link
-              to="/login"
-              className="nav-button"
-            >
+            <Link to="/login" className="nav-button">
               Login
             </Link>
 
-            <Link
-              to="/signup"
-              className="nav-button primary-nav-button"
-            >
-              Sign Up
+            <Link to="/signup" className="nav-button primary-nav-button">
+              Create Account
             </Link>
 
-            <button
-              type="button"
-              className="cart-button"
-            >
+            <button className="cart-button" type="button">
               Cart ({cartCount})
             </button>
           </div>
         </div>
 
-        <nav
-          className="main-nav"
-          aria-label="Main navigation"
-        >
+        <nav className="main-nav" aria-label="Main navigation">
           <a href="#home">Home</a>
-
-          <a href="#products">
-            Products
-          </a>
-
-          <a href="#about">
-            About
-          </a>
+          <a href="#solutions">Solutions</a>
+          <a href="#features">Features</a>
+          <a href="#inventory">Inventory</a>
+          <a href="#about">About</a>
         </nav>
       </header>
 
-      {/* =================================================
-          MAIN
-      ================================================= */}
-
       <main className="storefront">
-
-        {/* =================================================
-            HERO
-        ================================================= */}
-
-        <section
-          id="home"
-          className="promo-banner reveal-up"
-        >
+        <section id="home" className="promo-banner reveal-up">
           <div className="promo-copy">
-            <span className="promo-tag">
-              Home Comfort Solutions
-            </span>
+            <span className="promo-tag">Home Comfort Solutions</span>
 
-            <h1>
-              Comfort at home, all year round.
-            </h1>
+            <h1>Comfort at home, all year round.</h1>
 
             <p>
-              Walang BrownOut Appliances provides
-              dependable cooling, cleaner air and
-              smart home-comfort solutions for
-              households and businesses.
+              Walang BrownOut Appliances helps homes and businesses stay cool,
+              clean, and efficient with trusted portable AC units, air
+              purifiers, smart thermostats, and replacement filters.
             </p>
 
             <div className="promo-actions">
-              <a
-                href="#products"
-                className="primary-link"
-              >
-                Shop Products
+              <a href="#solutions" className="primary-link">
+                Explore Solutions
               </a>
 
-              <Link
-                to="/signup"
-                className="secondary-link"
-              >
-                Create Account
+              <Link to="/login" className="secondary-link">
+                View Dashboard
               </Link>
             </div>
           </div>
 
-          <div className="promo-visual">
-            <img
-              src={mainpic}
-              alt="Walang BrownOut Appliances"
-            />
+          <div className="promo-visual" aria-label="Appliance display image">
+            <img src={mainpic} alt="Walang BrownOut Appliances" />
           </div>
         </section>
-
-        {/* =================================================
-            ABOUT
-        ================================================= */}
 
         <section
           id="about"
@@ -285,302 +296,205 @@ const SmartThermostat =
           }`}
         >
           <div className="section-heading">
-            <h2>
-              About Walang BrownOut
-            </h2>
+            <h2>About Walang BrownOut</h2>
+            <a href="#about">Learn more</a>
 
             <button
-              type="button"
               className="section-toggle"
               aria-expanded={!collapsed.about}
-              onClick={() =>
-                toggleSection("about")
-              }
+              aria-label="Toggle about section"
+              onClick={() => toggleSection("about")}
+              type="button"
             >
-              <span className="chev">
-                ▾
-              </span>
+              <span className="chev">▾</span>
             </button>
           </div>
 
           <div className="about-box reveal-up">
             <p>
-              Walang BrownOut Appliances is a
-              regional distributor of home comfort
-              products including portable AC units,
-              air purifiers, replacement filters and
-              smart thermostats.
-            </p>
-
-            <p>
-              Our online storefront is connected to
-              the inventory system so product
-              information and availability can be
-              based on actual warehouse data.
+              Walang BrownOut Appliances is a regional distributor of home
+              comfort products dedicated to improving everyday living through
+              dependable cooling, clean air, and smarter energy use. We serve
+              households, offices, and retail partners with efficient solutions
+              built for comfort, health, and performance.
             </p>
           </div>
         </section>
 
-        {/* =================================================
-            PRODUCTS
-        ================================================= */}
+        <section
+          id="solutions"
+          className={`categories-section ${
+            collapsed.services ? "collapsed" : ""
+          }`}
+        >
+          <div className="section-heading">
+            <h2>Our services</h2>
+            <a href="#solutions">Explore</a>
+
+            <button
+              className="section-toggle"
+              aria-expanded={!collapsed.services}
+              aria-label="Toggle services section"
+              onClick={() => toggleSection("services")}
+              type="button"
+            >
+              <span className="chev">▾</span>
+            </button>
+          </div>
+
+          <div className="category-grid">
+            {services.map((service, index) => (
+              <article
+                className={`category-card reveal-up stagger-${index + 1}`}
+                key={service.title}
+              >
+                <div className={`category-thumb ${service.className}`}>
+                  <img src={service.image} alt={service.title} />
+                </div>
+                <h3>{service.title}</h3>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section
-          id="products"
+          id="inventory"
           className={`products-section ${
             collapsed.products ? "collapsed" : ""
           }`}
         >
           <div className="section-heading">
-            <h2>
-              Featured Products
-            </h2>
+            <h2>Featured home comfort essentials</h2>
+            <a href="#inventory">View all</a>
 
             <button
-              type="button"
               className="section-toggle"
               aria-expanded={!collapsed.products}
-              onClick={() =>
-                toggleSection("products")
-              }
+              aria-label="Toggle products section"
+              onClick={() => toggleSection("products")}
+              type="button"
             >
-              <span className="chev">
-                ▾
-              </span>
+              <span className="chev">▾</span>
             </button>
           </div>
 
-          {/* LOADING */}
+          <div className="product-grid">
+            {products.map((product, index) => (
+              <article
+                className={`product-card reveal-up stagger-${
+                  (index % 4) + 1
+                }`}
+                key={product.product_id}
+              >
+                <div className="product-image">
+                  {product.image_url ? (
+                    <img src={product.image_url} alt={product.name} />
+                  ) : null}
+                </div>
 
-          {loading && (
-            <div className="product-status">
-              Loading products...
-            </div>
-          )}
+                <div className="product-info">
+                  <h3>{product.name}</h3>
+                  <p>{product.description}</p>
 
-          {/* ERROR */}
+                  <div className="product-meta">
+                    <span className="price">
+                      {formatPeso(product.unit_price)}
+                    </span>
 
-          {!loading && productError && (
-            <div className="product-status product-error">
-              {productError}
-            </div>
-          )}
-
-          {/* NO PRODUCTS */}
-
-          {!loading &&
-            !productError &&
-            products.length === 0 && (
-              <div className="product-status">
-                No products are currently available.
-              </div>
-            )}
-
-          {/* PRODUCT GRID */}
-
-          {!loading &&
-            !productError &&
-            products.length > 0 && (
-              <div className="product-grid">
-
-                {products.map(
-                  (product, index) => {
-
-                    const outOfStock =
-                      product.available_stock <= 0;
-
-                    return (
-                      <article
-                        key={product.product_id}
-                        className={`product-card reveal-up stagger-${
-                          index + 1
-                        }`}
-                      >
-
-                        {/* IMAGE */}
-
-                        <div className="product-image">
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                            />
-                          ) : (
-                            <div className="no-product-image">
-                              No Image
-                            </div>
-                          )}
-                        </div>
-
-                        {/* INFORMATION */}
-
-                        <div className="product-info">
-
-                          <span className="product-category">
-                            {product.category}
-                          </span>
-
-                          <h3>
-                            {product.name}
-                          </h3>
-
-                          <p>
-                            {product.description}
-                          </p>
-
-                          {/* STOCK */}
-
-                          <div className="stock-information">
-                            {outOfStock ? (
-                              <span className="out-of-stock">
-                                Out of Stock
-                              </span>
-                            ) : (
-                              <span className="in-stock">
-                                {product.available_stock}{" "}
-                                available
-                              </span>
-                            )}
-                          </div>
-
-                          {/* PRICE + CART */}
-
-                          <div className="product-meta">
-
-                            <span className="price">
-                              {formatPrice(
-                                product.price
-                              )}
-                            </span>
-
-                            <button
-                              type="button"
-                              disabled={outOfStock}
-                              onClick={() =>
-                                addToCart(product)
-                              }
-                            >
-                              {outOfStock
-                                ? "Unavailable"
-                                : "Add to Cart"}
-                            </button>
-
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  }
-                )}
-
-              </div>
-            )}
+                    <button
+                      type="button"
+                      onClick={() => addToCart(product)}
+                      disabled={product.available_stock <= 0}
+                    >
+                      {product.available_stock > 0
+                        ? "Add to cart"
+                        : "Out of stock"}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
-        {/* =================================================
-            BENEFITS
-        ================================================= */}
-
-        <section className="promo-strip reveal-up">
-
+        <section id="features" className="promo-strip reveal-up">
           <div>
-            <span className="promo-badge">
-              Real Inventory
-            </span>
-
-            <h3>
-              Availability connected to stock
-            </h3>
+            <span className="promo-badge">Real-time stock</span>
+            <h3>Inventory from live batches</h3>
           </div>
 
           <div>
-            <span className="promo-badge">
-              Easy Ordering
-            </span>
-
-            <h3>
-              Order home-comfort products online
-            </h3>
+            <span className="promo-badge">Secure accounts</span>
+            <h3>Gmail OTP verification</h3>
           </div>
 
           <div>
-            <span className="promo-badge">
-              Reliable Supply
-            </span>
-
-            <h3>
-              Inventory replenishment monitoring
-            </h3>
+            <span className="promo-badge">Role based</span>
+            <h3>Correct dashboard access</h3>
           </div>
-
         </section>
 
+        <section className="newsletter-box reveal-up">
+          <div>
+            <span className="newsletter-tag">Newsletter</span>
+            <h2>Stay updated with WalangBrownOut.</h2>
+          </div>
+
+          <form className="newsletter-form" onSubmit={handleNewsletter}>
+            <input type="email" placeholder="Enter your email" required />
+            <button type="submit">Join now</button>
+          </form>
+        </section>
       </main>
 
-      {/* =================================================
-          FOOTER
-      ================================================= */}
-
       <footer className="site-footer reveal-up">
-
         <div className="footer-grid">
-
           <div className="footer-brand">
-            <div className="brand">
-              Walang BrownOut
-            </div>
+            <div className="brand">Walang BrownOut</div>
 
             <p>
-              Home comfort products backed by
-              integrated warehouse and inventory
-              management.
+              A secure, role-based warehouse and inventory management platform
+              for the WalangBrownout Appliances workflow.
             </p>
           </div>
 
           <div className="footer-column">
             <h4>Shop</h4>
-
-            <a href="#products">
-              Products
-            </a>
+            <a href="#inventory">New arrivals</a>
+            <a href="#inventory">Best sellers</a>
+            <a href="#inventory">Accessories</a>
+            <a href="#inventory">Sale</a>
           </div>
 
           <div className="footer-column">
             <h4>Company</h4>
-
-            <a href="#about">
-              About Us
-            </a>
-
-            <a href="#home">
-              Home
-            </a>
+            <a href="#about">About us</a>
+            <a href="#features">Features</a>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Create Account</Link>
           </div>
 
           <div className="footer-column">
-            <h4>Account</h4>
-
-            <Link to="/login">
-              Login
-            </Link>
-
-            <Link to="/signup">
-              Create Account
-            </Link>
+            <h4>Support</h4>
+            <a href="#solutions">Solutions</a>
+            <a href="#inventory">Inventory</a>
+            <a href="#about">FAQs</a>
+            <a href="#about">Privacy</a>
           </div>
-
         </div>
 
         <div className="footer-bottom">
           <span>
-            <strong>
-              © 2026 WalangBrownOut.
-            </strong>{" "}
-            All rights reserved.
+            <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
           </span>
+
+          <div className="social-links">
+            <a href="#">Instagram</a>
+            <a href="#">Facebook</a>
+            <a href="#">X</a>
+          </div>
         </div>
-
       </footer>
-
     </div>
   );
 }
