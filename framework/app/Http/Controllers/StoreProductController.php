@@ -10,6 +10,7 @@ class StoreProductController extends Controller
     public function index()
     {
         $products = Product::with('primaryImage')
+            ->withSum('batches as available_stock', 'current_quantity')
             ->where('is_visible', true)
             ->where('is_featured', true)
             ->orderBy('product_id')
@@ -22,8 +23,10 @@ class StoreProductController extends Controller
                     'name' => $product->name,
                     'description' => $product->description,
                     'category' => $product->category,
-
                     'price' => (float) $product->unit_price,
+
+                    'available_stock' =>
+                        (int) ($product->available_stock ?? 0),
 
                     'image_url' => $product->primaryImage
                         ? Storage::url(
