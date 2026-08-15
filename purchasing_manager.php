@@ -142,12 +142,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span class="text-sm">Dashboard</span>
                     </a>
 
-                    <a href="Inventory.php"
+                    <a href="PM_Inventory.php"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
                         <span class="text-sm">Inventory</span>
                     </a>
 
-                    <a href="Supplier.php"
+                    <a href="PM_Supplier.php"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
                         <span class="text-sm">Supplier</span>
                     </a>
