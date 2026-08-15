@@ -1,6 +1,8 @@
 <?php
-use App\Http\Controllers\SuperAdminController;
+
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\Auth\RegisterController;
 
 Route::get('/', function () {
     return view('welcome');
