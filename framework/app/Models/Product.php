@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
@@ -42,12 +43,21 @@ class Product extends Model
         );
     }
 
-    public function primaryImage()
+    public function primaryImage(): HasOne
     {
         return $this->hasOne(
             ProductImage::class,
             'product_id',
             'product_id'
         )->where('is_primary', true);
+    }
+
+    public function batches(): HasMany
+    {
+        return $this->hasMany(
+            Batch::class,
+            'product_id',
+            'product_id'
+        );
     }
 }
