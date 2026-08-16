@@ -7,6 +7,7 @@ import LogIn from "./LogIn.jsx";
 import Signup from "./Signup.jsx";
 import LoginOtp from "./LoginOtp.jsx";
 import SignupVerify from "./SignupVerify.jsx";
+import SystemUser from "./pages/users/SystemUser.jsx";
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login-otp" element={<LoginOtp />} />
       <Route path="/signup-verify" element={<SignupVerify />} />
+      <Route path="/user" element={<SystemUser />} />
+      
     </Routes>
   );
 }
