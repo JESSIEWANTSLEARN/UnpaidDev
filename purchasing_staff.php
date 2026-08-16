@@ -62,15 +62,6 @@ Purchasing Staff Dashboard -
 
                     <a href="#"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
-                        <span class="text-sm">Incoming Purchases</span>
-                    </a>
-
-                </div>
-
-                <div class="space-y-1">
-
-                    <a href="#"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
                         <span class="text-sm">Purchase Order</span>
                     </a>
 
