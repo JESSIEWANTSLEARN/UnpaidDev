@@ -58,6 +58,33 @@ Purchasing Staff Dashboard -
 
                 </div>
 
+                <div class="space-y-1">
+
+                    <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
+                        <span class="text-sm">Incoming Purchases</span>
+                    </a>
+
+                </div>
+
+                <div class="space-y-1">
+
+                    <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
+                        <span class="text-sm">Purchase Order</span>
+                    </a>
+
+                </div>
+
+                <div class="space-y-1">
+
+                    <a href="#"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
+                        <span class="text-sm">Supplier</span>
+                    </a>
+
+                </div>
+
             </nav>
 
 
@@ -133,6 +160,41 @@ Purchasing Staff Dashboard -
                     </div>
 
                 </div>
+                
+                <!-- article Summary -->
+                <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">[Name Holder]</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">[Number]</p>
+                            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[#1D4ED8]">[Status Holder]</span>
+                        </div>
+                    </article>
+
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">[Name Holder]</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">[Number]</p>
+                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">[Status Holder]</span>
+                        </div>
+                    </article>
+
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">[Name Holder]</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">[Number]</p>
+                            <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">[Status Holder]</span>
+                        </div>
+                    </article>
+
+                    <article class="rounded-lg border border-[#374151] bg-[#FFFFFF] p-5">
+                        <p class="text-sm font-medium text-[#374151]">[Name Holder]</p>
+                        <div class="mt-3 flex items-end justify-between">
+                            <p class="text-3xl font-bold text-[#2C3E50]">[Number]</p>
+                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-[#374151]">[Status Holder]</span>
+                        </div>
+                    </article>
+                </section>
             </main>
 
             <!-- Footer -->
