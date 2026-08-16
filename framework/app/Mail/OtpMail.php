@@ -15,8 +15,10 @@ class OtpMail extends Mailable
     public string $otpCode;
     public string $userName;
 
-    public function __construct(string $otpCode, string $userName)
-    {
+    public function __construct(
+        string $otpCode,
+        string $userName
+    ) {
         $this->otpCode = $otpCode;
         $this->userName = $userName;
     }

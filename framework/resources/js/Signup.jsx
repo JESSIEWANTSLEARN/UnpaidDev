@@ -14,11 +14,34 @@ function csrfToken() {
 
 async function readJson(response) {
   const text = await response.text();
-  if (!text) return {};
+
+  if (!text) {
+    return {};
+  }
+
   try {
     return JSON.parse(text);
   } catch {
-    return { message: text };
+    // Try to recover JSON if PHP accidentally output
+    // extra characters before/after the JSON response.
+    const firstBrace = text.indexOf("{");
+    const lastBrace = text.lastIndexOf("}");
+
+    if (
+      firstBrace !== -1 &&
+      lastBrace !== -1 &&
+      lastBrace > firstBrace
+    ) {
+      try {
+        return JSON.parse(
+          text.slice(firstBrace, lastBrace + 1)
+        );
+      } catch {
+        // Ignore malformed server output
+      }
+    }
+
+    return {};
   }
 }
 
