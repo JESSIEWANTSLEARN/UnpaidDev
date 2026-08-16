@@ -47,8 +47,8 @@ Purchasing Staff Dashboard -
 
                 <div class="space-y-1">
 
-                    <a href="Purchasing_Manager.php"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white">
+                    <a href="purchasing_staff.php"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
                         <span class="text-sm">Dashboard</span>
                     </a>
 
@@ -56,7 +56,7 @@ Purchasing Staff Dashboard -
 
                 <div class="space-y-1">
 
-                    <a href="#"
+                    <a href="PS_PurchaseOrder.php"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
                         <span class="text-sm">Purchase Order</span>
                     </a>
@@ -65,8 +65,8 @@ Purchasing Staff Dashboard -
 
                 <div class="space-y-1">
 
-                    <a href="#"
-                    class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5">
+                    <a href="PS_Supplier.php"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white">
                         <span class="text-sm">Supplier</span>
                     </a>
 

@@ -47,7 +47,7 @@ Purchasing Staff Dashboard -
 
                 <div class="space-y-1">
 
-                    <a href="Purchasing_Manager.php"
+                    <a href="purchasing_staff.php"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white">
                         <span class="text-sm">Dashboard</span>
                     </a>
