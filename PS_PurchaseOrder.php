@@ -125,7 +125,7 @@ Purchasing Staff Dashboard -
                                 Role
                             </p>
                             <h1 class="mt-1 text-3xl font-bold text-[#2C3E50]">
-                                Dashboard
+                                Purchase Order
                             </h1>
                             <p class="mt-2 max-w-3xl text-sm leading-6 text-[#374151]">
                                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae dolore est voluptatum voluptates! Tempora nulla, ex deleniti dolores dolor a, quam vitae commodi doloremque voluptates fugit illo, autem explicabo aperiam.
@@ -146,6 +146,78 @@ Purchasing Staff Dashboard -
 
                     </div>
 
+                </div>
+
+                <!-- Filters -->
+                <div class="flex flex-wrap gap-3 mb-5">
+                    <input type="text" placeholder="Search PO number or supplier…"
+                        class="border border-[#E5E7EB] rounded-lg px-4 py-2 text-sm flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/30">
+                    <select class="border border-[#E5E7EB] rounded-lg px-4 py-2 text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/30">
+                        <option value="">All Statuses</option>
+                        <option>Draft</option>
+                        <option>Submitted</option>
+                        <option>Approved</option>
+                        <option>Received</option>
+                    </select>
+                </div>
+    
+                <!-- PO Table -->
+                <div class="bg-white rounded-xl border border-[#E5E7EB] overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-[#E5E7EB] text-xs uppercase tracking-wider text-[#6B7280]">
+                                <th class="px-5 py-4 text-left">PO Number</th>
+                                <th class="px-5 py-4 text-left">Supplier</th>
+                                <th class="px-5 py-4 text-left">Date Created</th>
+                                <th class="px-5 py-4 text-right">Total Amount</th>
+                                <th class="px-5 py-4 text-center">Status</th>
+                                <th class="px-5 py-4 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#F3F4F6]">
+                            <tr class="hover:bg-[#F8FAFC]">
+                                <td class="px-5 py-4 font-mono font-semibold text-[#1D4ED8]">PO-0042</td>
+                                <td class="px-5 py-4 text-[#374151]">ABC Hardware</td>
+                                <td class="px-5 py-4 text-[#6B7280]">Jun 18, 2026</td>
+                                <td class="px-5 py-4 text-right font-semibold text-[#2C3E50]">₱12,500.00</td>
+                                <td class="px-5 py-4 text-center"><span class="badge badge-submitted">Submitted</span></td>
+                                <td class="px-5 py-4 text-center">
+                                    <button class="text-[#1D4ED8] hover:underline text-xs font-semibold">View</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-[#F8FAFC]">
+                                <td class="px-5 py-4 font-mono font-semibold text-[#1D4ED8]">PO-0041</td>
+                                <td class="px-5 py-4 text-[#374151]">XYZ Traders</td>
+                                <td class="px-5 py-4 text-[#6B7280]">Jun 15, 2026</td>
+                                <td class="px-5 py-4 text-right font-semibold text-[#2C3E50]">₱8,200.00</td>
+                                <td class="px-5 py-4 text-center"><span class="badge badge-approved">Approved</span></td>
+                                <td class="px-5 py-4 text-center">
+                                    <button class="text-[#1D4ED8] hover:underline text-xs font-semibold">View</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-[#F8FAFC]">
+                                <td class="px-5 py-4 font-mono font-semibold text-[#1D4ED8]">PO-0040</td>
+                                <td class="px-5 py-4 text-[#374151]">FastPack Co.</td>
+                                <td class="px-5 py-4 text-[#6B7280]">Jun 12, 2026</td>
+                                <td class="px-5 py-4 text-right font-semibold text-[#2C3E50]">₱3,750.00</td>
+                                <td class="px-5 py-4 text-center"><span class="badge badge-received">Received</span></td>
+                                <td class="px-5 py-4 text-center">
+                                    <button class="text-[#1D4ED8] hover:underline text-xs font-semibold">View</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-[#F8FAFC]">
+                                <td class="px-5 py-4 font-mono font-semibold text-[#1D4ED8]">PO-0039</td>
+                                <td class="px-5 py-4 text-[#374151]">SupplyCentral PH</td>
+                                <td class="px-5 py-4 text-[#6B7280]">Jun 10, 2026</td>
+                                <td class="px-5 py-4 text-right font-semibold text-[#2C3E50]">₱21,000.00</td>
+                                <td class="px-5 py-4 text-center"><span class="badge badge-draft">Draft</span></td>
+                                <td class="px-5 py-4 text-center">
+                                    <button class="text-[#1D4ED8] hover:underline text-xs font-semibold mr-2">Edit</button>
+                                    <button class="text-red-500 hover:underline text-xs font-semibold">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </main>
 
