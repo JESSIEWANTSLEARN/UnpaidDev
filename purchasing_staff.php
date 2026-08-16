@@ -103,7 +103,7 @@ Purchasing Staff Dashboard -
     <!-- Main -->
     <section class="flex-1 min-w-0">
             <!-- Header -->
-            <header class="h-[82px] flex items-center border-b border-[#374151] bg-[#FFFFFF]">
+            <header class="h-[82px] flex items-center border-b border-[#E5E7EB] bg-[#FFFFFF]">
 
                 <!-- Logo Section -->
                 <div class="flex items-center gap-4 px-6">
@@ -195,10 +195,122 @@ Purchasing Staff Dashboard -
                         </div>
                     </article>
                 </section>
+                
+                <!-- Product Request Log -->
+                <section class="mb-8 overflow-hidden rounded-md border-2 border-[#374151] bg-[#FFFFFF]">
+
+                    <div class="border-b border-[#374151] px-6 py-5">
+                        <h1 class="text-xl font-bold text-[#2C3E50]">
+                            Requested Product
+                        </h1>
+
+                        <p class="mt-1 text-sm text-[#374151]">
+                            Product that need to be restock.
+                        </p>
+                    </div>
+
+                </section>
+
+                <!-- Add Supplier Form -->
+                <section id="supplier-form" class="mb-8 overflow-hidden rounded-lg border-2 border-[#374151] bg-[#FFFFFF]">
+                    <div class="border-b border-[#374151] px-6 py-5">
+                        <h2 class="text-xl font-bold text-[#2C3E50]">Register Supplier</h2>
+                        <p class="mt-1 text-sm text-[#374151]">
+                            Add the supplier's business, contact, delivery, and product information.
+                        </p>
+                    </div>
+
+                    <form action="" method="POST" class="p-6">
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                            <div>
+                                <label for="supplier_name" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Supplier Name <span class="text-red-600">*</span>
+                                </label>
+                                <input type="text" id="supplier_name" name="supplier_name" required
+                                       placeholder="Enter company name"
+                                       class="w-full rounded-lg border border-[#374151] px-4 py-3 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20">
+                            </div>
+
+                            <div>
+                                <label for="contact_person" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Contact Person <span class="text-red-600">*</span>
+                                </label>
+                                <input type="text" id="contact_person" name="contact_person" required
+                                       placeholder="Full name"
+                                       class="w-full rounded-lg border border-[#374151] px-4 py-3 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20">
+                            </div>
+
+                            <div>
+                                <label for="contact_number" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Contact Number <span class="text-red-600">*</span>
+                                </label>
+                                <input type="tel" id="contact_number" name="contact_number" required
+                                       placeholder="09XX XXX XXXX"
+                                       class="w-full rounded-lg border border-[#374151] px-4 py-3 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20">
+                            </div>
+
+                            <div>
+                                <label for="supplier_email" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Email Address <span class="text-red-600">*</span>
+                                </label>
+                                <input type="email" id="supplier_email" name="supplier_email" required
+                                       placeholder="supplier@example.com"
+                                       class="w-full rounded-lg border border-[#374151] px-4 py-3 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20">
+                            </div>
+
+                            <div>
+                                <label for="product_category" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Supplied Product <span class="text-red-600">*</span>
+                                </label>
+                                <select id="product_category" name="product_category" required
+                                        class="w-full rounded-lg border border-[#374151] bg-[#FFFFFF] px-4 py-3 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20">
+                                    <option value="" selected disabled>Select product category</option>
+                                    <option value="portable_ac">Portable AC Unit</option>
+                                    <option value="air_purifier">Air Purifier</option>
+                                    <option value="replacement_filter">Replacement Filter</option>
+                                    <option value="smart_thermostat">Smart Thermostat</option>
+                                    <option value="multiple">Multiple Categories</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="lead_time" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Expected Lead Time <span class="text-red-600">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" id="lead_time" name="lead_time" min="1" required
+                                           placeholder="Number of days"
+                                           class="w-full rounded-lg border border-[#374151] px-4 py-3 pr-16 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20">
+                                    <span class="absolute right-4 top-3 text-sm text-slate-500">days</span>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-2 xl:col-span-3">
+                                <label for="supplier_address" class="mb-2 block text-sm font-semibold text-[#374151]">
+                                    Business Address <span class="text-red-600">*</span>
+                                </label>
+                                <textarea id="supplier_address" name="supplier_address" rows="3" required
+                                          placeholder="Enter complete supplier address"
+                                          class="w-full resize-none rounded-lg border border-[#374151] px-4 py-3 text-sm outline-none focus:border-[#1D4ED8] focus:ring-2 focus:ring-[#1D4ED8]/20"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex flex-col-reverse gap-3 border-t border-[#374151] pt-6 sm:flex-row sm:justify-end">
+                            <button type="reset"
+                                    class="rounded-lg border border-[#374151] px-6 py-3 text-sm font-bold text-[#374151] transition hover:bg-slate-50">
+                                Clear Form
+                            </button>
+                            <button type="submit"
+                                    class="rounded-lg bg-[#1D4ED8] px-6 py-3 text-sm font-bold text-[#FFFFFF] transition hover:bg-blue-800">
+                                Save Supplier
+                            </button>
+                        </div>
+                    </form>
+                </section>
             </main>
 
             <!-- Footer -->
-            <footer class="mt-auto border-t border-[#374151] bg-[#FFFFFF] px-6 py-8">
+            <footer class="mt-auto border-t border-[#E5E7EB] bg-[#FFFFFF] px-6 py-8">
 
                 <p class="text-center text-sm font-semibold text-[#2C3E50]">
                     &copy; 2026 Walang Brown Out. All rights reserved.
