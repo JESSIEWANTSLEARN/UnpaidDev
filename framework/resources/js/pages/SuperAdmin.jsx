@@ -13,7 +13,6 @@ function SuperAdmin() {
     // ==========================================
     // LOAD USERS FROM LARAVEL
     // ==========================================
-
     useEffect(() => {
 
         fetch('/api/super-admin/users')
