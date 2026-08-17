@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import "../css/LogIn.css";
 
 const Logo = "/storage/site/Logo.png";
-
 function csrfToken() {
   return (
     document
