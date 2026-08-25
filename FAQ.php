@@ -326,6 +326,62 @@ FAQ
                     </details>
 
                 </section>
+
+                <!-- Development Credits -->
+                <section class="mt-12 rounded-2xl bg-[#2C3E50] px-6 py-8 text-white shadow-sm">
+
+                    <div class="max-w-3xl">
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-300">
+                            Project Credits
+                        </p>
+
+                        <h2 class="mt-2 text-2xl font-bold">
+                            Walang Brown Out Development Team
+                        </h2>
+
+                        <p class="mt-3 text-sm leading-6 text-slate-300">
+                            This website was created through the collaboration
+                            of the following developers and contributors.
+                            Replace the sample labels below with the actual
+                            names and assigned roles of your group members.
+                        </p>
+                    </div>
+
+                    <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                        <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                            <p class="font-bold">[Member Name]</p>
+                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                        </div>
+
+                        <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                            <p class="font-bold">[Member Name]</p>
+                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                        </div>
+
+                        <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                            <p class="font-bold">[Member Name]</p>
+                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                        </div>
+
+                        <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                            <p class="font-bold">[Member Name]</p>
+                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                        </div>
+
+                        <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                            <p class="font-bold">[Member Name]</p>
+                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                        </div>
+
+                        <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                            <p class="font-bold">[Member Name]</p>
+                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                        </div>
+
+                    </div>
+
+                </section>
             </main>
 
             <!-- Footer -->
