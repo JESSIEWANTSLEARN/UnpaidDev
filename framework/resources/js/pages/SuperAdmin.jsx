@@ -223,6 +223,37 @@ function Icon({ name, size = 17 }) {
         const [theme, setTheme] = useState("light");
         const [activeModal, setActiveModal] = useState(null);
         const dropdownRef = useRef(null);
+        useEffect(() => {
+            if (!dropdownOpen) return;
+
+            const handleClickOutside = (e) => {
+                if (
+                    dropdownRef.current &&
+                    !dropdownRef.current.contains(e.target)
+                ) {
+                    setDropdownOpen(false);
+                }
+            };
+            const handleEscape = (e) => {
+                if (e.key === "Escape") setDropdownOpen(false);
+            };
+
+            document.addEventListener("mousedown", handleClickOutside);
+            document.addEventListener("keydown", handleEscape);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+                document.removeEventListener("keydown", handleEscape);
+            };
+        }, [dropdownOpen]);
+
+        const openModal = (type) => {
+            setActiveModal(type);
+            setDropdownOpen(false);
+        };
+
+        const closeModal = () => {
+            setActiveModal(null);
+        };
     }
 }
 
