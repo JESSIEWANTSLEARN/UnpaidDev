@@ -105,6 +105,226 @@ FAQ
                 <!-- FAQ List -->
                 <section class="space-y-4">
 
+                    <!-- FAQ 1 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            What is the Walang Brown Out system?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            Walang Brown Out is an online ordering and inventory
+                            management system for portable air conditioners,
+                            air purifiers, replacement filters, and smart
+                            thermostats.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 2 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            Are product quantities updated automatically?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            Yes. Inventory quantities are updated whenever
+                            products are received, reserved, sold, released,
+                            returned, or adjusted.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 3 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            What happens when a product reaches low stock?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            The system creates a stock alert based on the
+                            product's reorder level. Purchasing personnel can
+                            then review the product and prepare a purchase
+                            order.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 4 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            Does the system automatically order from suppliers?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            The system can generate reorder alerts and purchase
+                            order suggestions. However, an authorized
+                            purchasing employee must review and approve the
+                            purchase order.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 5 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            How does the system prevent expired filters?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            Replacement filters are recorded by batch and
+                            expiration date. The system follows the
+                            First-Expired, First-Out or FEFO method to release
+                            products with the nearest expiration dates first.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 6 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            Can customers place and track orders?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            Yes. Registered customers can browse available
+                            products, place orders, receive notifications, and
+                            view their current and previous order statuses.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 7 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            How are missing inventory items detected?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            Every stock movement is recorded in the system.
+                            Employees can compare the recorded quantity with
+                            the physical quantity and create an adjustment when
+                            a difference is discovered.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 8 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            Who can access purchasing functions?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            Only authorized roles, such as the Purchasing
+                            Manager, Purchasing Staff, Operations Manager, and
+                            Super Admin, can access purchasing-related
+                            functions based on their assigned permissions.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 9 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            Who developed the Walang Brown Out system?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            The system was designed and developed by the
+                            Walang Brown Out Development Team as an academic
+                            project focused on improving inventory, purchasing,
+                            warehouse, sales, and customer-order management.
+                        </div>
+
+                    </details>
+
+                    <!-- FAQ 10 -->
+                    <details class="group rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 font-semibold text-[#2C3E50]">
+
+                            Who contributed to the creation of the website?
+
+                            <span class="text-xl text-[#1D4ED8] transition-transform group-open:rotate-45">
+                                +
+                            </span>
+
+                        </summary>
+
+                        <div class="border-t border-[#E5E7EB] px-6 py-5 text-sm leading-6 text-[#64748B]">
+                            The project was completed through the combined
+                            efforts of the project leader, system analysts,
+                            UI/UX designers, database developers, programmers,
+                            testers, researchers, and documentation team.
+                            Individual members and their roles are listed in
+                            the Development Team section below.
+                        </div>
+
+                    </details>
+
                 </section>
             </main>
 
