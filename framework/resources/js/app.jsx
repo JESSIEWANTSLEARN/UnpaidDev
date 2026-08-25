@@ -10,23 +10,23 @@ import SignupVerify from "./SignupVerify.jsx";
 import SystemUser from "./pages/users/SystemUser.jsx";
 
 function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LogIn />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login-otp" element={<LoginOtp />} />
-      <Route path="/signup-verify" element={<SignupVerify />} />
-      <Route path="/user" element={<SystemUser />} />
-      
-    </Routes>
-  );
+    return (
+        <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LogIn />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login-otp" element={<LoginOtp />} />
+            <Route path="/signup-verify" element={<SignupVerify />} />
+            <Route path="/user" element={<SystemUser />} />
+            <Route path="/super-admin" element={<SuperAdmin />} />
+        </Routes>
+    );
 }
 
 createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
+    <React.StrictMode>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </React.StrictMode>,
 );
