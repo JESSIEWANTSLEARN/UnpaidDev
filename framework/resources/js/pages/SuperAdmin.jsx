@@ -216,6 +216,14 @@ function Icon({ name, size = 17 }) {
             ],
         },
     ];
+    function SuperAdmin() {
+        const [activeMenu, setActiveMenu] = useState("Dashboard");
+        const [sidebarOpen, setSidebarOpen] = useState(false);
+        const [dropdownOpen, setDropdownOpen] = useState(false);
+        const [theme, setTheme] = useState("light");
+        const [activeModal, setActiveModal] = useState(null);
+        const dropdownRef = useRef(null);
+    }
 }
 
 export default SuperAdmin;
