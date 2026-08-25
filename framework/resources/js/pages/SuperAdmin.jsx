@@ -183,6 +183,39 @@ function Icon({ name, size = 17 }) {
     };
 
     return <svg {...common}>{paths[name] || null}</svg>;
+
+    const navSections = [
+        {
+            label: "Overview",
+            items: [{ name: "Dashboard", icon: "home" }],
+        },
+        {
+            label: "Catalog",
+            items: [
+                { name: "Inventory", icon: "package" },
+                { name: "Products", icon: "warehouse" },
+                { name: "Categories", icon: "tag" },
+                { name: "Suppliers", icon: "truck" },
+            ],
+        },
+        {
+            label: "Operations",
+            items: [
+                { name: "Stock Movement", icon: "chart" },
+                { name: "Purchase Orders", icon: "cart" },
+                { name: "Sales Orders", icon: "money" },
+            ],
+        },
+        {
+            label: "System",
+            items: [
+                { name: "Users", icon: "users" },
+                { name: "Reports", icon: "reports" },
+                { name: "Audit Logs", icon: "search" },
+                { name: "Settings", icon: "settings" },
+            ],
+        },
+    ];
 }
 
 export default SuperAdmin;
