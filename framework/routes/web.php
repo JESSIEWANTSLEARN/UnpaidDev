@@ -7,12 +7,11 @@ use App\Http\Controllers\Auth\LoginOtpController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SignupVerificationController;
 
-use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\SystemUserController;
 use App\Http\Controllers\LogoutController;
-
 use App\Http\Controllers\SuperAdminDashboardController;
+
 
 // ==========================================
 // REACT PUBLIC PAGES
@@ -26,10 +25,11 @@ Route::view('/login-otp', 'react');
 
 
 // ==========================================
-// SYSTEM USER PAGE
+// REACT ROLE PAGES
 // ==========================================
 
 Route::view('/user', 'react');
+Route::view('/super-admin', 'react');
 
 
 // ==========================================
@@ -118,10 +118,10 @@ Route::put('/api/user/password', [
 
 
 // ==========================================
-// SUPER ADMIN
+// SUPER ADMIN API
 // ==========================================
 
-Route::get('/api/super-admin/users', [
-    SuperAdminController::class,
+Route::get('/api/super-admin/dashboard-data', [
+    SuperAdminDashboardController::class,
     'index'
 ]);
