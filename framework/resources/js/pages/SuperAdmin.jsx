@@ -254,7 +254,41 @@ function Icon({ name, size = 17 }) {
         const closeModal = () => {
             setActiveModal(null);
         };
+ const renderContent = () => {
+    switch (activeMenu) {
+      case "Products":
+        return <Products />;
+      case "Inventory":
+        return <Inventory />;
+      case "Categories":
+        return <Categories />;
+      case "Sales Orders":
+        return <SalesOrders />;
+      case "Suppliers":
+        return <Suppliers />;
+      case "Stock Movement":
+        return <StockMovement />;
+      case "Purchase Orders":
+        return <PurchaseOrders />;
+      case "Users":
+        return <Users />;
+      case "Reports":
+        return <Reports />;
+      case "Audit Logs":
+        return <AuditLogs />;
+      case "Settings":
+        return <Settings />;
+      default:
+        return <Dashboard />;
     }
+  };
+
+  return (
+
+
+
+
+    
 }
 
 export default SuperAdmin;
