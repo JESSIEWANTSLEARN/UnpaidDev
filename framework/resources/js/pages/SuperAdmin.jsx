@@ -254,41 +254,368 @@ function Icon({ name, size = 17 }) {
         const closeModal = () => {
             setActiveModal(null);
         };
- const renderContent = () => {
-    switch (activeMenu) {
-      case "Products":
-        return <Products />;
-      case "Inventory":
-        return <Inventory />;
-      case "Categories":
-        return <Categories />;
-      case "Sales Orders":
-        return <SalesOrders />;
-      case "Suppliers":
-        return <Suppliers />;
-      case "Stock Movement":
-        return <StockMovement />;
-      case "Purchase Orders":
-        return <PurchaseOrders />;
-      case "Users":
-        return <Users />;
-      case "Reports":
-        return <Reports />;
-      case "Audit Logs":
-        return <AuditLogs />;
-      case "Settings":
-        return <Settings />;
-      default:
-        return <Dashboard />;
+        const renderContent = () => {
+            switch (activeMenu) {
+                case "Products":
+                    return <Products />;
+                case "Inventory":
+                    return <Inventory />;
+                case "Categories":
+                    return <Categories />;
+                case "Sales Orders":
+                    return <SalesOrders />;
+                case "Suppliers":
+                    return <Suppliers />;
+                case "Stock Movement":
+                    return <StockMovement />;
+                case "Purchase Orders":
+                    return <PurchaseOrders />;
+                case "Users":
+                    return <Users />;
+                case "Reports":
+                    return <Reports />;
+                case "Audit Logs":
+                    return <AuditLogs />;
+                case "Settings":
+                    return <Settings />;
+                default:
+                    return <Dashboard />;
+            }
+        };
+
+        return (
+            <div
+                className={`ops-portal ${sidebarOpen ? "sidebar-open" : ""}`}
+                data-theme={theme}
+            >
+                {/* SIDEBAR */}
+                <aside className="ops-sidebar">
+                    <div className="ops-sidebar-brand">
+                        <img
+                            src={Logo}
+                            alt="Walang Brown Out Logo"
+                            width="45"
+                            height="45"
+                        />
+                        <div>
+                            <p className="ops-sidebar-title">Walang Brownout</p>
+                            <span className="ops-sidebar-subtitle">
+                                SUPER ADMIN PORTAL
+                            </span>
+                        </div>
+                    </div>
+
+                    <nav className="ops-nav">
+                        {navSections.map((section) => (
+                            <div
+                                className="ops-nav-section"
+                                key={section.label}
+                            >
+                                <div className="ops-nav-label">
+                                    {section.label}
+                                </div>
+                                {section.items.map((item) => (
+                                    <button
+                                        key={item.name}
+                                        className={`ops-nav-link ${activeMenu === item.name ? "active" : ""}`}
+                                        onClick={() => {
+                                            setActiveMenu(item.name);
+                                            setSidebarOpen(false);
+                                        }}
+                                    >
+                                        <span className="ops-nav-icon">
+                                            <Icon name={item.icon} size={17} />
+                                        </span>
+                                        <span>{item.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        ))}
+                    </nav>
+                </aside>
+
+                <div
+                    className="ops-sidebar-scrim"
+                    onClick={() => setSidebarOpen(false)}
+                />
+
+                {/* CONTENT */}
+                <div className="ops-content">
+                    <header className="ops-header">
+                        <div className="ops-header-inner">
+                            <div className="ops-header-left">
+                                <button
+                                    className="hamburger-btn"
+                                    aria-label="Open navigation menu"
+                                    onClick={() => setSidebarOpen(true)}
+                                >
+                                    <Icon name="menu" size={19} />
+                                </button>
+                                <div>
+                                    <span className="ops-header-eyebrow">
+                                        Super Admin
+                                    </span>
+                                    <span className="ops-header-title">
+                                        {activeMenu}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="ops-header-actions">
+                                {/* Messages */}
+                                <button
+                                    type="button"
+                                    className="icon-btn"
+                                    aria-label="Messages"
+                                >
+                                    <Icon name="message" size={17} />
+                                </button>
+
+                                {/* Notifications */}
+                                <button
+                                    type="button"
+                                    className="icon-btn"
+                                    aria-label="Notifications"
+                                >
+                                    <Icon name="bell" size={17} />
+                                    <span className="icon-btn-badge">1</span>
+                                </button>
+
+                                {/* Theme */}
+                                <button
+                                    type="button"
+                                    className="theme-toggle"
+                                    onClick={() =>
+                                        setTheme((t) =>
+                                            t === "light" ? "dark" : "light",
+                                        )
+                                    }
+                                    aria-label="Toggle theme"
+                                >
+                                    <Icon
+                                        name={theme === "dark" ? "sun" : "moon"}
+                                        size={16}
+                                    />
+                                </button>
+
+                                {/* User */}
+                                <div
+                                    className="user-pill-wrap"
+                                    ref={dropdownRef}
+                                >
+                                    <button
+                                        type="button"
+                                        className="user-pill"
+                                        onClick={() =>
+                                            setDropdownOpen((v) => !v)
+                                        }
+                                        aria-haspopup="true"
+                                        aria-expanded={dropdownOpen}
+                                    >
+                                        <span className="user-pill-avatar">
+                                            SA
+                                        </span>
+
+                                        <span className="user-pill-name">
+                                            Staff Administrator
+                                        </span>
+
+                                        <Icon name="chevron-down" size={14} />
+                                    </button>
+
+                                    {/* Dropdown */}
+                                    <div
+                                        className={`dropdown-menu ${dropdownOpen ? "open" : ""}`}
+                                    >
+                                        <div className="dropdown-user">
+                                            <div className="dropdown-avatar">
+                                                SA
+                                            </div>
+
+                                            <div className="dropdown-user-info">
+                                                <p>Staff Administrator</p>
+                                                <span>Staff Administrator</span>
+                                            </div>
+                                        </div>
+
+                                        <p className="dropdown-eyebrow">
+                                            Account Options
+                                        </p>
+
+                                        <button
+                                            type="button"
+                                            className="dropdown-link"
+                                            onClick={() => openModal("profile")}
+                                        >
+                                            <Icon name="user" size={15} />
+                                            View Profile
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="dropdown-link"
+                                            onClick={() =>
+                                                openModal("settings")
+                                            }
+                                        >
+                                            <Icon name="settings" size={15} />
+                                            Account Settings
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="dropdown-link"
+                                            onClick={() =>
+                                                openModal("security")
+                                            }
+                                        >
+                                            <Icon name="lock" size={15} />
+                                            Security & Password
+                                        </button>
+
+                                        <div className="dropdown-divider" />
+
+                                        <button
+                                            type="button"
+                                            className="dropdown-link danger"
+                                            onClick={() => {
+                                                // Handle logout logic here
+                                            }}
+                                        >
+                                            <Icon name="logout" size={15} />
+                                            Sign Out
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="ops-main">{renderContent()}</main>
+
+                    {activeModal && (
+                        <div
+                            className="admin-modal-backdrop"
+                            onClick={closeModal}
+                        >
+                            <div
+                                className="admin-modal"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="admin-modal-title"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="admin-modal-header">
+                                    <div>
+                                        <span className="admin-modal-eyebrow">
+                                            Account
+                                        </span>
+                                        <h2 id="admin-modal-title">
+                                            {activeModal === "profile"
+                                                ? "View Profile"
+                                                : activeModal === "settings"
+                                                  ? "Account Settings"
+                                                  : "Security & Password"}
+                                        </h2>
+                                    </div>
+                                    <button
+                                        className="admin-modal-close"
+                                        type="button"
+                                        aria-label="Close"
+                                        onClick={closeModal}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+
+                                {activeModal === "profile" && (
+                                    <div className="admin-modal-body">
+                                        <div className="admin-profile">
+                                            <div className="admin-profile-avatar">
+                                                SA
+                                            </div>
+                                            <div>
+                                                <h3>Super Admin</h3>
+                                                <p>Full System Access</p>
+                                            </div>
+                                        </div>
+                                        <div className="admin-info-grid">
+                                            <div>
+                                                <span>Role</span>
+                                                <strong>
+                                                    Super Administrator
+                                                </strong>
+                                            </div>
+                                            <div>
+                                                <span>Status</span>
+                                                <strong>Active</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeModal === "settings" && (
+                                    <div className="admin-modal-body">
+                                        <div className="admin-form-row">
+                                            <label>Display Name</label>
+                                            <input
+                                                type="text"
+                                                defaultValue="Super Admin"
+                                            />
+                                        </div>
+                                        <div className="admin-form-row">
+                                            <label>Email</label>
+                                            <input
+                                                type="email"
+                                                defaultValue="admin@walangbrownout.com"
+                                            />
+                                        </div>
+                                        <button
+                                            className="btn-primary"
+                                            type="button"
+                                            onClick={closeModal}
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                )}
+
+                                {activeModal === "security" && (
+                                    <div className="admin-modal-body">
+                                        <p className="ops-subtext">
+                                            Manage your password and account
+                                            security settings.
+                                        </p>
+                                        <div className="admin-form-row">
+                                            <label>Current Password</label>
+                                            <input
+                                                type="password"
+                                                placeholder="Enter current password"
+                                            />
+                                        </div>
+                                        <div className="admin-form-row">
+                                            <label>New Password</label>
+                                            <input
+                                                type="password"
+                                                placeholder="Enter new password"
+                                            />
+                                        </div>
+                                        <button
+                                            className="btn-primary"
+                                            type="button"
+                                            onClick={closeModal}
+                                        >
+                                            Update Password
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
     }
-  };
-
-  return (
-
-
-
-
-    
 }
 
 export default SuperAdmin;
