@@ -12,6 +12,7 @@ use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\SystemUserController;
 use App\Http\Controllers\LogoutController;
 
+use App\Http\Controllers\SuperAdminDashboardController;
 
 // ==========================================
 // REACT PUBLIC PAGES
