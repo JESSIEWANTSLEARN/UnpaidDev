@@ -350,33 +350,28 @@ FAQ
                     <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
                         <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                            <p class="font-bold">[Member Name]</p>
-                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                            <p class="font-bold">Jerome Raymundo</p>
+                            <p class="mt-1 text-sm text-blue-300">Project Manager</p>
                         </div>
 
                         <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                            <p class="font-bold">[Member Name]</p>
-                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                            <p class="font-bold">John Jessie Palarao</p>
+                            <p class="mt-1 text-sm text-blue-300">Lead Developer</p>
                         </div>
 
                         <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                            <p class="font-bold">[Member Name]</p>
-                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                            <p class="font-bold">Jhon Paul Villasanta</p>
+                            <p class="mt-1 text-sm text-blue-300">Front End</p>
                         </div>
 
                         <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                            <p class="font-bold">[Member Name]</p>
-                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                            <p class="font-bold">Taironne James Sieteriales</p>
+                            <p class="mt-1 text-sm text-blue-300">Scrum Master</p>
                         </div>
 
                         <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                            <p class="font-bold">[Member Name]</p>
-                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
-                        </div>
-
-                        <div class="rounded-xl border border-white/10 bg-white/5 p-5">
-                            <p class="font-bold">[Member Name]</p>
-                            <p class="mt-1 text-sm text-blue-300">[Member Role]</p>
+                            <p class="font-bold">John Lorena</p>
+                            <p class="mt-1 text-sm text-blue-300">Quality Analysis</p>
                         </div>
 
                     </div>
