@@ -7,22 +7,25 @@ import LogIn from "./LogIn.jsx";
 import Signup from "./Signup.jsx";
 import LoginOtp from "./LoginOtp.jsx";
 import SignupVerify from "./SignupVerify.jsx";
-
 import SystemUser from "./pages/users/SystemUser.jsx";
 import SuperAdmin from "./pages/SuperAdmin.jsx";
+import PresenceTracker from "./components/PresenceTracker.jsx";
 
 function App() {
     return (
-        <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LogIn />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login-otp" element={<LoginOtp />} />
-            <Route path="/signup-verify" element={<SignupVerify />} />
+        <>
+            <PresenceTracker />
 
-            <Route path="/user" element={<SystemUser />} />
-            <Route path="/super-admin" element={<SuperAdmin />} />
-        </Routes>
+            <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LogIn />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/login-otp" element={<LoginOtp />} />
+                <Route path="/signup-verify" element={<SignupVerify />} />
+                <Route path="/user" element={<SystemUser />} />
+                <Route path="/super-admin" element={<SuperAdmin />} />
+            </Routes>
+        </>
     );
 }
 
