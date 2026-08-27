@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-
 import { createRoot } from "react-dom/client";
 
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
@@ -20,12 +19,9 @@ import "../css/AuthTransitions.css";
 /* =========================================================
    AUTH PAGE ORDER
 
-   0 = Home
-   1 = Login
-   2 = Signup
-
-   Higher number = forward
-   Lower number = backward
+   Home   = 0
+   Login  = 1
+   Signup = 2
    ========================================================= */
 
 const AUTH_PAGE_ORDER = {
@@ -33,6 +29,10 @@ const AUTH_PAGE_ORDER = {
     "/login": 1,
     "/signup": 2,
 };
+
+/* =========================================================
+   PAGES THAT WILL USE SLIDE ANIMATION
+   ========================================================= */
 
 const AUTH_TRANSITION_PATHS = new Set(["/", "/login", "/signup"]);
 
@@ -43,53 +43,28 @@ const AUTH_TRANSITION_PATHS = new Set(["/", "/login", "/signup"]);
 function AnimatedRoutes() {
     const location = useLocation();
 
-    /* ---------------------------------------------------------
-       The location currently displayed on screen.
-       --------------------------------------------------------- */
-
+    // Page currently visible
     const [displayLocation, setDisplayLocation] = useState(location);
 
-    /* ---------------------------------------------------------
-       The next route waiting to appear.
-       --------------------------------------------------------- */
-
+    // Page we are going to
     const pendingLocation = useRef(null);
 
-    /* ---------------------------------------------------------
-       Transition state:
-
-       idle
-       exit
-       prepare
-       enter
-       --------------------------------------------------------- */
-
+    // idle | exit | enter
     const [phase, setPhase] = useState("idle");
 
-    /* ---------------------------------------------------------
-       forward:
-       Home -> Login -> Signup
-
-       backward:
-       Signup -> Login -> Home
-       --------------------------------------------------------- */
-
+    // forward | backward
     const [direction, setDirection] = useState("forward");
 
-    /* =========================================================
-       DETECT ROUTE CHANGE
-       ========================================================= */
+    /* =====================================================
+       DETECT PAGE CHANGE
+       ===================================================== */
 
     useEffect(() => {
         const currentPath = displayLocation.pathname;
 
         const nextPath = location.pathname;
 
-        /*
-         * Same page.
-         * Nothing to animate.
-         */
-
+        // Same page
         if (
             currentPath === nextPath &&
             displayLocation.search === location.search
@@ -97,20 +72,16 @@ function AnimatedRoutes() {
             return;
         }
 
-        /*
-         * We only animate:
-         *
-         * /
-         * /login
-         * /signup
-         *
-         * OTP/dashboard pages change normally.
-         */
+        // Only animate:
+        // Home
+        // Login
+        // Signup
 
         const shouldAnimate =
             AUTH_TRANSITION_PATHS.has(currentPath) &&
             AUTH_TRANSITION_PATHS.has(nextPath);
 
+        // OTP and dashboard pages change normally
         if (!shouldAnimate) {
             pendingLocation.current = null;
 
@@ -121,96 +92,52 @@ function AnimatedRoutes() {
             return;
         }
 
-        /*
-         * Save where we are going.
-         */
-
+        // Save next page
         pendingLocation.current = location;
 
         const currentOrder = AUTH_PAGE_ORDER[currentPath] ?? 0;
 
         const nextOrder = AUTH_PAGE_ORDER[nextPath] ?? 0;
 
-        /*
-         * Example:
-         *
-         * Home 0 -> Login 1
-         * forward
-         *
-         * Login 1 -> Signup 2
-         * forward
-         *
-         * Signup 2 -> Login 1
-         * backward
-         */
+        // Going deeper:
+        // Home -> Login
+        // Login -> Signup
 
-        const nextDirection = nextOrder > currentOrder ? "forward" : "backward";
+        if (nextOrder > currentOrder) {
+            setDirection("forward");
+        }
 
-        setDirection(nextDirection);
+        // Going back:
+        // Signup -> Login
+        // Login -> Home
+        else {
+            setDirection("backward");
+        }
 
+        // Start old page exit animation
         setPhase("exit");
     }, [location, displayLocation]);
 
-    /* =========================================================
-       TRANSITION FINISHED
-       ========================================================= */
+    /* =====================================================
+       WHEN ANIMATION FINISHES
+       ===================================================== */
 
-    const handleTransitionEnd = (event) => {
-        /*
-         * Ignore transitions coming from children.
-         */
-
+    const handleAnimationEnd = (event) => {
+        // Ignore animations from elements inside the page
         if (event.target !== event.currentTarget) {
             return;
         }
 
-        /*
-         * We only care about transform finishing.
-         */
-
-        if (event.propertyName !== "transform") {
-            return;
-        }
-
-        /* -----------------------------------------------------
-           OLD PAGE FINISHED EXITING
-           ----------------------------------------------------- */
-
+        // OLD PAGE FINISHED LEAVING
         if (phase === "exit" && pendingLocation.current) {
-            const nextLocation = pendingLocation.current;
+            setDisplayLocation(pendingLocation.current);
 
-            /*
-             * Replace the old page with the new page.
-             */
-
-            setDisplayLocation(nextLocation);
-
-            /*
-             * Put the new page just outside the screen.
-             */
-
-            setPhase("prepare");
-
-            /*
-             * Wait two animation frames.
-             *
-             * This lets the browser position the page outside
-             * the screen before starting the slide animation.
-             */
-
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    setPhase("enter");
-                });
-            });
+            setPhase("enter");
 
             return;
         }
 
-        /* -----------------------------------------------------
-           NEW PAGE FINISHED ENTERING
-           ----------------------------------------------------- */
-
+        // NEW PAGE FINISHED ENTERING
         if (phase === "enter") {
             pendingLocation.current = null;
 
@@ -218,39 +145,38 @@ function AnimatedRoutes() {
         }
     };
 
-    /* =========================================================
-       CSS CLASS
-       ========================================================= */
+    /* =====================================================
+       BUILD ANIMATION CLASS
+       ===================================================== */
 
     let transitionClass = "auth-transition-page";
 
+    // Old page leaves
     if (phase === "exit") {
         transitionClass +=
             direction === "forward" ? " exit-forward" : " exit-backward";
     }
 
-    if (phase === "prepare") {
-        transitionClass +=
-            direction === "forward" ? " prepare-forward" : " prepare-backward";
-    }
-
+    // New page enters
     if (phase === "enter") {
         transitionClass +=
             direction === "forward" ? " enter-forward" : " enter-backward";
     }
 
-    /* =========================================================
+    /* =====================================================
        ROUTES
-       ========================================================= */
+       ===================================================== */
 
     return (
         <div className="auth-transition-root">
             <div
                 className={transitionClass}
-                onTransitionEnd={handleTransitionEnd}
+                onAnimationEnd={handleAnimationEnd}
             >
                 <Routes location={displayLocation}>
-                    {/* PUBLIC */}
+                    {/* =====================================
+                        PUBLIC PAGES
+                        ===================================== */}
 
                     <Route path="/" element={<LandingPage />} />
 
@@ -258,17 +184,23 @@ function AnimatedRoutes() {
 
                     <Route path="/signup" element={<Signup />} />
 
-                    {/* OTP */}
+                    {/* =====================================
+                        OTP PAGES
+                        ===================================== */}
 
                     <Route path="/login-otp" element={<LoginOtp />} />
 
                     <Route path="/signup-verify" element={<SignupVerify />} />
 
-                    {/* SYSTEM USER */}
+                    {/* =====================================
+                        SYSTEM USER
+                        ===================================== */}
 
                     <Route path="/user" element={<SystemUser />} />
 
-                    {/* SUPER ADMIN */}
+                    {/* =====================================
+                        SUPER ADMIN
+                        ===================================== */}
 
                     <Route path="/super-admin" element={<SuperAdmin />} />
                 </Routes>
@@ -278,7 +210,7 @@ function AnimatedRoutes() {
 }
 
 /* =========================================================
-   APPLICATION
+   MAIN APP
    ========================================================= */
 
 function App() {
@@ -292,7 +224,7 @@ function App() {
 }
 
 /* =========================================================
-   REACT ROOT
+   START REACT
    ========================================================= */
 
 createRoot(document.getElementById("root")).render(
