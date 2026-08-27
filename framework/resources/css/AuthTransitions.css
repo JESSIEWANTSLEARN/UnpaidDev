@@ -1,28 +1,34 @@
 /* =========================================================
-   WALANG BROWNOUT
-   HOME / LOGIN / SIGNUP PAGE TRANSITIONS
+   WALANG BROWNOUT AUTH TRANSITIONS
+   Theme:
+   Blue       #0E5BA8
+   Dark Navy  #2C3E50
+   Light Gray #F2F2F2
    ========================================================= */
+
+html,
+body,
+#root {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
 
 .auth-transition-root {
     position: relative;
     width: 100%;
     min-height: 100vh;
-    overflow-x: hidden;
-    background: #ffffff;
+    overflow: hidden;
 }
 
 .auth-transition-page {
+    position: relative;
     width: 100%;
     min-height: 100vh;
-
-    transform: translateX(0);
-    opacity: 1;
-
-    transition:
-        transform 0.28s ease-in-out,
-        opacity 0.28s ease-in-out;
-
-    will-change: transform, opacity;
 }
 
 /* =========================================================
@@ -32,65 +38,155 @@
    ========================================================= */
 
 .auth-transition-page.exit-forward {
-    transform: translateX(-15%);
-    opacity: 0;
-}
-
-.auth-transition-page.prepare-forward {
-    transform: translateX(100%);
-    opacity: 0;
-    transition: none;
+    animation: pageOutLeft 0.25s ease forwards;
 }
 
 .auth-transition-page.enter-forward {
-    transform: translateX(0);
-    opacity: 1;
+    animation: pageInRight 0.3s ease forwards;
 }
 
 /* =========================================================
    BACKWARD
    Signup -> Login
    Login -> Home
-   Signup -> Home
    ========================================================= */
 
 .auth-transition-page.exit-backward {
-    transform: translateX(15%);
-    opacity: 0;
-}
-
-.auth-transition-page.prepare-backward {
-    transform: translateX(-100%);
-    opacity: 0;
-    transition: none;
+    animation: pageOutRight 0.25s ease forwards;
 }
 
 .auth-transition-page.enter-backward {
-    transform: translateX(0);
-    opacity: 1;
+    animation: pageInLeft 0.3s ease forwards;
 }
 
 /* =========================================================
-   MOBILE
+   COLORED TRANSITION LAYER
    ========================================================= */
 
-@media (max-width: 768px) {
-    .auth-transition-page.exit-forward {
-        transform: translateX(-25%);
+.auth-transition-page.exit-forward::after,
+.auth-transition-page.exit-backward::after {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 9999;
+
+    pointer-events: none;
+}
+
+/* Forward = Walang BrownOut blue */
+
+.auth-transition-page.exit-forward::after {
+    background: linear-gradient(135deg, #0e5ba8, #2c3e50);
+
+    animation: colorWipeForward 0.25s ease forwards;
+}
+
+/* Backward = reverse theme */
+
+.auth-transition-page.exit-backward::after {
+    background: linear-gradient(135deg, #2c3e50, #0e5ba8);
+
+    animation: colorWipeBackward 0.25s ease forwards;
+}
+
+/* =========================================================
+   PAGE MOVEMENT
+   Small movement so it does not feel dizzy
+   ========================================================= */
+
+@keyframes pageOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
     }
 
-    .auth-transition-page.exit-backward {
-        transform: translateX(25%);
+    to {
+        transform: translateX(-25px);
+        opacity: 0.7;
+    }
+}
+
+@keyframes pageInRight {
+    from {
+        transform: translateX(25px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pageOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(25px);
+        opacity: 0.7;
+    }
+}
+
+@keyframes pageInLeft {
+    from {
+        transform: translateX(-25px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
 }
 
 /* =========================================================
-   ACCESSIBILITY
-   Disable animation if user requests reduced motion
+   COLOR WIPE
+   ========================================================= */
+
+@keyframes colorWipeForward {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    35% {
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 0.95;
+    }
+}
+
+@keyframes colorWipeBackward {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    35% {
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 0.95;
+    }
+}
+
+/* =========================================================
+   REDUCED MOTION
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-    .auth-transition-page {
-        transition: none;
+    .auth-transition-page,
+    .auth-transition-page::after {
+        animation: none !important;
     }
 }
