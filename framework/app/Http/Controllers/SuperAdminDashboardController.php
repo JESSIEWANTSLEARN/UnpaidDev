@@ -15,8 +15,6 @@ class SuperAdminDashboardController extends Controller
 {
     use HandlesSuperAdminSupport;
 
-    private const LOW_STOCK_THRESHOLD = 10;
-
     // =========================================================
     // DASHBOARD API
     // =========================================================
@@ -125,6 +123,8 @@ class SuperAdminDashboardController extends Controller
 
     private function dashboardData(): array
     {
+        $lowStockThreshold = 10;
+
         // CURRENT USER
         $currentUser = DB::table('WBO_Users')
             ->select('user_id', 'name', 'email', 'contact_number', 'role', 'account_status', 'email_verified_at', 'last_seen_at', 'created_at')
@@ -330,7 +330,7 @@ class SuperAdminDashboardController extends Controller
         $metrics = [
             'total_products' => $products->count(),
             'total_stock' => (int) $products->sum('available_stock'),
-            'low_stock_items' => $products->filter(fn($product) => $product->available_stock > 0 && $product->available_stock <= self::LOW_STOCK_THRESHOLD)->count(),
+            'low_stock_items' => $products->filter(fn($product) => $product->available_stock > 0 && $product->available_stock <= $lowStockThreshold)->count(),
             'out_of_stock' => $products->filter(fn($product) => $product->available_stock <= 0)->count(),
             'total_suppliers' => $suppliers->count(),
             'pending_orders' => $orders->where('status', 'PENDING')->count(),
@@ -345,7 +345,7 @@ class SuperAdminDashboardController extends Controller
         // FINAL RESPONSE
         return [
             'current_user' => $currentUser,
-            'low_stock_threshold' => self::LOW_STOCK_THRESHOLD,
+            'low_stock_threshold' => $lowStockThreshold,
             'metrics' => $metrics,
             'products' => $products,
             'batches' => $batches,
