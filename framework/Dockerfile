@@ -1,5 +1,5 @@
 FROM php:8.3-apache
-RUN php artisan storage:link
+
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -19,10 +19,14 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
+# Copy Laravel public storage files directly into Apache public directory
+RUN mkdir -p public/storage \
+    && cp -R storage/app/public/* public/storage/
+
 RUN npm install
 RUN npm run build
 
-RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache public/storage
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
