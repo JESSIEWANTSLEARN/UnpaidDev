@@ -2,15 +2,18 @@
 
 // =====================================================
 // DATABASE
+// Local = XAMPP
+// Render = Railway environment variables
 // =====================================================
 
-$host = 'localhost';
-$dbname = 'WalangBrownout';
-$username = 'root';
-$password = '';
+$host = getenv('DB_HOST') ?: 'localhost';
+$port = getenv('DB_PORT') ?: '3306';
+$dbname = getenv('DB_DATABASE') ?: 'WalangBrownout';
+$username = getenv('DB_USERNAME') ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
 $charset = 'utf8mb4';
 
-$dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
+$dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
 
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -42,6 +45,7 @@ try {
 
 // =====================================================
 // GMAIL SMTP
+// TEMPORARY CONFIGURATION
 // =====================================================
 
 define(
@@ -54,36 +58,15 @@ define(
     587
 );
 
-
-// Gmail account that sends the OTP
 define(
     'SMTP_USERNAME',
     'palaraojessie19@gmail.com'
 );
 
-
-// =====================================================
-// GOOGLE APP PASSWORD
-// =====================================================
-//
-// IMPORTANT:
-//
-// HINDI normal Gmail password ang ilalagay dito.
-//
-// Kailangan Google APP PASSWORD.
-//
-// Example only:
-//
-// abcd efgh ijkl mnop
-//
-// =====================================================
-
 define(
     'SMTP_APP_PASSWORD',
-    'zlqe xedr jynq vrpb
-'
+    'zlqexedrjynqvrpb'
 );
-
 
 define(
     'SMTP_FROM_NAME',
