@@ -1,0 +1,137 @@
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { INITIAL_FORMS } from "../config/superAdminConfig.js";
+import { apiRequest, download, logoutRequest, toFormData } from "../services/superAdminApi.js";
+import { initials, Logo } from "../utils/superAdminUtils.js";
+
+export default function useSuperAdmin() {
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+  const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [theme, setTheme] = useState("light");
+  const [activeModal, setActiveModal] = useState(null);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reloadToken, setReloadToken] = useState(0);
+  const [modalBusy, setModalBusy] = useState(false);
+  const [modalError, setModalError] = useState("");
+  const [forms, setForms] = useState(INITIAL_FORMS);
+
+  const setForm = (key, update) => setForms((all) => ({
+    ...all,
+    [key]: typeof update === "function" ? update(all[key]) : update,
+  }));
+  const resetForm = (key) => setForm(key, { ...INITIAL_FORMS[key] });
+  const refresh = () => setReloadToken((v) => v + 1);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true); setError("");
+    apiRequest("/api/super-admin/dashboard-data")
+      .then((result) => { if (!cancelled) setData(result); })
+      .catch((err) => {
+        if (err.status === 401) return navigate("/login", { replace: true });
+        if (!cancelled) setError(err.message || "Unable to load Super Admin data.");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [navigate, reloadToken]);
+
+  useEffect(() => {
+    if (!dropdownOpen) return undefined;
+    const outside = (event) => dropdownRef.current && !dropdownRef.current.contains(event.target) && setDropdownOpen(false);
+    const escape = (event) => event.key === "Escape" && setDropdownOpen(false);
+    document.addEventListener("mousedown", outside); document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("mousedown", outside); document.removeEventListener("keydown", escape); };
+  }, [dropdownOpen]);
+
+  const currentUser = data?.current_user;
+  const userInitials = initials(currentUser?.name);
+  const unreadNotifications = Number(data?.metrics?.unread_notifications || 0);
+  const brandName = data?.settings?.company_name || "Walang Brownout";
+  const brandLogo = data?.settings?.company_logo_url || Logo;
+
+  useEffect(() => {
+    if (!currentUser) return;
+    setForm("profile", { name: currentUser.name || "", email: currentUser.email || "", contact_number: currentUser.contact_number || "" });
+  }, [currentUser?.user_id, currentUser?.name, currentUser?.email, currentUser?.contact_number]);
+
+  useEffect(() => {
+    const s = data?.settings; if (!s) return;
+    setForm("company", (form) => ({ ...form, company_name: s.company_name || "Walang Brownout", company_email: s.company_email || "", company_contact: s.company_contact || "", company_address: s.company_address || "", logo: null }));
+  }, [data?.settings?.company_name, data?.settings?.company_email, data?.settings?.company_contact, data?.settings?.company_address]);
+
+  const openModal = (type) => { setActiveModal(type); setDropdownOpen(false); setModalError(""); };
+  const closeModal = () => { if (!modalBusy) { setActiveModal(null); setModalError(""); } };
+
+  const runModalAction = async (action, keepOpen = false) => {
+    setModalBusy(true); setModalError("");
+    try { await action(); if (!keepOpen) setActiveModal(null); refresh(); }
+    catch (err) {
+      if (err.status === 401) navigate("/login", { replace: true });
+      setModalError(err.message || "The request could not be completed.");
+    } finally { setModalBusy(false); }
+  };
+
+  const handleProfileSave = () => runModalAction(() => apiRequest("/api/super-admin/profile", { method: "PUT", body: forms.profile }));
+  const handlePasswordUpdate = () => runModalAction(async () => { await apiRequest("/api/super-admin/password", { method: "PUT", body: forms.password }); resetForm("password"); });
+  const handleAddProduct = () => runModalAction(async () => {
+    const body = toFormData(forms.product, ["is_seasonal", "is_visible", "is_featured"]);
+    await apiRequest("/api/super-admin/products", { method: "POST", body, formData: true }); resetForm("product");
+  });
+  const handleStockIn = () => runModalAction(async () => { await apiRequest("/api/super-admin/stock-in", { method: "POST", body: forms.stock }); resetForm("stock"); });
+  const handleAddUser = () => runModalAction(async () => { await apiRequest("/api/super-admin/users", { method: "POST", body: forms.user }); resetForm("user"); });
+  const handleAddSupplier = () => runModalAction(async () => { await apiRequest("/api/super-admin/suppliers", { method: "POST", body: forms.supplier }); resetForm("supplier"); });
+  const handleAddPurchaseOrder = () => runModalAction(async () => { await apiRequest("/api/super-admin/purchase-orders", { method: "POST", body: forms.purchaseOrder }); resetForm("purchaseOrder"); });
+  const handleCompanySave = () => runModalAction(async () => {
+    const body = toFormData(forms.company); await apiRequest("/api/super-admin/company-information", { method: "POST", body, formData: true });
+    setForm("company", (form) => ({ ...form, logo: null }));
+  });
+
+  const openUserEditor = (user) => {
+    setForm("editUser", { user_id: user.user_id, name: user.name || "", email: user.email || "", contact_number: user.contact_number || "", role: user.role || "System_User", account_status: user.account_status || "active" });
+    setModalError(""); setActiveModal("editUser");
+  };
+  const handleUpdateUser = () => runModalAction(() => apiRequest(`/api/super-admin/users/${forms.editUser.user_id}`, { method: "PUT", body: forms.editUser }));
+  const handleNotificationStatus = (id, status) => runModalAction(() => apiRequest(`/api/super-admin/notifications/${id}`, { method: "PUT", body: { status } }), true);
+  const handleCreateBackup = () => runModalAction(() => apiRequest("/api/super-admin/backups", { method: "POST" }), true);
+  const handleRestoreBackup = (filename) => {
+    if (!window.confirm(`Restore ${filename}? This replaces the current WalangBrownout data with the selected backup. A safety backup will be created first.`)) return;
+    runModalAction(() => apiRequest(`/api/super-admin/backups/${encodeURIComponent(filename)}/restore`, { method: "POST", body: { confirmation: "RESTORE" } }));
+  };
+  const handleDownloadBackup = (filename) => download(`/api/super-admin/backups/${encodeURIComponent(filename)}/download`);
+  const handleExportReport = () => download("/api/super-admin/export-report");
+  const handleLogout = async () => {
+    setDropdownOpen(false);
+    try { await logoutRequest(); navigate("/login", { replace: true }); }
+    catch (err) { setError(err.message || "Logout failed."); }
+  };
+
+  const setters = {
+    setProfileForm: (v) => setForm("profile", v), setPasswordForm: (v) => setForm("password", v),
+    setProductForm: (v) => setForm("product", v), setStockForm: (v) => setForm("stock", v),
+    setUserForm: (v) => setForm("user", v), setSupplierForm: (v) => setForm("supplier", v),
+    setPurchaseOrderForm: (v) => setForm("purchaseOrder", v), setCompanyForm: (v) => setForm("company", v),
+    setEditUserForm: (v) => setForm("editUser", v),
+  };
+
+  return {
+    activeMenu, setActiveMenu, sidebarOpen, setSidebarOpen, dropdownOpen, setDropdownOpen, theme, setTheme,
+    activeModal, data, loading, error, refresh, dropdownRef, modalBusy, modalError, currentUser, userInitials,
+    unreadNotifications, brandName, brandLogo, openModal, closeModal, openUserEditor, handleExportReport, handleLogout,
+    modalProps: {
+      type: activeModal, onClose: closeModal, busy: modalBusy, error: modalError, currentUser, userInitials, data,
+      profileForm: forms.profile, passwordForm: forms.password, productForm: forms.product, stockForm: forms.stock,
+      userForm: forms.user, supplierForm: forms.supplier, purchaseOrderForm: forms.purchaseOrder,
+      companyForm: forms.company, editUserForm: forms.editUser, ...setters,
+      onProfileSave: handleProfileSave, onPasswordUpdate: handlePasswordUpdate, onAddProduct: handleAddProduct,
+      onStockIn: handleStockIn, onAddUser: handleAddUser, onAddSupplier: handleAddSupplier,
+      onAddPurchaseOrder: handleAddPurchaseOrder, onCompanySave: handleCompanySave, onUpdateUser: handleUpdateUser,
+      onNotificationStatus: handleNotificationStatus, onCreateBackup: handleCreateBackup,
+      onRestoreBackup: handleRestoreBackup, onDownloadBackup: handleDownloadBackup,
+    },
+  };
+}
