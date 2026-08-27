@@ -1,0 +1,96 @@
+/* =========================================================
+   WALANG BROWNOUT
+   HOME / LOGIN / SIGNUP PAGE TRANSITIONS
+   ========================================================= */
+
+.auth-transition-root {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: #ffffff;
+}
+
+.auth-transition-page {
+    width: 100%;
+    min-height: 100vh;
+
+    transform: translateX(0);
+    opacity: 1;
+
+    transition:
+        transform 0.28s ease-in-out,
+        opacity 0.28s ease-in-out;
+
+    will-change: transform, opacity;
+}
+
+/* =========================================================
+   FORWARD
+   Home -> Login
+   Login -> Signup
+   ========================================================= */
+
+.auth-transition-page.exit-forward {
+    transform: translateX(-15%);
+    opacity: 0;
+}
+
+.auth-transition-page.prepare-forward {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: none;
+}
+
+.auth-transition-page.enter-forward {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* =========================================================
+   BACKWARD
+   Signup -> Login
+   Login -> Home
+   Signup -> Home
+   ========================================================= */
+
+.auth-transition-page.exit-backward {
+    transform: translateX(15%);
+    opacity: 0;
+}
+
+.auth-transition-page.prepare-backward {
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: none;
+}
+
+.auth-transition-page.enter-backward {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .auth-transition-page.exit-forward {
+        transform: translateX(-25%);
+    }
+
+    .auth-transition-page.exit-backward {
+        transform: translateX(25%);
+    }
+}
+
+/* =========================================================
+   ACCESSIBILITY
+   Disable animation if user requests reduced motion
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-transition-page {
+        transition: none;
+    }
+}
