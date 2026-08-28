@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\WBOUser;
+use App\Services\AuthSessionService;
 use App\Services\OtpService;
+use App\Services\TrustedDeviceService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class LoginOtpController extends Controller
 {
     public function verify(
         Request $request,
-        OtpService $otpService
+        OtpService $otpService,
+        AuthSessionService $sessions,
+        TrustedDeviceService $trustedDevices
     ) {
         $length = $otpService->length();
 
@@ -20,7 +23,8 @@ class LoginOtpController extends Controller
             'otp' => "required|digits:{$length}",
         ]);
 
-        $pendingUser = $request->session()->get('pending_user');
+        $pendingUser =
+            $request->session()->get('pending_user');
 
         if (!$pendingUser) {
             return response()->json([
@@ -31,8 +35,11 @@ class LoginOtpController extends Controller
             ], 401);
         }
 
-        $storedHash = $request->session()->get('otp_hash');
-        $otpExpiry = $request->session()->get('otp_expiry');
+        $storedHash =
+            $request->session()->get('otp_hash');
+
+        $otpExpiry =
+            $request->session()->get('otp_expiry');
 
         if (!$storedHash) {
             return response()->json([
@@ -40,7 +47,8 @@ class LoginOtpController extends Controller
                 'message' =>
                     'This OTP is no longer valid. Please request a new OTP.',
                 'can_resend' => true,
-                'otp_policy' => $otpService->publicPolicy(),
+                'otp_policy' =>
+                    $otpService->publicPolicy(),
             ], 422);
         }
 
@@ -59,7 +67,8 @@ class LoginOtpController extends Controller
                 'message' =>
                     'Your OTP has expired. Please request a new OTP.',
                 'can_resend' => true,
-                'otp_policy' => $otpService->publicPolicy(),
+                'otp_policy' =>
+                    $otpService->publicPolicy(),
             ], 422);
         }
 
@@ -97,7 +106,8 @@ class LoginOtpController extends Controller
                         'Too many incorrect attempts. Request a new OTP.',
                     'attempts_remaining' => 0,
                     'can_resend' => true,
-                    'otp_policy' => $otpService->publicPolicy(),
+                    'otp_policy' =>
+                        $otpService->publicPolicy(),
                 ], 429);
             }
 
@@ -106,19 +116,10 @@ class LoginOtpController extends Controller
                 'message' =>
                     "Invalid OTP code. Attempts remaining: {$remaining}.",
                 'attempts_remaining' => $remaining,
-                'otp_policy' => $otpService->publicPolicy(),
+                'otp_policy' =>
+                    $otpService->publicPolicy(),
             ], 422);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Re-read the user after OTP
-        |--------------------------------------------------------------------------
-        |
-        | Do not trust role/status values captured before the OTP was entered.
-        | An administrator may have disabled or changed the user in the meantime.
-        |
-        */
 
         $user = WBOUser::where(
             'user_id',
@@ -130,7 +131,8 @@ class LoginOtpController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'The account could not be found.',
+                'message' =>
+                    'The account could not be found.',
                 'redirect' => '/login',
             ], 404);
         }
@@ -148,43 +150,59 @@ class LoginOtpController extends Controller
             ], 403);
         }
 
-        // Rotate the session ID after authentication.
-        $request->session()->regenerate();
+        $rememberDevice =
+            (bool) $request->session()->get(
+                'otp_remember_device',
+                false
+            );
 
-        $request->session()->put([
-            'logged_in' => true,
-            'user_id' => (int) $user->user_id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-            'last_activity' => now()->timestamp,
-        ]);
+        $sessions->start(
+            $request,
+            $user,
+            'LOGIN',
+            'User successfully logged in after OTP verification.'
+        );
 
-        try {
-            DB::table('WBO_AuditLogs')->insert([
-                'user_id' => (int) $user->user_id,
-                'action' => 'LOGIN',
-                'description' => 'User successfully logged in',
-                'ip_address' => $request->ip(),
-            ]);
-        } catch (\Throwable $e) {
-            report($e);
+        $cookie = null;
+
+        if ($rememberDevice) {
+            try {
+                $cookie =
+                    $trustedDevices->issueCookie(
+                        $request,
+                        $user
+                    );
+            } catch (\Throwable $e) {
+                // Login remains successful even if remembering the
+                // device fails. The user will simply need OTP next time.
+                report($e);
+            }
         }
 
         $this->clearLoginOtp($request);
 
-        return response()->json([
+        $response = response()->json([
             'success' => true,
             'message' => 'Login successful.',
-            'redirect' => $this->dashboardForRole($user->role),
+            'redirect' =>
+                $this->dashboardForRole($user->role),
+            'trusted_device_created' =>
+                $cookie !== null,
         ]);
+
+        if ($cookie) {
+            $response->withCookie($cookie);
+        }
+
+        return $response;
     }
 
     public function resend(
         Request $request,
         OtpService $otpService
     ) {
-        $pendingUser = $request->session()->get('pending_user');
+        $pendingUser =
+            $request->session()->get('pending_user');
 
         if (!$pendingUser) {
             return response()->json([
@@ -208,7 +226,8 @@ class LoginOtpController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'This account is no longer available for login.',
+                'message' =>
+                    'This account is no longer available for login.',
                 'redirect' => '/login',
             ], 403);
         }
@@ -219,13 +238,17 @@ class LoginOtpController extends Controller
                 0
             );
 
-        if ($resendCount >= $otpService->maxResends()) {
+        if (
+            $resendCount >=
+            $otpService->maxResends()
+        ) {
             return response()->json([
                 'success' => false,
                 'message' =>
                     'You have reached the maximum number of OTP resends. You can restart login to receive a fresh OTP.',
                 'resends_remaining' => 0,
-                'otp_policy' => $otpService->publicPolicy(),
+                'otp_policy' =>
+                    $otpService->publicPolicy(),
             ], 429);
         }
 
@@ -252,8 +275,10 @@ class LoginOtpController extends Controller
                 'success' => false,
                 'message' =>
                     "Please wait {$secondsRemaining} seconds before requesting another OTP.",
-                'seconds_remaining' => $secondsRemaining,
-                'otp_policy' => $otpService->publicPolicy(),
+                'seconds_remaining' =>
+                    $secondsRemaining,
+                'otp_policy' =>
+                    $otpService->publicPolicy(),
             ], 429);
         }
 
@@ -270,11 +295,11 @@ class LoginOtpController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Unable to resend OTP. Please try again.',
+                'message' =>
+                    'Unable to resend OTP. Please try again.',
             ], 500);
         }
 
-        // Replacing otp_hash invalidates the previous OTP immediately.
         $request->session()->put([
             'pending_user' => [
                 'id' => (int) $user->user_id,
@@ -282,27 +307,33 @@ class LoginOtpController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
             ],
-            'otp_hash' => $otpService->hash($newOtp),
-            'otp_expiry' => $otpService->expiryTimestamp(),
-            'otp_resend_count' => $resendCount + 1,
+            'otp_hash' =>
+                $otpService->hash($newOtp),
+            'otp_expiry' =>
+                $otpService->expiryTimestamp(),
+            'otp_resend_count' =>
+                $resendCount + 1,
             'otp_attempt_count' => 0,
             'otp_last_sent' => now()->timestamp,
         ]);
 
         $remaining =
-            $otpService->maxResends() - ($resendCount + 1);
+            $otpService->maxResends() -
+            ($resendCount + 1);
 
         return response()->json([
             'success' => true,
             'message' =>
                 "A new OTP has been sent. Resends remaining: {$remaining}.",
             'resends_remaining' => $remaining,
-            'otp_policy' => $otpService->publicPolicy(),
+            'otp_policy' =>
+                $otpService->publicPolicy(),
         ]);
     }
 
-    private function clearLoginOtp(Request $request): void
-    {
+    private function clearLoginOtp(
+        Request $request
+    ): void {
         $request->session()->forget([
             'pending_user',
             'otp_code',
@@ -311,11 +342,13 @@ class LoginOtpController extends Controller
             'otp_resend_count',
             'otp_attempt_count',
             'otp_last_sent',
+            'otp_remember_device',
         ]);
     }
 
-    private function dashboardForRole(?string $role): string
-    {
+    private function dashboardForRole(
+        ?string $role
+    ): string {
         return match ($role) {
             'super_admin' => '/super-admin',
             'Operations_Manager' => '/operations-manager',

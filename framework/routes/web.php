@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\SignupVerificationController;
 use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\SystemUserController;
 use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\SessionSecurityController;
 
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\SuperAdminController;
@@ -38,6 +39,10 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/signup/verify-otp', [SignupVerificationController::class, 'verify']);
 Route::post('/signup/resend-otp', [SignupVerificationController::class, 'resend']);
 Route::post('/logout', [LogoutController::class, 'logout']);
+
+Route::get('/api/session/status', [SessionSecurityController::class, 'status']);
+Route::post('/api/session/activity', [SessionSecurityController::class, 'activity']);
+Route::post('/api/session/forget-device', [SessionSecurityController::class, 'forgetDevice']);
 
 // Store / public API
 Route::get('/api/store/products', [StoreProductController::class, 'index']);

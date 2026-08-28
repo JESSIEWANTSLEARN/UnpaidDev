@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnforceIdleSession;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,6 +26,11 @@ return Application::configure(
                 Request::HEADER_X_FORWARDED_PORT |
                 Request::HEADER_X_FORWARDED_PROTO |
                 Request::HEADER_X_FORWARDED_AWS_ELB
+        );
+        $middleware->web(
+            append: [
+                EnforceIdleSession::class,
+            ]
         );
 
     })
