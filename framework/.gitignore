@@ -47,3 +47,7 @@ INSTALL_*.ps1
 # Temporary authentication scans
 AUTH_SCAN.txt
 OTP_FINAL_SCAN.txt
+
+# Temporary session/device scans
+SESSION_DEVICE_SCAN.txt
+SESSION_DEVICE_FINAL_SCAN.txt
