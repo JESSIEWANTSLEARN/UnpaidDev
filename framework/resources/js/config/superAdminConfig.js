@@ -46,9 +46,10 @@ export const INITIAL_FORMS = {
   profile: { name: "", email: "", contact_number: "" },
   password: { current_password: "", password: "", password_confirmation: "" },
   product: {
-    sku: "", name: "", description: "", category: "", supplier_id: "", abc_class: "C",
+    sku: "", name: "", description: "", category_id: "", category: "", supplier_id: "", abc_class: "C",
     is_seasonal: false, is_visible: true, is_featured: false, unit_cost: "", unit_price: "", image: null,
   },
+  category: { name: "", description: "" },
   stock: { product_id: "", batch_number: "", quantity_received: "", expiry_date: "" },
   user: {
     name: "", email: "", contact_number: "", password: "", password_confirmation: "",
