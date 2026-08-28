@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -22,6 +23,7 @@ class SuperAdminCatalogController extends Controller
             'sku' => ['required', 'string', 'max:50', Rule::unique('WBO_Products', 'sku')],
             'name' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
+            'category_id' => ['nullable', 'integer', Rule::exists('WBO_Categories', 'category_id')],
             'category' => ['nullable', 'string', 'max:100'],
             'supplier_id' => ['nullable', 'integer', Rule::exists('WBO_Suppliers', 'supplier_id')],
             'abc_class' => ['required', Rule::in(['A', 'B', 'C'])],
@@ -33,20 +35,19 @@ class SuperAdminCatalogController extends Controller
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $imagePath = null;
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-        }
+        $categoryId = $this->resolveCategoryId($validated);
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('products', 'public')
+            : null;
 
         try {
-            $productId = DB::transaction(function () use ($validated, $imagePath) {
+            $productId = DB::transaction(function () use ($validated, $categoryId, $imagePath) {
                 $productId = DB::table('WBO_Products')->insertGetId([
                     'sku' => $validated['sku'],
                     'name' => $validated['name'],
-                    'description' => $validated['description'] ?: null,
-                    'category' => $validated['category'] ?: null,
-                    'supplier_id' => $validated['supplier_id'] ?: null,
+                    'description' => $validated['description'] ?? null,
+                    'category_id' => $categoryId,
+                    'supplier_id' => $validated['supplier_id'] ?? null,
                     'abc_class' => $validated['abc_class'],
                     'is_seasonal' => (bool) $validated['is_seasonal'],
                     'is_visible' => (bool) $validated['is_visible'],
@@ -91,6 +92,44 @@ class SuperAdminCatalogController extends Controller
         ], 201);
     }
 
+    public function storeCategory(Request $request): JsonResponse
+    {
+        $this->authorizeSuperAdmin();
+
+        $request->merge([
+            'name' => trim((string) $request->input('name', '')),
+        ]);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100', Rule::unique('WBO_Categories', 'name')],
+            'description' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $categoryId = DB::table('WBO_Categories')->insertGetId([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->audit(
+            $request,
+            'CATEGORY_ADDED',
+            "Added category {$validated['name']}."
+        );
+
+        return response()->json([
+            'message' => 'Category added successfully.',
+            'category_id' => $categoryId,
+            'category' => [
+                'category_id' => $categoryId,
+                'category' => $validated['name'],
+                'description' => $validated['description'] ?? null,
+                'is_active' => true,
+            ],
+        ], 201);
+    }
     public function stockIn(Request $request): JsonResponse
     {
         $this->authorizeSuperAdmin();
@@ -120,16 +159,18 @@ class SuperAdminCatalogController extends Controller
                 'quantity_received' => $validated['quantity_received'],
                 'current_quantity' => $validated['quantity_received'],
                 'received_date' => now(),
-                'expiry_date' => $validated['expiry_date'] ?: null,
+                'expiry_date' => $validated['expiry_date'] ?? null,
             ]);
 
             DB::table('WBO_Transactions')->insert([
                 'batch_id' => $batchId,
                 'transaction_type' => 'RECEIVE',
                 'quantity_change' => $validated['quantity_received'],
-                'timestamp' => now(),
                 'order_id' => null,
+                'purchase_order_id' => null,
+                'reference_note' => 'Manual stock-in by Super Admin',
                 'performed_by_user_id' => session('user_id'),
+                'timestamp' => now(),
             ]);
 
             return $batchId;
@@ -147,7 +188,6 @@ class SuperAdminCatalogController extends Controller
         ], 201);
     }
 
-
     public function storeSupplier(Request $request): JsonResponse
     {
         $this->authorizeSuperAdmin();
@@ -156,14 +196,20 @@ class SuperAdminCatalogController extends Controller
             'name' => ['required', 'string', 'max:150'],
             'contact_number' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:100'],
+            'address' => ['nullable', 'string', 'max:255'],
             'lead_time_days' => ['required', 'integer', 'min:0'],
+            'supplier_status' => ['nullable', Rule::in(['ACTIVE', 'INACTIVE'])],
         ]);
 
         $supplierId = DB::table('WBO_Suppliers')->insertGetId([
             'name' => $validated['name'],
-            'contact_number' => $validated['contact_number'] ?: null,
-            'email' => $validated['email'] ?: null,
+            'contact_number' => $validated['contact_number'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'address' => $validated['address'] ?? null,
             'lead_time_days' => $validated['lead_time_days'],
+            'supplier_status' => $validated['supplier_status'] ?? 'ACTIVE',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $this->audit(
@@ -190,35 +236,91 @@ class SuperAdminCatalogController extends Controller
         ]);
 
         $product = DB::table('WBO_Products')
-            ->select('product_id', 'supplier_id', 'name')
+            ->select('product_id', 'supplier_id', 'name', 'unit_cost')
             ->where('product_id', $validated['product_id'])
             ->first();
 
-        if ($product && $product->supplier_id !== null && (int) $product->supplier_id !== (int) $validated['supplier_id']) {
+        if (
+            $product &&
+            $product->supplier_id !== null &&
+            (int) $product->supplier_id !== (int) $validated['supplier_id']
+        ) {
             throw ValidationException::withMessages([
                 'supplier_id' => ['The selected supplier does not match the supplier assigned to this product.'],
             ]);
         }
 
-        $poId = DB::table('WBO_PurchaseOrders')->insertGetId([
-            'supplier_id' => $validated['supplier_id'],
-            'product_id' => $validated['product_id'],
-            'quantity' => $validated['quantity'],
-            'status' => $validated['status'],
-            'created_at' => now(),
-            'created_by_user_id' => session('user_id'),
-        ]);
+        $result = DB::transaction(function () use ($validated, $product) {
+            $poNumber = $this->generatePurchaseOrderNumber();
+
+            $poId = DB::table('WBO_PurchaseOrders')->insertGetId([
+                'po_number' => $poNumber,
+                'supplier_id' => $validated['supplier_id'],
+                'status' => $validated['status'],
+                'created_by_user_id' => session('user_id'),
+                'approved_by_user_id' => null,
+                'created_at' => now(),
+                'ordered_at' => $validated['status'] === 'ORDERED' ? now() : null,
+            ]);
+
+            DB::table('WBO_PurchaseOrderDetails')->insert([
+                'po_id' => $poId,
+                'product_id' => $validated['product_id'],
+                'quantity_ordered' => $validated['quantity'],
+                'quantity_received' => 0,
+                'unit_cost' => $product ? $product->unit_cost : 0,
+            ]);
+
+            return [
+                'po_id' => $poId,
+                'po_number' => $poNumber,
+            ];
+        });
 
         $this->audit(
             $request,
             'PURCHASE_ORDER_CREATED',
-            "Created purchase order #{$poId} for {$validated['quantity']} unit(s)."
+            "Created purchase order {$result['po_number']} for {$validated['quantity']} unit(s)."
         );
 
         return response()->json([
             'message' => 'Purchase order created successfully.',
-            'po_id' => $poId,
+            'po_id' => $result['po_id'],
+            'po_number' => $result['po_number'],
         ], 201);
     }
 
+    private function resolveCategoryId(array $validated): ?int
+    {
+        if (!empty($validated['category_id'])) {
+            return (int) $validated['category_id'];
+        }
+
+        $categoryName = trim((string) ($validated['category'] ?? ''));
+
+        if ($categoryName === '') {
+            return null;
+        }
+
+        $categoryId = DB::table('WBO_Categories')
+            ->where('name', $categoryName)
+            ->value('category_id');
+
+        if (!$categoryId) {
+            throw ValidationException::withMessages([
+                'category' => ['Select an existing category from WBO_Categories.'],
+            ]);
+        }
+
+        return (int) $categoryId;
+    }
+
+    private function generatePurchaseOrderNumber(): string
+    {
+        do {
+            $poNumber = 'PO-' . now()->format('Ymd-His') . '-' . Str::upper(Str::random(4));
+        } while (DB::table('WBO_PurchaseOrders')->where('po_number', $poNumber)->exists());
+
+        return $poNumber;
+    }
 }
