@@ -44,3 +44,6 @@ INSTALL_*.ps1
 # Backup files
 *.bak
 *.backup
+# Temporary authentication scans
+AUTH_SCAN.txt
+OTP_FINAL_SCAN.txt

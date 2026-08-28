@@ -3,21 +3,18 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\OtpMail;
 use App\Models\WBOUser;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 class RegisterController extends Controller
 {
-    public function register(Request $request)
-    {
-        // ==========================================
-        // VALIDATE SIGNUP FORM
-        // ==========================================
-
+    public function register(
+        Request $request,
+        OtpService $otpService
+    ) {
         $validated = $request->validate([
             'name' => [
                 'required',
@@ -29,7 +26,6 @@ class RegisterController extends Controller
                 'required',
                 'email',
                 'max:100',
-                'unique:WBO_Users,email',
             ],
 
             'contact_number' => [
@@ -45,190 +41,195 @@ class RegisterController extends Controller
             ],
         ]);
 
+        $email = strtolower(trim($validated['email']));
 
-        // ==========================================
-        // START DATABASE TRANSACTION
-        // ==========================================
+        $existing = WBOUser::where(
+            'email',
+            $email
+        )->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Existing email
+        |--------------------------------------------------------------------------
+        |
+        | Active accounts must log in normally.
+        | Pending accounts may resume verification only after proving ownership
+        | with the same password used when the account was originally created.
+        |
+        */
+
+        if ($existing) {
+            if ($existing->account_status === 'disabled') {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'This account has been disabled. Please contact support.',
+                ], 403);
+            }
+
+            if ($existing->account_status === 'active') {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'An account with this email already exists. Please log in.',
+                    'redirect' => '/login',
+                ], 422);
+            }
+
+            if (
+                $existing->account_status === 'pending_verification'
+            ) {
+                if (
+                    !Hash::check(
+                        $validated['password'],
+                        $existing->password_hash
+                    )
+                ) {
+                    return response()->json([
+                        'success' => false,
+                        'message' =>
+                            'An unverified account already exists for this email. Use the original password or log in to continue verification.',
+                    ], 422);
+                }
+
+                $this->clearSignupOtp($request);
+
+                $otp = $otpService->generate();
+
+                try {
+                    $otpService->send(
+                        $existing,
+                        $otp,
+                        'signup'
+                    );
+                } catch (\Throwable $e) {
+                    report($e);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' =>
+                            'Unable to send a new verification code. Please try again.',
+                    ], 500);
+                }
+
+                $this->storeSignupOtp(
+                    $request,
+                    $existing,
+                    $otp,
+                    $otpService
+                );
+
+                return response()->json([
+                    'success' => true,
+                    'message' =>
+                        'Your unverified account was found. A new verification code has been sent.',
+                    'redirect' => '/signup-verify',
+                    'verification' => 'signup',
+                    'email' => $existing->email,
+                    'recovered' => true,
+                    'otp_policy' => $otpService->publicPolicy(),
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'This account is currently unavailable.',
+            ], 403);
+        }
 
         DB::beginTransaction();
 
-
         try {
-
-            // ==========================================
-            // CREATE USER
-            // ==========================================
-
             $user = WBOUser::create([
-
-                'name' =>
-                    $validated['name'],
-
-                'email' =>
-                    $validated['email'],
-
+                'name' => trim($validated['name']),
+                'email' => $email,
                 'contact_number' =>
-                    $validated['contact_number'],
-
+                    trim($validated['contact_number']),
                 'password_hash' =>
-                    Hash::make(
-                        $validated['password']
-                    ),
-
-                // Public signup users start here
-                'role' =>
-                    'System_User',
-
-                'account_status' =>
-                    'pending_verification',
-
-                'email_verified_at' =>
-                    null,
+                    Hash::make($validated['password']),
+                'role' => 'System_User',
+                'account_status' => 'pending_verification',
+                'email_verified_at' => null,
             ]);
 
+            $otp = $otpService->generate();
 
-            // ==========================================
-            // GENERATE 6-DIGIT OTP
-            // ==========================================
-
-            $otp = (string) random_int(
-                100000,
-                999999
+            $otpService->send(
+                $user,
+                $otp,
+                'signup'
             );
-
-
-            // ==========================================
-            // SAVE SIGNUP VERIFICATION SESSION
-            // ==========================================
-
-            session([
-
-                'signup_pending_user' => [
-
-                    'id' =>
-                        (int) $user->user_id,
-
-                    'name' =>
-                        $user->name,
-
-                    'email' =>
-                        $user->email,
-
-                    'role' =>
-                        $user->role,
-                ],
-
-
-                // Current OTP
-                'signup_otp_code' =>
-                    $otp,
-
-
-                // OTP expires after 5 minutes
-                'signup_otp_expiry' =>
-                    now()->addMinutes(5)->timestamp,
-
-
-                // Maximum 2 resends later
-                'signup_otp_resend_count' =>
-                    0,
-
-
-                // Used for resend cooldown
-                'signup_otp_last_sent' =>
-                    now()->timestamp,
-            ]);
-
-
-            // ==========================================
-            // SEND OTP THROUGH GMAIL
-            // ==========================================
-
-            Mail::to(
-                $user->email
-            )->send(
-
-                new OtpMail(
-                    $otp,
-                    $user->name
-                )
-
-            );
-
-
-            // ==========================================
-            // SAVE USER
-            // ==========================================
 
             DB::commit();
 
+            $this->clearSignupOtp($request);
 
-            // ==========================================
-            // SUCCESS RESPONSE FOR REACT
-            // ==========================================
+            $this->storeSignupOtp(
+                $request,
+                $user,
+                $otp,
+                $otpService
+            );
 
             return response()->json([
-
-                'success' =>
-                    true,
-
+                'success' => true,
                 'message' =>
                     'Account created. Verification OTP sent.',
-
-                'redirect' =>
-                    '/signup-verify',
-
+                'redirect' => '/signup-verify',
+                'verification' => 'signup',
+                'email' => $user->email,
+                'otp_policy' => $otpService->publicPolicy(),
             ], 201);
-
-        }
-
-        catch (\Throwable $e) {
-
-            // ==========================================
-            // CANCEL DATABASE INSERT
-            // ==========================================
-
+        } catch (\Throwable $e) {
             if (DB::transactionLevel() > 0) {
                 DB::rollBack();
             }
 
+            $this->clearSignupOtp($request);
 
-            // ==========================================
-            // REMOVE TEMPORARY SIGNUP SESSION
-            // ==========================================
-
-            session()->forget([
-
-                'signup_pending_user',
-
-                'signup_otp_code',
-
-                'signup_otp_expiry',
-
-                'signup_otp_resend_count',
-
-                'signup_otp_last_sent',
-
-            ]);
-
-
-            // Put technical error in Laravel log
             report($e);
 
-
-            // ==========================================
-            // ERROR RESPONSE FOR REACT
-            // ==========================================
-
             return response()->json([
-
-                'success' =>
-                    false,
-
+                'success' => false,
                 'message' =>
                     'Unable to create your account. Please try again.',
-
             ], 500);
         }
+    }
+
+    private function storeSignupOtp(
+        Request $request,
+        WBOUser $user,
+        string $otp,
+        OtpService $otpService
+    ): void {
+        $request->session()->put([
+            'signup_pending_user' => [
+                'id' => (int) $user->user_id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+            'signup_otp_hash' => $otpService->hash($otp),
+            'signup_otp_expiry' =>
+                $otpService->expiryTimestamp(),
+            'signup_otp_resend_count' => 0,
+            'signup_otp_attempt_count' => 0,
+            'signup_otp_last_sent' => now()->timestamp,
+        ]);
+    }
+
+    private function clearSignupOtp(Request $request): void
+    {
+        $request->session()->forget([
+            'signup_pending_user',
+            'signup_otp_code',
+            'signup_otp_hash',
+            'signup_otp_expiry',
+            'signup_otp_resend_count',
+            'signup_otp_attempt_count',
+            'signup_otp_last_sent',
+        ]);
     }
 }

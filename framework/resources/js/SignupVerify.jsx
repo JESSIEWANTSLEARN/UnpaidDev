@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/Otp.css";
 
 const Logo = "/storage/site/Logo.png";
+const POLICY_KEY = "wbo_signup_otp_policy";
 
 function csrfToken() {
   return (
@@ -14,7 +15,9 @@ function csrfToken() {
 
 async function readJson(response) {
   const text = await response.text();
+
   if (!text) return {};
+
   try {
     return JSON.parse(text);
   } catch {
@@ -22,18 +25,80 @@ async function readJson(response) {
   }
 }
 
+function readPolicy() {
+  try {
+    const raw = sessionStorage.getItem(POLICY_KEY);
+
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+
+    return parsed && typeof parsed === "object"
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function savePolicy(policy) {
+  if (!policy || typeof policy !== "object") return;
+
+  sessionStorage.setItem(
+    POLICY_KEY,
+    JSON.stringify({
+      ...policy,
+      sent_at_ms: Date.now(),
+    }),
+  );
+}
+
+function initialCooldown(policy) {
+  const cooldown = Number(
+    policy?.resend_cooldown_seconds,
+  );
+
+  const sentAt = Number(policy?.sent_at_ms);
+
+  if (
+    !Number.isFinite(cooldown) ||
+    cooldown <= 0 ||
+    !Number.isFinite(sentAt) ||
+    sentAt <= 0
+  ) {
+    return 0;
+  }
+
+  const elapsed = Math.floor(
+    (Date.now() - sentAt) / 1000,
+  );
+
+  return Math.max(0, cooldown - elapsed);
+}
+
 function SignupVerify() {
   const navigate = useNavigate();
 
+  const initialPolicy = useMemo(() => readPolicy(), []);
+
+  const [policy, setPolicy] = useState(initialPolicy);
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
+  const [cooldown, setCooldown] = useState(() =>
+    initialCooldown(initialPolicy),
+  );
 
   const email =
-    sessionStorage.getItem("wbo_signup_email") || "your registered email";
+    sessionStorage.getItem("wbo_signup_email") ||
+    "your registered email";
+
+  const otpLength =
+    Number(policy?.length) > 0
+      ? Number(policy.length)
+      : null;
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -45,8 +110,27 @@ function SignupVerify() {
     return () => window.clearInterval(timer);
   }, [cooldown]);
 
+  const updatePolicy = (nextPolicy) => {
+    if (!nextPolicy || typeof nextPolicy !== "object") {
+      return;
+    }
+
+    const stored = {
+      ...nextPolicy,
+      sent_at_ms: Date.now(),
+    };
+
+    setPolicy(stored);
+    savePolicy(nextPolicy);
+  };
+
   const handleOtpChange = (event) => {
-    const value = event.target.value.replace(/\D/g, "").slice(0, 6);
+    let value = event.target.value.replace(/\D/g, "");
+
+    if (otpLength) {
+      value = value.slice(0, otpLength);
+    }
+
     setOtp(value);
   };
 
@@ -55,8 +139,18 @@ function SignupVerify() {
     setError("");
     setMessage("");
 
-    if (!/^\d{6}$/.test(otp)) {
-      setError("OTP must contain exactly 6 digits.");
+    if (
+      otpLength &&
+      !new RegExp(`^\\d{${otpLength}}$`).test(otp)
+    ) {
+      setError(
+        `OTP must contain exactly ${otpLength} digits.`,
+      );
+      return;
+    }
+
+    if (!otp) {
+      setError("Please enter the verification code.");
       return;
     }
 
@@ -76,16 +170,33 @@ function SignupVerify() {
 
       const data = await readJson(response);
 
+      if (data.otp_policy) {
+        setPolicy((current) => ({
+          ...(current || {}),
+          ...data.otp_policy,
+        }));
+      }
+
       if (!response.ok || data.success === false) {
         setError(data.message || "Unable to verify the OTP.");
+
         if (data.redirect) {
-          window.setTimeout(() => navigate(data.redirect), 900);
+          window.setTimeout(
+            () => navigate(data.redirect),
+            900,
+          );
         }
+
         return;
       }
 
       sessionStorage.removeItem("wbo_signup_email");
-      setMessage(data.message || "Your account has been verified.");
+      sessionStorage.removeItem(POLICY_KEY);
+
+      setMessage(
+        data.message ||
+          "Your account has been verified.",
+      );
 
       window.setTimeout(() => {
         if (data.redirect) {
@@ -124,19 +235,40 @@ function SignupVerify() {
       if (!response.ok || data.success === false) {
         setError(data.message || "Unable to resend the OTP.");
 
+        if (data.otp_policy) {
+          setPolicy((current) => ({
+            ...(current || {}),
+            ...data.otp_policy,
+          }));
+        }
+
         if (Number(data.seconds_remaining) > 0) {
           setCooldown(Number(data.seconds_remaining));
         }
 
         if (data.redirect) {
-          window.setTimeout(() => navigate(data.redirect), 900);
+          window.setTimeout(
+            () => navigate(data.redirect),
+            900,
+          );
         }
 
         return;
       }
 
       setOtp("");
-      setCooldown(30);
+
+      if (data.otp_policy) {
+        updatePolicy(data.otp_policy);
+
+        setCooldown(
+          Number(
+            data.otp_policy
+              .resend_cooldown_seconds,
+          ) || 0,
+        );
+      }
+
       setMessage(data.message || "A new OTP has been sent.");
     } catch {
       setError("Unable to connect to the server. Please try again.");
@@ -150,7 +282,10 @@ function SignupVerify() {
       <header className="otp-header">
         <div className="otp-header-inner">
           <Link to="/" className="otp-brand">
-            <img src={Logo} alt="Walang Brown Out Logo" />
+            <img
+              src={Logo}
+              alt="Walang Brown Out Logo"
+            />
 
             <div className="otp-brand-text">
               <span>Republic of the Philippines</span>
@@ -161,23 +296,28 @@ function SignupVerify() {
       </header>
 
       <main className="otp-container">
-        <Link to="/signup" className="otp-back">
-          ← Back to Signup
+        <Link to="/login" className="otp-back">
+          {"\u2190"} Back to Login
         </Link>
 
         <div className="otp-title">
           <h2>Verify Your Account</h2>
           <p>
-            We sent a 6-digit verification code to
+            We sent a verification code to
             <br />
             <strong>{email}</strong>
           </p>
         </div>
 
         {error && <div className="otp-error">{error}</div>}
-        {message && <div className="otp-message">{message}</div>}
+        {message && (
+          <div className="otp-message">{message}</div>
+        )}
 
-        <form className="otp-form" onSubmit={verifyOtp}>
+        <form
+          className="otp-form"
+          onSubmit={verifyOtp}
+        >
           <label htmlFor="otp">Enter OTP Code</label>
 
           <input
@@ -186,27 +326,50 @@ function SignupVerify() {
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
-            placeholder="000000"
+            placeholder={
+              otpLength
+                ? "0".repeat(otpLength)
+                : "Verification code"
+            }
             value={otp}
             onChange={handleOtpChange}
             disabled={loading}
-            maxLength={6}
+            maxLength={otpLength || undefined}
             required
           />
 
           <button
             className="otp-primary"
             type="submit"
-            disabled={loading || otp.length !== 6}
+            disabled={
+              loading ||
+              !otp ||
+              Boolean(
+                otpLength &&
+                  otp.length !== otpLength,
+              )
+            }
           >
             {loading ? "Verifying..." : "Verify OTP"}
           </button>
         </form>
 
         <div className="otp-info">
-          OTP expires after 5 minutes.
-          <br />
-          You may resend the OTP a maximum of 2 times.
+          {policy ? (
+            <>
+              OTP expires after{" "}
+              {policy.expiry_minutes}{" "}
+              {Number(policy.expiry_minutes) === 1
+                ? "minute"
+                : "minutes"}
+              .
+              <br />
+              You may resend the OTP a maximum of{" "}
+              {policy.max_resends} times.
+            </>
+          ) : (
+            "Use the current verification code sent to your email."
+          )}
         </div>
 
         <div className="otp-resend">
@@ -223,10 +386,15 @@ function SignupVerify() {
                 : "Resend OTP"}
           </button>
         </div>
+
+        <div className="otp-info">
+          If you leave this page, you can continue later by
+          logging in with the same email and password.
+        </div>
       </main>
 
       <footer className="otp-footer">
-        <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
+        <strong>{"\u00A9"} 2026 WalangBrownOut.</strong> All rights reserved.
       </footer>
     </div>
   );

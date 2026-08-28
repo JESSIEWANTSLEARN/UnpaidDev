@@ -12,21 +12,23 @@ class OtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $otpCode;
-    public string $userName;
-
     public function __construct(
-        string $otpCode,
-        string $userName
+        public string $otpCode,
+        public string $userName,
+        public string $purpose,
+        public int $expiryMinutes
     ) {
-        $this->otpCode = $otpCode;
-        $this->userName = $userName;
     }
 
     public function envelope(): Envelope
     {
+        $subject = config(
+            "otp.subjects.{$this->purpose}",
+            'WalangBrownout OTP Verification'
+        );
+
         return new Envelope(
-            subject: 'WalangBrownout OTP Verification',
+            subject: $subject,
         );
     }
 
@@ -34,6 +36,12 @@ class OtpMail extends Mailable
     {
         return new Content(
             view: 'emails.otp',
+            with: [
+                'otpCode' => $this->otpCode,
+                'userName' => $this->userName,
+                'purpose' => $this->purpose,
+                'expiryMinutes' => $this->expiryMinutes,
+            ],
         );
     }
 

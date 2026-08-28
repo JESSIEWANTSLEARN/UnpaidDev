@@ -22,27 +22,20 @@ async function readJson(response) {
   try {
     return JSON.parse(text);
   } catch {
-    // Try to recover JSON if PHP accidentally output
-    // extra characters before/after the JSON response.
-    const firstBrace = text.indexOf("{");
-    const lastBrace = text.lastIndexOf("}");
-
-    if (
-      firstBrace !== -1 &&
-      lastBrace !== -1 &&
-      lastBrace > firstBrace
-    ) {
-      try {
-        return JSON.parse(
-          text.slice(firstBrace, lastBrace + 1)
-        );
-      } catch {
-        // Ignore malformed server output
-      }
-    }
-
-    return {};
+    return { message: text };
   }
+}
+
+function saveOtpPolicy(policy) {
+  if (!policy || typeof policy !== "object") return;
+
+  sessionStorage.setItem(
+    "wbo_signup_otp_policy",
+    JSON.stringify({
+      ...policy,
+      sent_at_ms: Date.now(),
+    }),
+  );
 }
 
 function Signup() {
@@ -131,12 +124,26 @@ function Signup() {
         setError(
           validationMessage ||
             data.message ||
-            "Unable to create your account."
+            "Unable to create your account.",
         );
+
+        if (data.redirect) {
+          window.setTimeout(
+            () => navigate(data.redirect),
+            900,
+          );
+        }
+
         return;
       }
 
-      sessionStorage.setItem("wbo_signup_email", email);
+      sessionStorage.setItem(
+        "wbo_signup_email",
+        data.email || email,
+      );
+
+      saveOtpPolicy(data.otp_policy);
+
       navigate(data.redirect || "/signup-verify");
     } catch {
       setError("Unable to connect to the server. Please try again.");
@@ -167,7 +174,7 @@ function Signup() {
 
       <main className="signup-container">
         <Link to="/" className="back-button">
-          ← Back to Home
+          {"\u2190"} Back to Home
         </Link>
 
         <div className="signup-title">
@@ -228,7 +235,7 @@ function Signup() {
               required
               minLength="6"
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder={"\u2022".repeat(8)}
               value={formData.password}
               onChange={handleChange}
               disabled={loading}
@@ -243,15 +250,21 @@ function Signup() {
               required
               minLength="6"
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder={"\u2022".repeat(8)}
               value={formData.confirmPassword}
               onChange={handleChange}
               disabled={loading}
             />
           </div>
 
-          <button className="signup-button" type="submit" disabled={loading}>
-            {loading ? "Creating Account..." : "Create Account"}
+          <button
+            className="signup-button"
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? "Creating Account..."
+              : "Create Account"}
           </button>
 
           <p className="login-text">
@@ -262,7 +275,7 @@ function Signup() {
       </main>
 
       <footer className="signup-footer">
-        <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
+        <strong>{"\u00A9"} 2026 WalangBrownOut.</strong> All rights reserved.
       </footer>
     </div>
   );

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../css/LogIn.css";
 
 const Logo = "/storage/site/Logo.png";
+
 function csrfToken() {
   return (
     document
@@ -13,12 +14,26 @@ function csrfToken() {
 
 async function readJson(response) {
   const text = await response.text();
+
   if (!text) return {};
+
   try {
     return JSON.parse(text);
   } catch {
     return { message: text };
   }
+}
+
+function saveOtpPolicy(key, policy) {
+  if (!policy || typeof policy !== "object") return;
+
+  sessionStorage.setItem(
+    key,
+    JSON.stringify({
+      ...policy,
+      sent_at_ms: Date.now(),
+    }),
+  );
 }
 
 function LogIn() {
@@ -65,12 +80,46 @@ function LogIn() {
         setError(
           validationMessage ||
             data.message ||
-            "Unable to log in. Please try again."
+            "Unable to log in. Please try again.",
         );
+
+        if (data.redirect) {
+          window.setTimeout(() => navigate(data.redirect), 900);
+        }
+
         return;
       }
 
-      sessionStorage.setItem("wbo_login_email", email);
+      const destinationEmail = data.email || email;
+
+      if (data.verification === "signup") {
+        sessionStorage.removeItem("wbo_login_email");
+        sessionStorage.removeItem("wbo_login_otp_policy");
+
+        sessionStorage.setItem(
+          "wbo_signup_email",
+          destinationEmail,
+        );
+
+        saveOtpPolicy(
+          "wbo_signup_otp_policy",
+          data.otp_policy,
+        );
+      } else {
+        sessionStorage.removeItem("wbo_signup_email");
+        sessionStorage.removeItem("wbo_signup_otp_policy");
+
+        sessionStorage.setItem(
+          "wbo_login_email",
+          destinationEmail,
+        );
+
+        saveOtpPolicy(
+          "wbo_login_otp_policy",
+          data.otp_policy,
+        );
+      }
+
       navigate(data.redirect || "/login-otp");
     } catch {
       setError("Unable to connect to the server. Please try again.");
@@ -101,7 +150,7 @@ function LogIn() {
 
       <main className="login-container">
         <Link to="/" className="back-button">
-          ← Back to Home
+          {"\u2190"} Back to Home
         </Link>
 
         <div className="login-title">
@@ -134,7 +183,7 @@ function LogIn() {
               id="login-password"
               type="password"
               autoComplete="current-password"
-              placeholder="••••••••"
+              placeholder={"\u2022".repeat(8)}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               disabled={loading}
@@ -142,7 +191,11 @@ function LogIn() {
             />
           </div>
 
-          <button className="login-button" type="submit" disabled={loading}>
+          <button
+            className="login-button"
+            type="submit"
+            disabled={loading}
+          >
             {loading ? "Sending OTP..." : "Continue to Login"}
           </button>
 
@@ -154,7 +207,7 @@ function LogIn() {
       </main>
 
       <footer className="login-footer">
-        <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
+        <strong>{"\u00A9"} 2026 WalangBrownOut.</strong> All rights reserved.
       </footer>
     </div>
   );

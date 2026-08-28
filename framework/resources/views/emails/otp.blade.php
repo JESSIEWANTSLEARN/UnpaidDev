@@ -28,7 +28,11 @@
             Hello <strong>{{ $userName }}</strong>,
         </p>
 
-        <p>Your OTP verification code is:</p>
+        <p>
+            Your
+            {{ $purpose === 'signup' ? 'account verification' : 'login' }}
+            code is:
+        </p>
 
         <h1 style="
             color: #1D4ED8;
@@ -39,11 +43,15 @@
 
         <p>
             This code will expire in
-            <strong>5 minutes</strong>.
+            <strong>
+                {{ $expiryMinutes }}
+                {{ $expiryMinutes === 1 ? 'minute' : 'minutes' }}
+            </strong>.
         </p>
 
         <p style="color: #6B7280;">
-            If you did not request this verification,
+            If you did not request this
+            {{ $purpose === 'signup' ? 'account verification' : 'login' }},
             you may ignore this email.
         </p>
 
