@@ -20,7 +20,29 @@ export default function ProductModal({
       <div className="admin-form-row"><label>SKU</label><input value={productForm.sku} maxLength={50} required onChange={update("sku")} /></div>
       <div className="admin-form-row"><label>Product Name</label><input value={productForm.name} maxLength={150} required onChange={update("name")} /></div>
       <div className="admin-form-row"><label>Description</label><textarea value={productForm.description} rows={3} onChange={update("description")} /></div>
-      <div className="admin-form-row"><label>Category</label><input value={productForm.category} maxLength={100} onChange={update("category")} /></div>
+      <div className="admin-form-row">
+        <label>Category</label>
+        <select
+          value={productForm.category_id || ""}
+          required
+          onChange={(event) =>
+            setProductForm((form) => ({
+              ...form,
+              category_id: event.target.value,
+              category: "",
+            }))
+          }
+        >
+          <option value="">Select category</option>
+          {(data?.categories || [])
+            .filter((category) => Number(category.is_active ?? 1) === 1)
+            .map((category) => (
+              <option key={category.category_id} value={category.category_id}>
+                {category.category}
+              </option>
+            ))}
+        </select>
+      </div>
       <div className="admin-form-row">
         <label>Supplier</label>
         <select value={productForm.supplier_id} onChange={update("supplier_id")}>

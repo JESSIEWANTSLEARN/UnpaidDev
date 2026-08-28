@@ -3,7 +3,7 @@ import React from "react";
 const TEXT = {
   categoryInfo: (
     <>
-      The current database stores a category directly in <strong>WBO_Products.category</strong> and has no separate category table. No fake category records are created. Enter a new category when adding a product to introduce it to the catalog.
+      Product categories are stored in <strong>WBO_Categories</strong> and linked to products through <strong>category_id</strong>.
     </>
   ),
   messages: (

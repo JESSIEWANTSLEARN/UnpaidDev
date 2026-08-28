@@ -1,6 +1,7 @@
 export { default as AccountSettingsModal } from "./AccountSettingsModal.jsx";
 export { default as BackupModal } from "./BackupModal.jsx";
 export { default as CompanyInfoModal } from "./CompanyInfoModal.jsx";
+export { default as CategoryModal } from "./CategoryModal.jsx";
 export { default as InfoModal } from "./InfoModal.jsx";
 export { default as NotificationsModal } from "./NotificationsModal.jsx";
 export { default as ProductModal } from "./ProductModal.jsx";
