@@ -5,9 +5,15 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libonig-dev \
     nodejs \
     npm \
-    && docker-php-ext-install pdo_mysql zip
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo_mysql zip gd mbstring \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
 
@@ -21,7 +27,7 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Copy Laravel public storage files directly into Apache public directory
 RUN mkdir -p public/storage \
-    && cp -R storage/app/public/* public/storage/
+    && cp -R storage/app/public/. public/storage/
 
 RUN npm install
 RUN npm run build
