@@ -6,11 +6,32 @@ export const money = (value) =>
 export const number = (value) => new Intl.NumberFormat("en-PH").format(Number(value || 0));
 
 export const formatDate = (value) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+  if (!value) return "â€”";
+
+  let normalized = value;
+
+  // MySQL/Laravel may return UTC without a timezone suffix.
+  // Add Z only to timezone-less database datetime strings.
+  if (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(value.trim())
+  ) {
+    normalized = `${value.trim().replace(" ", "T")}Z`;
+  }
+
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
   return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Manila",
   }).format(date);
 };
 
