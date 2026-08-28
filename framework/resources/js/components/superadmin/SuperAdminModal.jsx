@@ -3,6 +3,7 @@ import {
   AccountSettingsModal,
   BackupModal,
   CompanyInfoModal,
+  CategoryModal,
   InfoModal,
   NotificationsModal,
   ProductModal,
@@ -58,6 +59,7 @@ function ModalContent(props) {
     case "backupRestore":
       return <BackupModal {...props} />;
     case "categoryInfo":
+      return <CategoryModal {...props} />;
     case "messages":
       return <InfoModal type={props.type} />;
     default:
@@ -89,7 +91,7 @@ export default function SuperAdminModal(props) {
             onClick={onClose}
             disabled={busy}
           >
-            ×
+            Ã—
           </button>
         </div>
 
