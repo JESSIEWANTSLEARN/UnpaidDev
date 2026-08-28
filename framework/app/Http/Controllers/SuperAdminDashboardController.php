@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SuperAdminReportService;
+
 use App\Http\Controllers\Concerns\HandlesSuperAdminSupport;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -29,92 +31,203 @@ class SuperAdminDashboardController extends Controller
     // EXPORT REPORT
     // =========================================================
 
-    public function exportReport(Request $request): StreamedResponse|JsonResponse
+    public function auditLogs(Request $request): JsonResponse
     {
         $this->authorizeSuperAdmin();
 
-        $data = $this->dashboardData();
+        $period = strtolower((string) $request->query('period', 'today'));
+        $role = (string) $request->query('role', 'all');
+        $category = strtolower((string) $request->query('category', 'all'));
+        $search = trim((string) $request->query('search', ''));
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = min(100, max(10, (int) $request->query('per_page', 50)));
 
-        $this->audit($request, 'REPORT_EXPORTED', 'Exported the Super Admin system report.');
+        $allowedPeriods = ['today', '7days', '28days', 'all'];
+        $allowedCategories = [
+            'all',
+            'authentication',
+            'catalog',
+            'inventory',
+            'purchase_orders',
+            'sales',
+            'users',
+            'settings',
+            'backup_reports',
+            'security',
+            'system',
+        ];
 
-        $fileName = 'WalangBrownout-SuperAdmin-Report-' . now()->format('Y-m-d-His') . '.csv';
+        if (!in_array($period, $allowedPeriods, true)) {
+            $period = 'today';
+        }
 
-        return response()->streamDownload(function () use ($data) {
-            $output = fopen('php://output', 'w');
+        if (!in_array($category, $allowedCategories, true)) {
+            $category = 'all';
+        }
 
-            // UTF-8 BOM for Excel
-            fwrite($output, "\xEF\xBB\xBF");
+        $query = DB::table('WBO_AuditLogs as a')
+            ->leftJoin('WBO_Users as u', 'u.user_id', '=', 'a.user_id')
+            ->select(
+                'a.log_id',
+                'a.user_id',
+                'u.name as user_name',
+                'u.email as user_email',
+                'u.role as user_role',
+                'a.action',
+                'a.description',
+                'a.ip_address',
+                'a.user_agent',
+                'a.created_at'
+            );
 
-            // REPORT HEADER
-            fputcsv($output, ['WalangBrownout Super Admin Report']);
-            fputcsv($output, ['Generated At', now()->format('Y-m-d H:i:s')]);
-            fputcsv($output, []);
+        // Database timestamps remain UTC. Period boundaries are calculated
+        // from Philippine local time and converted back to UTC for querying.
+        if ($period !== 'all') {
+            $start = Carbon::now('Asia/Manila')->startOfDay();
 
-            // SUMMARY
-            fputcsv($output, ['SUMMARY']);
-            foreach ($data['metrics'] as $key => $value) {
-                fputcsv($output, [Str::headline($key), $value]);
+            if ($period === '7days') {
+                $start->subDays(6);
+            } elseif ($period === '28days') {
+                $start->subDays(27);
             }
 
-            // PRODUCTS
-            fputcsv($output, []);
-            fputcsv($output, ['PRODUCTS']);
-            fputcsv($output, ['Product ID', 'SKU', 'Name', 'Category', 'ABC Class', 'Unit Cost', 'Unit Price', 'Stock', 'Visible', 'Featured']);
-            foreach ($data['products'] as $product) {
-                fputcsv($output, [
-                    $product->product_id, $product->sku, $product->name, $product->category, $product->abc_class, 
-                    $product->unit_cost, $product->unit_price, $product->available_stock, 
-                    $product->is_visible ? 'Yes' : 'No', $product->is_featured ? 'Yes' : 'No'
-                ]);
-            }
+            $query->where(
+                'a.created_at',
+                '>=',
+                $start->copy()->utc()->format('Y-m-d H:i:s')
+            );
+        }
 
-            // SUPPLIERS
-            fputcsv($output, []);
-            fputcsv($output, ['SUPPLIERS']);
-            fputcsv($output, ['Supplier ID', 'Name', 'Contact', 'Email', 'Lead Time Days', 'Products']);
-            foreach ($data['suppliers'] as $supplier) {
-                fputcsv($output, [
-                    $supplier->supplier_id, $supplier->name, $supplier->contact_number, 
-                    $supplier->email, $supplier->lead_time_days, $supplier->product_count
-                ]);
+        if ($role !== '' && $role !== 'all') {
+            if ($role === 'system') {
+                $query->whereNull('a.user_id');
+            } else {
+                $query->where('u.role', $role);
             }
+        }
 
-            // SALES ORDERS
-            fputcsv($output, []);
-            fputcsv($output, ['SALES ORDERS']);
-            fputcsv($output, ['Order ID', 'Customer User ID', 'Customer', 'Contact', 'Order Date', 'Status', 'Items', 'Total']);
-            foreach ($data['orders'] as $order) {
-                fputcsv($output, [
-                    $order->order_id, $order->customer_user_id, $order->customer_name, 
-                    $order->customer_contact, $order->order_date, $order->status, 
-                    $order->total_quantity, $order->total_amount
-                ]);
+        if ($search !== '') {
+            $like = '%' . $search . '%';
+
+            $query->where(function ($subQuery) use ($like) {
+                $subQuery
+                    ->where('u.name', 'like', $like)
+                    ->orWhere('u.email', 'like', $like)
+                    ->orWhere('u.role', 'like', $like)
+                    ->orWhere('a.action', 'like', $like)
+                    ->orWhere('a.description', 'like', $like)
+                    ->orWhere('a.ip_address', 'like', $like);
+            });
+        }
+
+        $categoryPatterns = [
+            'authentication' => ['LOGIN%', 'LOGOUT%', 'ACCOUNT_VERIFIED%', 'OTP%', 'AUTH%', 'SIGNUP%'],
+            'catalog' => ['PRODUCT%', 'CATEGORY%', 'SUPPLIER%'],
+            'inventory' => ['STOCK%', 'INVENTORY%', 'BATCH%', 'TRANSACTION%'],
+            'purchase_orders' => ['PURCHASE_ORDER%', 'PO%'],
+            'sales' => ['SALES%', 'SALE%', 'ORDER%'],
+            'users' => ['USER%'],
+            'settings' => ['COMPANY%', 'SETTING%', 'NOTIFICATION%'],
+            'backup_reports' => ['BACKUP%', 'REPORT%'],
+            'security' => ['PASSWORD%', 'SECURITY%', 'TRUSTED%', 'SESSION%'],
+        ];
+
+        if ($category !== 'all') {
+            if ($category === 'system') {
+                $knownPatterns = array_merge(...array_values($categoryPatterns));
+
+                $query->where(function ($subQuery) use ($knownPatterns) {
+                    foreach ($knownPatterns as $pattern) {
+                        $subQuery->where('a.action', 'not like', $pattern);
+                    }
+                });
+            } else {
+                $patterns = $categoryPatterns[$category] ?? [];
+
+                $query->where(function ($subQuery) use ($patterns) {
+                    foreach ($patterns as $index => $pattern) {
+                        if ($index === 0) {
+                            $subQuery->where('a.action', 'like', $pattern);
+                        } else {
+                            $subQuery->orWhere('a.action', 'like', $pattern);
+                        }
+                    }
+                });
             }
+        }
 
-            // USERS
-            fputcsv($output, []);
-            fputcsv($output, ['USERS']);
-            fputcsv($output, ['User ID', 'Name', 'Email', 'Contact', 'Role', 'Status', 'Presence', 'Last Seen', 'Verified At', 'Created At']);
-            foreach ($data['users'] as $user) {
-                fputcsv($output, [
-                    $user->user_id, $user->name, $user->email, $user->contact_number, $user->role, $user->account_status,
-                    $user->is_online ? 'ONLINE' : 'OFFLINE', $user->last_seen_at, $user->email_verified_at, $user->created_at
-                ]);
-            }
+        $total = (clone $query)->count('a.log_id');
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $lastPage);
 
-            // AUDIT LOGS
-            fputcsv($output, []);
-            fputcsv($output, ['AUDIT LOGS']);
-            fputcsv($output, ['Log ID', 'User', 'Action', 'Description', 'IP Address', 'Created At']);
-            foreach ($data['audit_logs'] as $log) {
-                fputcsv($output, [
-                    $log->log_id, $log->user_name ?: 'System', $log->action, 
-                    $log->description, $log->ip_address, $log->created_at
-                ]);
-            }
+        $logs = $query
+            ->orderByDesc('a.created_at')
+            ->orderByDesc('a.log_id')
+            ->offset(($page - 1) * $perPage)
+            ->limit($perPage)
+            ->get()
+            ->map(function ($log) {
+                $log->created_at = $log->created_at
+                    ? Carbon::parse((string) $log->created_at, 'UTC')
+                        ->setTimezone('Asia/Manila')
+                        ->toIso8601String()
+                    : null;
 
-            fclose($output);
-        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+                return $log;
+            });
+
+        return response()->json([
+            'logs' => $logs,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => $lastPage,
+            ],
+            'timezone' => 'Asia/Manila',
+        ]);
+    }
+
+    public function exportReport(
+        Request $request,
+        SuperAdminReportService $reports
+    ): StreamedResponse|JsonResponse
+    {
+        $this->authorizeSuperAdmin();
+
+        $type = strtolower(trim((string) $request->query('type', 'complete')));
+
+        if (!$reports->supports($type)) {
+            return response()->json([
+                'message' => 'Invalid report type.',
+            ], 422);
+        }
+
+        $label = $reports->label($type);
+        $spreadsheet = $reports->build($type);
+
+        $this->audit(
+            $request,
+            'REPORT_EXPORTED',
+            "Exported {$label} XLSX report."
+        );
+
+        $fileName = 'WalangBrownout-'
+            . Str::slug($label)
+            . '-'
+            . Carbon::now('Asia/Manila')->format('Y-m-d-His')
+            . '.xlsx';
+
+        return response()->streamDownload(
+            function () use ($reports, $spreadsheet) {
+                $reports->write($spreadsheet);
+            },
+            $fileName,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate',
+            ]
+        );
     }
 
     // =========================================================
