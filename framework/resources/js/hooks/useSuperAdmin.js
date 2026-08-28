@@ -82,6 +82,10 @@ export default function useSuperAdmin() {
     const body = toFormData(forms.product, ["is_seasonal", "is_visible", "is_featured"]);
     await apiRequest("/api/super-admin/products", { method: "POST", body, formData: true }); resetForm("product");
   });
+  const handleAddCategory = () => runModalAction(async () => {
+    await apiRequest("/api/super-admin/categories", { method: "POST", body: forms.category });
+    resetForm("category");
+  });
   const handleStockIn = () => runModalAction(async () => { await apiRequest("/api/super-admin/stock-in", { method: "POST", body: forms.stock }); resetForm("stock"); });
   const handleAddUser = () => runModalAction(async () => { await apiRequest("/api/super-admin/users", { method: "POST", body: forms.user }); resetForm("user"); });
   const handleAddSupplier = () => runModalAction(async () => { await apiRequest("/api/super-admin/suppliers", { method: "POST", body: forms.supplier }); resetForm("supplier"); });
@@ -103,7 +107,7 @@ export default function useSuperAdmin() {
     runModalAction(() => apiRequest(`/api/super-admin/backups/${encodeURIComponent(filename)}/restore`, { method: "POST", body: { confirmation: "RESTORE" } }));
   };
   const handleDownloadBackup = (filename) => download(`/api/super-admin/backups/${encodeURIComponent(filename)}/download`);
-  const handleExportReport = () => download("/api/super-admin/export-report");
+  const handleExportReport = (type = "complete") => download(`/api/super-admin/export-report?type=${encodeURIComponent(type)}`);
   const handleLogout = async () => {
     setDropdownOpen(false);
     try { await logoutRequest(); navigate("/login", { replace: true }); }
@@ -112,7 +116,7 @@ export default function useSuperAdmin() {
 
   const setters = {
     setProfileForm: (v) => setForm("profile", v), setPasswordForm: (v) => setForm("password", v),
-    setProductForm: (v) => setForm("product", v), setStockForm: (v) => setForm("stock", v),
+    setProductForm: (v) => setForm("product", v), setCategoryForm: (v) => setForm("category", v), setStockForm: (v) => setForm("stock", v),
     setUserForm: (v) => setForm("user", v), setSupplierForm: (v) => setForm("supplier", v),
     setPurchaseOrderForm: (v) => setForm("purchaseOrder", v), setCompanyForm: (v) => setForm("company", v),
     setEditUserForm: (v) => setForm("editUser", v),
@@ -124,10 +128,10 @@ export default function useSuperAdmin() {
     unreadNotifications, brandName, brandLogo, openModal, closeModal, openUserEditor, handleExportReport, handleLogout,
     modalProps: {
       type: activeModal, onClose: closeModal, busy: modalBusy, error: modalError, currentUser, userInitials, data,
-      profileForm: forms.profile, passwordForm: forms.password, productForm: forms.product, stockForm: forms.stock,
+      profileForm: forms.profile, passwordForm: forms.password, productForm: forms.product, categoryForm: forms.category, stockForm: forms.stock,
       userForm: forms.user, supplierForm: forms.supplier, purchaseOrderForm: forms.purchaseOrder,
       companyForm: forms.company, editUserForm: forms.editUser, ...setters,
-      onProfileSave: handleProfileSave, onPasswordUpdate: handlePasswordUpdate, onAddProduct: handleAddProduct,
+      onProfileSave: handleProfileSave, onPasswordUpdate: handlePasswordUpdate, onAddProduct: handleAddProduct, onAddCategory: handleAddCategory,
       onStockIn: handleStockIn, onAddUser: handleAddUser, onAddSupplier: handleAddSupplier,
       onAddPurchaseOrder: handleAddPurchaseOrder, onCompanySave: handleCompanySave, onUpdateUser: handleUpdateUser,
       onNotificationStatus: handleNotificationStatus, onCreateBackup: handleCreateBackup,
