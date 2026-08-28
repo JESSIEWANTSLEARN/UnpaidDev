@@ -148,7 +148,7 @@ class SuperAdminController extends Controller
         ]);
 
         $settings = $this->systemSettings();
-        $logoPath = $settings['company_logo_path'] ?: 'site/Logo.png';
+        $logoPath = $settings['company_logo'] ?? $settings['company_logo_path'] ?? 'site/Logo.png';
 
         if ($request->hasFile('logo')) {
             $newLogoPath = $request->file('logo')->store('site', 'public');
@@ -170,7 +170,7 @@ class SuperAdminController extends Controller
             'company_email' => $validated['company_email'] ?: '',
             'company_contact' => $validated['company_contact'] ?: '',
             'company_address' => $validated['company_address'] ?: '',
-            'company_logo_path' => $logoPath,
+            'company_logo' => $logoPath,
         ];
 
         foreach ($values as $key => $value) {
@@ -178,7 +178,7 @@ class SuperAdminController extends Controller
                 ['setting_key' => $key],
                 [
                     'setting_value' => $value,
-                    'updated_by' => session('user_id'),
+                    'updated_by_user_id' => session('user_id'),
                     'updated_at' => now(),
                 ]
             );
