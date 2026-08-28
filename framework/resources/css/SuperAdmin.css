@@ -4,3 +4,5 @@
 @import "./superadmin/content-extra.css";
 @import "./superadmin/modal.css";
 @import "./superadmin/users.css";
+@import "./superadmin/audit.css";
+@import "./superadmin/reports.css";
