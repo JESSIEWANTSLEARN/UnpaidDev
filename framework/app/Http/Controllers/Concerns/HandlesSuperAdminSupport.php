@@ -26,25 +26,37 @@ trait HandlesSuperAdminSupport
 
     protected function systemSettings(): array
     {
+        $defaultLogo = 'site/Logo.png';
+
         $defaults = [
             'table_ready' => false,
             'company_name' => 'Walang Brownout',
             'company_email' => '',
             'company_contact' => '',
             'company_address' => '',
-            'company_logo_path' => 'site/Logo.png',
-            'company_logo_url' => Storage::url('site/Logo.png'),
+            'company_logo' => $defaultLogo,
+            'company_logo_path' => $defaultLogo,
+            'company_logo_url' => Storage::url($defaultLogo),
         ];
-        if (!Schema::hasTable('WBO_SystemSettings')) return $defaults;
 
-        $values = DB::table('WBO_SystemSettings')->pluck('setting_value', 'setting_key');
-        $logoPath = $values->get('company_logo_path', 'site/Logo.png') ?: 'site/Logo.png';
+        if (!Schema::hasTable('WBO_SystemSettings')) {
+            return $defaults;
+        }
+
+        $values = DB::table('WBO_SystemSettings')
+            ->pluck('setting_value', 'setting_key');
+
+        $logoPath = $values->get('company_logo')
+            ?: $values->get('company_logo_path')
+            ?: $defaultLogo;
+
         return [
             'table_ready' => true,
             'company_name' => $values->get('company_name', 'Walang Brownout') ?: 'Walang Brownout',
             'company_email' => $values->get('company_email', '') ?: '',
             'company_contact' => $values->get('company_contact', '') ?: '',
             'company_address' => $values->get('company_address', '') ?: '',
+            'company_logo' => $logoPath,
             'company_logo_path' => $logoPath,
             'company_logo_url' => Storage::url($logoPath),
         ];
