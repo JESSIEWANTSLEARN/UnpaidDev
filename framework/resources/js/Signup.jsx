@@ -174,7 +174,7 @@ function Signup() {
 
       <main className="signup-container">
         <Link to="/" className="back-button">
-          {"\u2190"} Back to Home
+          ← Back to Home
         </Link>
 
         <div className="signup-title">
@@ -235,7 +235,7 @@ function Signup() {
               required
               minLength="6"
               autoComplete="new-password"
-              placeholder={"\u2022".repeat(8)}
+              placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
               disabled={loading}
@@ -250,7 +250,7 @@ function Signup() {
               required
               minLength="6"
               autoComplete="new-password"
-              placeholder={"\u2022".repeat(8)}
+              placeholder="••••••••"
               value={formData.confirmPassword}
               onChange={handleChange}
               disabled={loading}
@@ -275,7 +275,7 @@ function Signup() {
       </main>
 
       <footer className="signup-footer">
-        <strong>{"\u00A9"} 2026 WalangBrownOut.</strong> All rights reserved.
+        <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
       </footer>
     </div>
   );

@@ -548,3 +548,26 @@
     filter: none !important;
   }
 }
+
+.login-remember-device {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 4px 0 2px;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.login-remember-device input {
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.login-remember-device span {
+  flex: 1;
+}

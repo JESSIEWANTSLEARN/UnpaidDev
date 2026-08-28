@@ -294,13 +294,13 @@ function LoginOtp() {
 
       <main className="otp-container">
         <Link to="/login" className="otp-back">
-          {"\u2190"} Back to Login
+          ← Back to Login
         </Link>
 
         <div className="otp-title">
           <h2>Verify Your Login</h2>
           <p>
-            We sent a verification code to
+            We sent a 6-digit verification code to
             <br />
             <strong>{email}</strong>
           </p>
@@ -323,11 +323,7 @@ function LoginOtp() {
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
-            placeholder={
-              otpLength
-                ? "0".repeat(otpLength)
-                : "Verification code"
-            }
+            placeholder="000000"
             value={otp}
             onChange={handleOtpChange}
             disabled={loading}
@@ -386,7 +382,7 @@ function LoginOtp() {
       </main>
 
       <footer className="otp-footer">
-        <strong>{"\u00A9"} 2026 WalangBrownOut.</strong> All rights reserved.
+        <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
       </footer>
     </div>
   );

@@ -43,6 +43,7 @@ function LogIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -67,6 +68,7 @@ function LogIn() {
         body: JSON.stringify({
           email,
           password,
+          remember_device: rememberDevice,
         }),
       });
 
@@ -91,6 +93,16 @@ function LogIn() {
       }
 
       const destinationEmail = data.email || email;
+
+      if (data.authenticated === true) {
+        sessionStorage.removeItem("wbo_login_email");
+        sessionStorage.removeItem("wbo_login_otp_policy");
+        sessionStorage.removeItem("wbo_signup_email");
+        sessionStorage.removeItem("wbo_signup_otp_policy");
+
+        window.location.href = data.redirect || "/";
+        return;
+      }
 
       if (data.verification === "signup") {
         sessionStorage.removeItem("wbo_login_email");
@@ -150,7 +162,7 @@ function LogIn() {
 
       <main className="login-container">
         <Link to="/" className="back-button">
-          {"\u2190"} Back to Home
+          ← Back to Home
         </Link>
 
         <div className="login-title">
@@ -183,13 +195,27 @@ function LogIn() {
               id="login-password"
               type="password"
               autoComplete="current-password"
-              placeholder={"\u2022".repeat(8)}
+              placeholder="••••••••"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               disabled={loading}
               required
             />
           </div>
+
+          <label className="login-remember-device">
+            <input
+              type="checkbox"
+              checked={rememberDevice}
+              onChange={(event) =>
+                setRememberDevice(event.target.checked)
+              }
+              disabled={loading}
+            />
+            <span>
+              Remember this device and skip OTP next time
+            </span>
+          </label>
 
           <button
             className="login-button"
@@ -207,7 +233,7 @@ function LogIn() {
       </main>
 
       <footer className="login-footer">
-        <strong>{"\u00A9"} 2026 WalangBrownOut.</strong> All rights reserved.
+        <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
       </footer>
     </div>
   );
