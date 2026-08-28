@@ -91,7 +91,7 @@ export default function SuperAdminModal(props) {
             onClick={onClose}
             disabled={busy}
           >
-            Ã—
+            ×
           </button>
         </div>
 

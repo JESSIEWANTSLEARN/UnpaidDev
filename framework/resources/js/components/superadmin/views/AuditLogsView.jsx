@@ -292,8 +292,8 @@ export default function AuditLogs() {
                       </span>
                     </td>
                     <td><strong>{log.action}</strong></td>
-                    <td>{log.description || "â€”"}</td>
-                    <td>{log.ip_address || "â€”"}</td>
+                    <td>{log.description || "—"}</td>
+                    <td>{log.ip_address || "—"}</td>
                     <td>{formatDate(log.created_at)}</td>
                   </tr>
                 ))

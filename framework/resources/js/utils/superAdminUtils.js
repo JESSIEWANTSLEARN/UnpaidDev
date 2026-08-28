@@ -6,7 +6,7 @@ export const money = (value) =>
 export const number = (value) => new Intl.NumberFormat("en-PH").format(Number(value || 0));
 
 export const formatDate = (value) => {
-  if (!value) return "â€”";
+  if (!value) return "—";
 
   let normalized = value;
 
