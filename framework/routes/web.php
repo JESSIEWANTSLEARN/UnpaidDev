@@ -56,6 +56,7 @@ Route::post('/api/presence/offline', [PresenceController::class, 'offline']);
 
 // Super Admin dashboard + report
 Route::get('/api/super-admin/dashboard-data', [SuperAdminDashboardController::class, 'index']);
+Route::get('/api/super-admin/audit-logs', [SuperAdminDashboardController::class, 'auditLogs']);
 Route::get('/api/super-admin/user-presence', [PresenceController::class, 'superAdminIndex']);
 Route::get('/api/super-admin/export-report', [SuperAdminDashboardController::class, 'exportReport']);
 
@@ -69,6 +70,7 @@ Route::put('/api/super-admin/notifications/{notificationId}', [SuperAdminControl
 
 // Super Admin catalog / inventory / purchasing creation
 Route::post('/api/super-admin/products', [SuperAdminCatalogController::class, 'storeProduct']);
+Route::post('/api/super-admin/categories', [SuperAdminCatalogController::class, 'storeCategory']);
 Route::post('/api/super-admin/stock-in', [SuperAdminCatalogController::class, 'stockIn']);
 Route::post('/api/super-admin/suppliers', [SuperAdminCatalogController::class, 'storeSupplier']);
 Route::post('/api/super-admin/purchase-orders', [SuperAdminCatalogController::class, 'storePurchaseOrder']);

@@ -6,18 +6,41 @@
 /storage/*.key
 /storage/pail
 /vendor
+
+# Environment / secrets
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
+/auth.json
+
+# IDE / development files
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
-/auth.json
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
+
+# WalangBrownout temporary repair files
+WBO_FIX/
+.wbo-fix-backups/
+app/Http/Controllers/*.backup-*
+
+# Temporary repair / installer scripts
+FIX_*.ps1
+RESUME_*.ps1
+HOTFIX_*.ps1
+FINAL_*.ps1
+INSTALL_*.ps1
+
+# Database exports / SQL dumps
+*.sql
+
+# Backup files
+*.bak
+*.backup
