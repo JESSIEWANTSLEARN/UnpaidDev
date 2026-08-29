@@ -48,4 +48,19 @@ return [
             'lax'
         ),
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Login rate limiting
+    |--------------------------------------------------------------------------
+    */
+    'login_rate_limit' => [
+        'max_attempts' => max(
+            1,
+            (int) env('LOGIN_MAX_ATTEMPTS', 5)
+        ),
+        'lock_seconds' => max(
+            60,
+            (int) env('LOGIN_LOCK_SECONDS', 300)
+        ),
+    ],
 ];

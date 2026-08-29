@@ -32,7 +32,8 @@ Route::view('/user', 'react');
 Route::view('/super-admin', 'react');
 
 // Authentication
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])
+    ->middleware(\App\Http\Middleware\ThrottleLoginAttempts::class);
 Route::post('/login/verify-otp', [LoginOtpController::class, 'verify']);
 Route::post('/login/resend-otp', [LoginOtpController::class, 'resend']);
 Route::post('/register', [RegisterController::class, 'register']);
