@@ -99,6 +99,13 @@ class OtpService
             'WalangBrownout OTP Verification'
         );
 
+// Give each login OTP email a unique reference so email clients
+// are less likely to group repeated login verification messages.
+if ($purpose === 'login') {
+    $requestReference = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+    $subject .= " - {$requestReference}";
+}
+
         // Keep the existing OTP Blade design exactly as-is.
         $html = view('emails.otp', [
             'otpCode' => $otp,
