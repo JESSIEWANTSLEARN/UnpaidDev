@@ -223,3 +223,399 @@
   color: rgba(24, 24, 24, 0.55);
   font-size: 0.72rem;
 }
+
+/* =========================================
+   PHASE 3: WBO OTP INTERACTION DESIGN
+   Shared by Login OTP and Signup Verification.
+========================================= */
+
+.otp-page {
+  --wbo-interaction: #2563eb;
+  --wbo-interaction-soft: rgba(37, 99, 235, 0.14);
+}
+
+.otp-page::before,
+.otp-page::after {
+  z-index: 0;
+}
+
+.otp-page::before {
+  animation: otpDriftOne 9s ease-in-out infinite;
+}
+
+.otp-page::after {
+  animation: otpDriftTwo 11s ease-in-out infinite;
+}
+
+.otp-header-inner {
+  opacity: 0;
+  animation: otpHeaderDown 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.otp-brand img {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.otp-brand:hover img {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+.otp-container {
+  opacity: 0;
+  transform: translateY(26px) scale(0.985);
+  filter: blur(5px);
+  animation: otpCardRise 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.otp-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 42px rgba(17, 17, 17, 0.11);
+}
+
+.otp-container:focus-within {
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow:
+    0 28px 42px rgba(17, 17, 17, 0.1),
+    0 0 28px rgba(37, 99, 235, 0.08);
+}
+
+.otp-title,
+.otp-form,
+.otp-info,
+.otp-resend {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: otpFieldRise 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.otp-title {
+  animation-delay: 0.26s;
+}
+
+.otp-form {
+  animation-delay: 0.34s;
+}
+
+.otp-info {
+  animation-delay: 0.42s;
+}
+
+.otp-resend {
+  animation-delay: 0.48s;
+}
+
+.otp-input {
+  caret-color: var(--wbo-interaction);
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.otp-input:focus {
+  border-color: var(--wbo-interaction);
+  box-shadow:
+    0 0 0 3px var(--wbo-interaction-soft),
+    0 0 20px rgba(37, 99, 235, 0.14);
+  transform: translateY(-2px);
+}
+
+.otp-primary,
+.otp-secondary {
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+.otp-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -55%;
+  width: 38%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.24),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.55s ease;
+}
+
+.otp-primary:hover:not(:disabled)::after {
+  left: 125%;
+}
+
+.otp-primary:hover:not(:disabled),
+.otp-primary:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 22px rgba(17, 17, 17, 0.15),
+    0 0 0 3px rgba(37, 99, 235, 0.12),
+    0 0 22px rgba(37, 99, 235, 0.18);
+}
+
+.otp-secondary:hover:not(:disabled),
+.otp-secondary:focus-visible {
+  border-color: rgba(37, 99, 235, 0.45);
+  background: rgba(37, 99, 235, 0.06);
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.1),
+    0 0 16px rgba(37, 99, 235, 0.12);
+}
+
+.otp-primary:active:not(:disabled),
+.otp-secondary:active:not(:disabled) {
+  transform: scale(0.985);
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.16),
+    0 0 20px rgba(37, 99, 235, 0.22);
+}
+
+.otp-back {
+  border-radius: 8px;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.otp-back:hover {
+  color: var(--wbo-interaction);
+  transform: translateX(-2px);
+}
+
+.otp-back:focus-visible,
+.otp-brand:focus-visible,
+.otp-primary:focus-visible,
+.otp-secondary:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline-offset: 3px;
+}
+
+.otp-error {
+  animation: otpShake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.otp-message {
+  animation: otpMessageIn 0.35s ease both;
+}
+
+@keyframes otpHeaderDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes otpCardRise {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes otpFieldRise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes otpDriftOne {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(28px, 34px) scale(1.06);
+  }
+}
+
+@keyframes otpDriftTwo {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-26px, -28px) scale(1.05);
+  }
+}
+
+@keyframes otpShake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes otpMessageIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .otp-brand-text {
+    display: none;
+  }
+
+  .otp-header-inner {
+    padding: 10px 16px;
+  }
+
+  .otp-container {
+    width: calc(100% - 28px);
+    margin: 36px auto;
+    padding: 24px;
+  }
+
+  .otp-title h2 {
+    font-size: 1.45rem;
+  }
+
+  .otp-input {
+    font-size: 1.2rem;
+    letter-spacing: 0.28em;
+  }
+
+  .otp-page::before,
+  .otp-page::after {
+    width: 260px;
+    height: 260px;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .otp-primary:active:not(:disabled),
+  .otp-secondary:active:not(:disabled) {
+    box-shadow:
+      0 0 0 3px rgba(37, 99, 235, 0.16),
+      0 0 20px rgba(37, 99, 235, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .otp-page::before,
+  .otp-page::after,
+  .otp-header-inner,
+  .otp-container,
+  .otp-title,
+  .otp-form,
+  .otp-info,
+  .otp-resend,
+  .otp-error,
+  .otp-message {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .otp-brand img,
+  .otp-input,
+  .otp-primary,
+  .otp-secondary,
+  .otp-back {
+    transition: none !important;
+  }
+
+  .otp-container:hover,
+  .otp-input:focus,
+  .otp-primary:hover:not(:disabled),
+  .otp-primary:active:not(:disabled),
+  .otp-secondary:active:not(:disabled),
+  .otp-back:hover {
+    transform: none;
+  }
+
+  .otp-primary::after {
+    display: none;
+  }
+}
+
+/* === WBO PHASE 4 FINAL START === */
+/* =========================================================
+   WBO PHASE 4 FINAL INTERACTION SYSTEM
+   OTP card matches Login / Signup interaction language
+   ========================================================= */
+
+.otp-page .otp-container {
+  outline: 2px solid transparent;
+  outline-offset: 0;
+}
+
+.otp-page .otp-container:hover,
+.otp-page .otp-container:focus-within {
+  outline-color: #2563eb;
+  border-color: rgba(37, 99, 235, 0.70);
+  box-shadow:
+    0 20px 40px rgba(17, 17, 17, 0.10),
+    0 0 8px rgba(37, 99, 235, 0.72),
+    0 0 20px rgba(37, 99, 235, 0.38),
+    0 0 34px rgba(37, 99, 235, 0.18);
+}
+
+.otp-page .otp-container:active {
+  outline-color: #2563eb;
+  box-shadow:
+    0 0 10px rgba(37, 99, 235, 0.82),
+    0 0 24px rgba(37, 99, 235, 0.46),
+    0 0 38px rgba(37, 99, 235, 0.22);
+}
+
+.otp-page .otp-input:hover:not(:disabled) {
+  border-color: rgba(37, 99, 235, 0.42);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .otp-page .otp-container:active {
+    outline-color: #2563eb;
+    box-shadow:
+      0 0 10px rgba(37, 99, 235, 0.85),
+      0 0 24px rgba(37, 99, 235, 0.48),
+      0 0 40px rgba(37, 99, 235, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .otp-page .otp-container:hover,
+  .otp-page .otp-container:active {
+    transform: none;
+  }
+}
+/* === WBO PHASE 4 FINAL END === */

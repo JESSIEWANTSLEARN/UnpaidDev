@@ -301,7 +301,7 @@ function LoginOtp() {
         <div className="otp-title">
           <h2>Verify Your Login</h2>
           <p>
-            We sent a 6-digit verification code to
+            We sent a {otpLength || 6}-digit verification code to
             <br />
             <strong>{email}</strong>
           </p>
