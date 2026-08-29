@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../css/Signup.css";
 
+import { authFetch } from "./utils/authRequest.js";
 const Logo = "/storage/site/Logo.png";
 
 function csrfToken() {
@@ -97,7 +98,7 @@ function Signup() {
     try {
       setLoading(true);
 
-      const response = await fetch("/register", {
+      const response = await authFetch("/register", {
         method: "POST",
         credentials: "same-origin",
         headers: {

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/Otp.css";
 
+import { authFetch } from "./utils/authRequest.js";
 const Logo = "/storage/site/Logo.png";
 const POLICY_KEY = "wbo_login_otp_policy";
 
@@ -157,7 +158,7 @@ function LoginOtp() {
     try {
       setLoading(true);
 
-      const response = await fetch("/login/verify-otp", {
+      const response = await authFetch("/login/verify-otp", {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -216,7 +217,7 @@ function LoginOtp() {
     try {
       setResending(true);
 
-      const response = await fetch("/login/resend-otp", {
+      const response = await authFetch("/login/resend-otp", {
         method: "POST",
         credentials: "same-origin",
         headers: {

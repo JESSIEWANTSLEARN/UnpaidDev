@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/LogIn.css";
 
+import { authFetch } from "./utils/authRequest.js";
 const Logo = "/storage/site/Logo.png";
 
 function csrfToken() {
@@ -57,7 +58,7 @@ function LogIn() {
     try {
       setLoading(true);
 
-      const response = await fetch("/login", {
+      const response = await authFetch("/login", {
         method: "POST",
         credentials: "same-origin",
         headers: {
