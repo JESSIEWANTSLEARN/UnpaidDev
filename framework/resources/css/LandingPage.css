@@ -299,12 +299,21 @@ img {
     width: 100%;
     min-height: 300px;
     border-radius: 20px;
+    overflow: hidden;
     background: linear-gradient(135deg, #d5d2ce, #f2efe8);
     border: 1px solid rgba(17, 17, 17, 0.08);
     animation: floatCard 5s ease-in-out infinite;
     transition:
         transform 0.35s ease,
         box-shadow 0.35s ease;
+}
+
+.promo-visual img {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    object-fit: cover;
+    object-position: center;
 }
 
 .promo-visual:hover {
@@ -383,6 +392,7 @@ img {
 .category-thumb {
     width: 100%;
     height: 150px;
+    overflow: hidden;
     border-radius: 14px;
     background: linear-gradient(135deg, #e8e3df, #d9d4ce);
 }
@@ -435,8 +445,42 @@ img {
 }
 
 .product-image {
+    position: relative;
     height: 260px;
+    overflow: hidden;
     background: linear-gradient(135deg, #e6e2de, #dfe1e4);
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.stock-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+}
+
+.stock-badge.in-stock {
+    background: #16a34a;
+}
+
+.stock-badge.out-of-stock {
+    background: #dc2626;
 }
 
 .image-one {
@@ -497,8 +541,14 @@ img {
     transition: transform 0.2s ease;
 }
 
-.product-meta button:hover {
+.product-meta button:hover:not(:disabled) {
     transform: scale(1.05);
+}
+
+.product-meta button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
 }
 
 /* ================= PROMO STRIP ================= */
@@ -782,6 +832,10 @@ img {
         min-height: 220px;
     }
 
+    .promo-visual img {
+        min-height: 220px;
+    }
+
     .product-grid,
     .category-grid,
     .promo-strip {
@@ -824,6 +878,32 @@ img {
         display: none;
     }
 }
+
+/* ================= ACCESSIBILITY / MOTION ================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal-up,
+    .reveal-up.is-visible {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        transition: none !important;
+    }
+
+    .promo-visual {
+        animation: none !important;
+    }
+
+    .category-card,
+    .product-card,
+    .nav-button,
+    .cart-button,
+    .primary-link,
+    .secondary-link {
+        transition: none !important;
+    }
+}
+
 /* =========================================================
    WBO BLUE IMAGE GLOW
    Landing/Home page service + product pictures
@@ -872,3 +952,92 @@ img {
     transform: none;
   }
 }
+
+/* === WBO PHASE 4 FINAL START === */
+/* =========================================================
+   WBO PHASE 4 FINAL INTERACTION SYSTEM
+   Landing: consistent blue hover / focus / touch feedback
+   ========================================================= */
+
+.page-shell {
+  --wbo-blue: #2563eb;
+  --wbo-blue-soft: rgba(37, 99, 235, 0.14);
+  --wbo-blue-mid: rgba(37, 99, 235, 0.38);
+}
+
+.page-shell .category-card,
+.page-shell .product-card {
+  outline: 1px solid transparent;
+  outline-offset: 0;
+}
+
+.page-shell .category-card:hover,
+.page-shell .product-card:hover,
+.page-shell .category-card:focus-within,
+.page-shell .product-card:focus-within {
+  outline-color: rgba(37, 99, 235, 0.55);
+  box-shadow:
+    0 18px 34px rgba(17, 17, 17, 0.10),
+    0 0 8px rgba(37, 99, 235, 0.55),
+    0 0 20px rgba(37, 99, 235, 0.30);
+}
+
+.page-shell .category-card:active,
+.page-shell .product-card:active {
+  outline-color: var(--wbo-blue);
+  box-shadow:
+    0 0 8px rgba(37, 99, 235, 0.78),
+    0 0 20px rgba(37, 99, 235, 0.42),
+    0 0 32px rgba(37, 99, 235, 0.20);
+  transform: translateY(-4px) scale(0.992);
+}
+
+.page-shell .nav-button:focus-visible,
+.page-shell .cart-button:focus-visible,
+.page-shell .primary-link:focus-visible,
+.page-shell .secondary-link:focus-visible,
+.page-shell .product-meta button:focus-visible,
+.page-shell .section-toggle:focus-visible,
+.page-shell .newsletter-form button:focus-visible,
+.page-shell .newsletter-form input:focus-visible,
+.page-shell .main-nav a:focus-visible,
+.page-shell .footer-column a:focus-visible,
+.page-shell .social-links a:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.30);
+  outline-offset: 3px;
+}
+
+.page-shell .product-meta button:active:not(:disabled),
+.page-shell .nav-button:active,
+.page-shell .cart-button:active,
+.page-shell .primary-link:active,
+.page-shell .secondary-link:active {
+  box-shadow:
+    0 0 0 3px var(--wbo-blue-soft),
+    0 0 18px rgba(37, 99, 235, 0.26);
+  transform: scale(0.97);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .page-shell .category-card:active,
+  .page-shell .product-card:active {
+    outline-color: var(--wbo-blue);
+    box-shadow:
+      0 0 8px rgba(37, 99, 235, 0.82),
+      0 0 20px rgba(37, 99, 235, 0.44),
+      0 0 32px rgba(37, 99, 235, 0.20);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell .category-card:active,
+  .page-shell .product-card:active,
+  .page-shell .product-meta button:active:not(:disabled),
+  .page-shell .nav-button:active,
+  .page-shell .cart-button:active,
+  .page-shell .primary-link:active,
+  .page-shell .secondary-link:active {
+    transform: none;
+  }
+}
+/* === WBO PHASE 4 FINAL END === */

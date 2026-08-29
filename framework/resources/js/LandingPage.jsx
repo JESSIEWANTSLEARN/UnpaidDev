@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../css/LandingPage.css";
 
@@ -112,6 +112,7 @@ function formatPeso(value) {
 }
 
 function LandingPage() {
+  const pageRef = useRef(null);
   const [cartCount, setCartCount] = useState(0);
   const [products, setProducts] = useState(fallbackProducts);
   const [collapsed, setCollapsed] = useState({
@@ -156,7 +157,7 @@ function LandingPage() {
   }, []);
 
   useEffect(() => {
-    const revealItems = document.querySelectorAll(".reveal-up");
+    const revealItems = pageRef.current?.querySelectorAll(".reveal-up") ?? [];
 
     const revealObserver = new IntersectionObserver(
       (entries) => {
@@ -217,7 +218,7 @@ function LandingPage() {
   };
 
   return (
-    <div className="page-shell">
+    <div ref={pageRef} className="page-shell wbo-landing">
       <header className="site-header">
         <div className="max-width-container header-top">
           <div className="header-brand">
@@ -245,8 +246,8 @@ function LandingPage() {
               Create Account
             </Link>
 
-            <button className="cart-button" type="button">
-              Cart ({cartCount})
+            <button className="cart-button" type="button" aria-label={`${cartCount} item${cartCount === 1 ? "" : "s"} in cart`}>
+              Cart (<span aria-live="polite">{cartCount}</span>)
             </button>
           </div>
         </div>
@@ -285,7 +286,7 @@ function LandingPage() {
           </div>
 
           <div className="promo-visual" aria-label="Appliance display image">
-            <img src={mainpic} alt="Walang BrownOut Appliances" />
+            <img src={mainpic} alt="Walang BrownOut Appliances" loading="eager" fetchPriority="high" />
           </div>
         </section>
 
@@ -349,7 +350,7 @@ function LandingPage() {
                 key={service.title}
               >
                 <div className={`category-thumb ${service.className}`}>
-                  <img src={service.image} alt={service.title} />
+                  <img src={service.image} alt={service.title} loading="lazy" decoding="async" />
                 </div>
                 <h3>{service.title}</h3>
               </article>
@@ -388,8 +389,18 @@ function LandingPage() {
               >
                 <div className="product-image">
                   {product.image_url ? (
-                    <img src={product.image_url} alt={product.name} />
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : null}
+                  <span className={`stock-badge ${product.available_stock > 0 ? "in-stock" : "out-of-stock"}`}>
+                    {product.available_stock > 0
+                      ? `${product.available_stock} in stock`
+                      : "Out of stock"}
+                  </span>
                 </div>
 
                 <div className="product-info">
@@ -425,7 +436,7 @@ function LandingPage() {
 
           <div>
             <span className="promo-badge">Secure accounts</span>
-            <h3>Gmail OTP verification</h3>
+            <h3>Email OTP verification</h3>
           </div>
 
           <div>
@@ -500,3 +511,4 @@ function LandingPage() {
 }
 
 export default LandingPage;
+
