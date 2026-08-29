@@ -52,6 +52,8 @@ function Signup() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -229,33 +231,69 @@ function Signup() {
           </div>
 
           <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              required
-              minLength="6"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-            />
+            <label htmlFor="signup-password">Password</label>
+
+            <div className="password-field">
+              <input
+                id="signup-password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                required
+                minLength="6"
+                autoComplete="new-password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                disabled={loading}
+              />
+
+              <button
+                className="password-toggle"
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                disabled={loading}
+                aria-pressed={showPassword}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <div className="form-group">
-            <label>Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              required
-              minLength="6"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              disabled={loading}
-            />
+            <label htmlFor="signup-confirm-password">Confirm Password</label>
+
+            <div className="password-field">
+              <input
+                id="signup-confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                required
+                minLength="6"
+                autoComplete="new-password"
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                disabled={loading}
+              />
+
+              <button
+                className="password-toggle"
+                type="button"
+                onClick={() =>
+                  setShowConfirmPassword((visible) => !visible)
+                }
+                disabled={loading}
+                aria-pressed={showConfirmPassword}
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <button

@@ -45,6 +45,7 @@ function LogIn() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -192,16 +193,29 @@ function LogIn() {
           <div className="form-group">
             <label htmlFor="login-password">Password</label>
 
-            <input
-              id="login-password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              disabled={loading}
-              required
-            />
+            <div className="password-field">
+              <input
+                id="login-password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                disabled={loading}
+                required
+              />
+
+              <button
+                className="password-toggle"
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                disabled={loading}
+                aria-pressed={showPassword}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           <label className="login-remember-device">
