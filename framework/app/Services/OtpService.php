@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Mail\OtpMail;
 use App\Models\WBOUser;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
+use RuntimeException;
 
 class OtpService
 {
@@ -77,14 +77,56 @@ class OtpService
             throw new InvalidArgumentException('Invalid OTP purpose.');
         }
 
-        Mail::to($user->email)->send(
-            new OtpMail(
-                otpCode: $otp,
-                userName: $user->name,
-                purpose: $purpose,
-                expiryMinutes: $this->expiryMinutes()
-            )
+        $apiKey = (string) config('services.brevo.key');
+
+        if ($apiKey === '') {
+            throw new RuntimeException(
+                'BREVO_API_KEY is not configured.'
+            );
+        }
+
+        $senderEmail = (string) config('mail.from.address');
+        $senderName = (string) config('mail.from.name', 'WalangBrownout');
+
+        if ($senderEmail === '') {
+            throw new RuntimeException(
+                'MAIL_FROM_ADDRESS is not configured.'
+            );
+        }
+
+        $subject = config(
+            "otp.subjects.{$purpose}",
+            'WalangBrownout OTP Verification'
         );
+
+        // Keep the existing OTP Blade design exactly as-is.
+        $html = view('emails.otp', [
+            'otpCode' => $otp,
+            'userName' => $user->name,
+            'purpose' => $purpose,
+            'expiryMinutes' => $this->expiryMinutes(),
+        ])->render();
+
+        $response = Http::acceptJson()
+            ->withHeaders([
+                'api-key' => $apiKey,
+            ])
+            ->post('https://api.brevo.com/v3/smtp/email', [
+                'sender' => [
+                    'name' => $senderName,
+                    'email' => $senderEmail,
+                ],
+                'to' => [
+                    [
+                        'email' => $user->email,
+                        'name' => $user->name,
+                    ],
+                ],
+                'subject' => $subject,
+                'htmlContent' => $html,
+            ]);
+
+        $response->throw();
     }
 
     public function publicPolicy(): array
