@@ -19,6 +19,9 @@ export default function useSuperAdmin() {
   const [modalBusy, setModalBusy] = useState(false);
   const [modalError, setModalError] = useState("");
   const [forms, setForms] = useState(INITIAL_FORMS);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userSessions, setUserSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
 
   const setForm = (key, update) => setForms((all) => ({
     ...all,
@@ -65,7 +68,14 @@ export default function useSuperAdmin() {
   }, [data?.settings?.company_name, data?.settings?.company_email, data?.settings?.company_contact, data?.settings?.company_address]);
 
   const openModal = (type) => { setActiveModal(type); setDropdownOpen(false); setModalError(""); };
-  const closeModal = () => { if (!modalBusy) { setActiveModal(null); setModalError(""); } };
+  const closeModal = () => {
+    if (!modalBusy) {
+      setActiveModal(null);
+      setModalError("");
+      setSelectedUser(null);
+      setUserSessions([]);
+    }
+  };
 
   const runModalAction = async (action, keepOpen = false) => {
     setModalBusy(true); setModalError("");
@@ -96,10 +106,101 @@ export default function useSuperAdmin() {
   });
 
   const openUserEditor = (user) => {
+    setSelectedUser(user);
     setForm("editUser", { user_id: user.user_id, name: user.name || "", email: user.email || "", contact_number: user.contact_number || "", role: user.role || "System_User", account_status: user.account_status || "active" });
     setModalError(""); setActiveModal("editUser");
   };
-  const handleUpdateUser = () => runModalAction(() => apiRequest(`/api/super-admin/users/${forms.editUser.user_id}`, { method: "PUT", body: forms.editUser }));
+
+  const handleUpdateUser = () => runModalAction(() =>
+    apiRequest(`/api/super-admin/users/${forms.editUser.user_id}`, {
+      method: "PUT",
+      body: forms.editUser,
+    })
+  );
+
+  const loadUserSessions = async (userId) => {
+    setSessionsLoading(true);
+    setModalError("");
+    try {
+      const result = await apiRequest(`/api/super-admin/users/${userId}/sessions`);
+      setUserSessions(result.sessions || []);
+    } catch (err) {
+      if (err.status === 401) navigate("/login", { replace: true });
+      setModalError(err.message || "Unable to load user sessions.");
+      setUserSessions([]);
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  const openUserSessions = (user) => {
+    setSelectedUser(user);
+    setUserSessions([]);
+    setModalError("");
+    setActiveModal("userSessions");
+    loadUserSessions(user.user_id);
+  };
+
+  const handleRevokeUserSession = async (sessionId) => {
+    if (!selectedUser) return;
+    setModalBusy(true);
+    setModalError("");
+    try {
+      await apiRequest(
+        `/api/super-admin/users/${selectedUser.user_id}/sessions/${encodeURIComponent(sessionId)}`,
+        { method: "DELETE" }
+      );
+      await loadUserSessions(selectedUser.user_id);
+      refresh();
+    } catch (err) {
+      if (err.status === 401) navigate("/login", { replace: true });
+      setModalError(err.message || "Unable to revoke the session.");
+    } finally {
+      setModalBusy(false);
+    }
+  };
+
+  const handleRevokeAllUserSessions = async () => {
+    if (!selectedUser) return;
+
+    const isSelf = Number(selectedUser.user_id) === Number(currentUser?.user_id);
+    const label = isSelf ? "all other sessions" : "all active sessions";
+
+    if (!window.confirm(`Revoke ${label} for ${selectedUser.name}?`)) return;
+
+    setModalBusy(true);
+    setModalError("");
+    try {
+      await apiRequest(`/api/super-admin/users/${selectedUser.user_id}/sessions`, {
+        method: "DELETE",
+      });
+      await loadUserSessions(selectedUser.user_id);
+      refresh();
+    } catch (err) {
+      if (err.status === 401) navigate("/login", { replace: true });
+      setModalError(err.message || "Unable to revoke sessions.");
+    } finally {
+      setModalBusy(false);
+    }
+  };
+
+  const openUserDelete = (user) => {
+    setSelectedUser(user);
+    setForm("deleteUser", { confirmation: "" });
+    setModalError("");
+    setActiveModal("deleteUser");
+  };
+
+  const handleDeleteUser = () => runModalAction(async () => {
+    if (!selectedUser) return;
+    await apiRequest(`/api/super-admin/users/${selectedUser.user_id}`, {
+      method: "DELETE",
+      body: forms.deleteUser,
+    });
+    setSelectedUser(null);
+    resetForm("deleteUser");
+  });
+
   const handleNotificationStatus = (id, status) => runModalAction(() => apiRequest(`/api/super-admin/notifications/${id}`, { method: "PUT", body: { status } }), true);
   const handleCreateBackup = () => runModalAction(() => apiRequest("/api/super-admin/backups", { method: "POST" }), true);
   const handleRestoreBackup = (filename) => {
@@ -119,21 +220,25 @@ export default function useSuperAdmin() {
     setProductForm: (v) => setForm("product", v), setCategoryForm: (v) => setForm("category", v), setStockForm: (v) => setForm("stock", v),
     setUserForm: (v) => setForm("user", v), setSupplierForm: (v) => setForm("supplier", v),
     setPurchaseOrderForm: (v) => setForm("purchaseOrder", v), setCompanyForm: (v) => setForm("company", v),
-    setEditUserForm: (v) => setForm("editUser", v),
+    setEditUserForm: (v) => setForm("editUser", v), setDeleteUserForm: (v) => setForm("deleteUser", v),
   };
 
   return {
     activeMenu, setActiveMenu, sidebarOpen, setSidebarOpen, dropdownOpen, setDropdownOpen, theme, setTheme,
     activeModal, data, loading, error, refresh, dropdownRef, modalBusy, modalError, currentUser, userInitials,
-    unreadNotifications, brandName, brandLogo, openModal, closeModal, openUserEditor, handleExportReport, handleLogout,
+    unreadNotifications, brandName, brandLogo, openModal, closeModal, openUserEditor, openUserSessions, openUserDelete,
+    handleExportReport, handleLogout,
     modalProps: {
       type: activeModal, onClose: closeModal, busy: modalBusy, error: modalError, currentUser, userInitials, data,
       profileForm: forms.profile, passwordForm: forms.password, productForm: forms.product, categoryForm: forms.category, stockForm: forms.stock,
       userForm: forms.user, supplierForm: forms.supplier, purchaseOrderForm: forms.purchaseOrder,
-      companyForm: forms.company, editUserForm: forms.editUser, ...setters,
+      companyForm: forms.company, editUserForm: forms.editUser, deleteUserForm: forms.deleteUser,
+      selectedUser, userSessions, sessionsLoading, ...setters,
       onProfileSave: handleProfileSave, onPasswordUpdate: handlePasswordUpdate, onAddProduct: handleAddProduct, onAddCategory: handleAddCategory,
       onStockIn: handleStockIn, onAddUser: handleAddUser, onAddSupplier: handleAddSupplier,
       onAddPurchaseOrder: handleAddPurchaseOrder, onCompanySave: handleCompanySave, onUpdateUser: handleUpdateUser,
+      onRevokeUserSession: handleRevokeUserSession, onRevokeAllUserSessions: handleRevokeAllUserSessions,
+      onDeleteUser: handleDeleteUser,
       onNotificationStatus: handleNotificationStatus, onCreateBackup: handleCreateBackup,
       onRestoreBackup: handleRestoreBackup, onDownloadBackup: handleDownloadBackup,
     },

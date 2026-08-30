@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\SuperAdminReportService;
+use App\Services\NotificationService;
 
 use App\Http\Controllers\Concerns\HandlesSuperAdminSupport;
 use Carbon\Carbon;
@@ -21,10 +22,16 @@ class SuperAdminDashboardController extends Controller
     // DASHBOARD API
     // =========================================================
 
-    public function index(): JsonResponse
-    {
+    public function index(
+        NotificationService $notifications
+    ): JsonResponse {
         $this->authorizeSuperAdmin();
-        return response()->json($this->dashboardData());
+
+        $notifications->syncOperationalAlerts();
+
+        return response()->json(
+            $this->dashboardData()
+        );
     }
 
     // =========================================================
@@ -366,6 +373,7 @@ class SuperAdminDashboardController extends Controller
 
         // NOTIFICATIONS
         $notifications = DB::table('WBO_Notifications as n')
+            ->where('n.recipient_user_id', $currentUser->user_id)
             ->leftJoin('WBO_Products as p', 'p.product_id', '=', 'n.related_product_id')
             ->leftJoin('WBO_Batches as b', 'b.batch_id', '=', 'n.related_batch_id')
             ->leftJoin('WBO_Users as u', 'u.user_id', '=', 'n.recipient_user_id')
@@ -437,6 +445,248 @@ class SuperAdminDashboardController extends Controller
             ];
         })->values();
 
+        // USER ACTIVITY ANALYTICS
+        // WBO_UserSessions timestamps are stored in UTC.
+        // The dashboard displays Philippine-local dates and hours.
+        $manilaNow = Carbon::now('Asia/Manila');
+        $todayStartManila = $manilaNow->copy()->startOfDay();
+        $todayEndManila = $todayStartManila->copy()->addDay();
+
+        $todayStartUtc = $todayStartManila
+            ->copy()
+            ->utc()
+            ->format('Y-m-d H:i:s');
+
+        $todayEndUtc = $todayEndManila
+            ->copy()
+            ->utc()
+            ->format('Y-m-d H:i:s');
+
+        $activityStartManila = $todayStartManila
+            ->copy()
+            ->subDays(29);
+
+        $activityStartUtc = $activityStartManila
+            ->copy()
+            ->utc()
+            ->format('Y-m-d H:i:s');
+
+        $trackedSessions = DB::table('WBO_UserSessions')
+            ->where(function ($query) use ($activityStartUtc) {
+                $query
+                    ->where('logged_in_at', '>=', $activityStartUtc)
+                    ->orWhere('last_activity_at', '>=', $activityStartUtc);
+            })
+            ->select(
+                'session_id',
+                'user_id',
+                'logged_in_at',
+                'last_activity_at',
+                'logged_out_at',
+                'is_active'
+            )
+            ->get();
+
+        $todaySessions = $trackedSessions->filter(
+            fn ($session) =>
+                $session->logged_in_at &&
+                (string) $session->logged_in_at >= $todayStartUtc &&
+                (string) $session->logged_in_at < $todayEndUtc
+        );
+
+        $todayActiveUserIds = collect();
+
+        foreach ($trackedSessions as $session) {
+            foreach (['logged_in_at', 'last_activity_at'] as $field) {
+                $value = $session->{$field};
+
+                if (!$value) {
+                    continue;
+                }
+
+                $utcValue = Carbon::parse(
+                    (string) $value,
+                    'UTC'
+                );
+
+                if (
+                    $utcValue->gte(
+                        Carbon::parse($todayStartUtc, 'UTC')
+                    ) &&
+                    $utcValue->lt(
+                        Carbon::parse($todayEndUtc, 'UTC')
+                    )
+                ) {
+                    $todayActiveUserIds->push(
+                        (int) $session->user_id
+                    );
+                }
+            }
+        }
+
+        $dailyActiveSets = [];
+
+        for ($offset = 0; $offset < 30; $offset++) {
+            $day = $activityStartManila
+                ->copy()
+                ->addDays($offset);
+
+            $key = $day->format('Y-m-d');
+
+            $dailyActiveSets[$key] = [];
+        }
+
+        foreach ($trackedSessions as $session) {
+            $userId = (int) $session->user_id;
+
+            foreach (['logged_in_at', 'last_activity_at'] as $field) {
+                $value = $session->{$field};
+
+                if (!$value) {
+                    continue;
+                }
+
+                $localDate = Carbon::parse(
+                    (string) $value,
+                    'UTC'
+                )
+                    ->setTimezone('Asia/Manila')
+                    ->format('Y-m-d');
+
+                if (array_key_exists($localDate, $dailyActiveSets)) {
+                    $dailyActiveSets[$localDate][$userId] = true;
+                }
+            }
+        }
+
+        $dailyActivity30 = collect(
+            $dailyActiveSets
+        )->map(
+            function ($usersForDay, $date) {
+                $day = Carbon::createFromFormat(
+                    'Y-m-d',
+                    $date,
+                    'Asia/Manila'
+                );
+
+                return [
+                    'date' => $date,
+                    'label' => $day->format('M d'),
+                    'short_label' => $day->format('D'),
+                    'active_users' => count($usersForDay),
+                ];
+            }
+        )->values();
+
+        $hourlyCounts = array_fill(0, 24, 0);
+
+        foreach ($todaySessions as $session) {
+            $loginHour = (int) Carbon::parse(
+                (string) $session->logged_in_at,
+                'UTC'
+            )
+                ->setTimezone('Asia/Manila')
+                ->format('G');
+
+            $hourlyCounts[$loginHour]++;
+
+            if ($session->last_activity_at) {
+                $lastActivity = Carbon::parse(
+                    (string) $session->last_activity_at,
+                    'UTC'
+                )->setTimezone('Asia/Manila');
+
+                $lastActivityDate =
+                    $lastActivity->format('Y-m-d');
+
+                if (
+                    $lastActivityDate ===
+                    $todayStartManila->format('Y-m-d')
+                ) {
+                    $lastHour = (int) $lastActivity->format('G');
+
+                    if ($lastHour !== $loginHour) {
+                        $hourlyCounts[$lastHour]++;
+                    }
+                }
+            }
+        }
+
+        $hourlyActivity = collect(
+            range(0, 23)
+        )->map(
+            function ($hour) use ($hourlyCounts) {
+                return [
+                    'hour' => $hour,
+                    'label' => Carbon::createFromTime(
+                        $hour,
+                        0,
+                        0,
+                        'Asia/Manila'
+                    )->format('g A'),
+                    'count' => (int) $hourlyCounts[$hour],
+                ];
+            }
+        )->values();
+
+        $peakCount = max($hourlyCounts);
+        $peakHour = $peakCount > 0
+            ? (int) array_search(
+                $peakCount,
+                $hourlyCounts,
+                true
+            )
+            : null;
+
+        $currentlyOnline = $users
+            ->filter(
+                fn ($user) =>
+                    (bool) $user->is_online
+            )
+            ->count();
+
+        $userActivity = [
+            'timezone' => 'Asia/Manila',
+            'definition' =>
+                'Authenticated activity based on session login and latest activity timestamps.',
+            'metrics' => [
+                'active_users_today' =>
+                    $todayActiveUserIds
+                        ->unique()
+                        ->count(),
+                'sessions_today' =>
+                    $todaySessions->count(),
+                'currently_online' =>
+                    $currentlyOnline,
+                'peak_activity_hour' =>
+                    $peakHour === null
+                        ? null
+                        : Carbon::createFromTime(
+                            $peakHour,
+                            0,
+                            0,
+                            'Asia/Manila'
+                        )->format('g A'),
+                'peak_activity_count' =>
+                    $peakCount,
+                'tracked_sessions_30d' =>
+                    $trackedSessions->count(),
+                'distinct_users_30d' =>
+                    $trackedSessions
+                        ->pluck('user_id')
+                        ->unique()
+                        ->count(),
+            ],
+            'daily_7' =>
+                $dailyActivity30
+                    ->slice(-7)
+                    ->values(),
+            'daily_30' =>
+                $dailyActivity30,
+            'hourly_today' =>
+                $hourlyActivity,
+        ];
+
         // DASHBOARD METRICS
         $openPurchaseOrders = $purchaseOrders->filter(fn($po) => in_array($po->status, ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'ORDERED', 'PARTIALLY_RECEIVED'], true))->unique('po_id')->count();
 
@@ -471,6 +721,7 @@ class SuperAdminDashboardController extends Controller
             'notifications' => $notifications,
             'audit_logs' => $auditLogs,
             'stock_trend' => $stockTrend,
+            'user_activity' => $userActivity,
             'settings' => $this->systemSettings(),
             'backups' => $this->backupList()
         ];

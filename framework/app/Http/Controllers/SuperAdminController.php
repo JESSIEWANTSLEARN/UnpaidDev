@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\HandlesSuperAdminSupport;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -254,6 +255,21 @@ class SuperAdminController extends Controller
                 'email_verified_at' => $emailVerifiedAt,
             ]);
 
+        if ($validated['account_status'] !== 'active') {
+            $revokedSessions = $this->revokeSessionsForUser($userId);
+            $revokedTrustedDevices = $this->revokeTrustedDevicesForUser($userId);
+
+            DB::table('WBO_Users')
+                ->where('user_id', $userId)
+                ->update(['last_seen_at' => null]);
+
+            $this->audit(
+                $request,
+                'USER_ACCESS_REVOKED',
+                "Revoked {$revokedSessions} active session(s) and {$revokedTrustedDevices} trusted device(s) for disabled/pending user #{$userId}."
+            );
+        }
+
         if ($userId === (int) session('user_id')) {
             session([
                 'name' => $validated['name'],
@@ -271,6 +287,473 @@ class SuperAdminController extends Controller
         return response()->json([
             'message' => 'User updated successfully.',
         ]);
+    }
+
+    public function userSessions(Request $request, int $userId): JsonResponse
+    {
+        $this->authorizeSuperAdmin();
+
+        $user = DB::table('WBO_Users')
+            ->select('user_id', 'name', 'email', 'role', 'account_status')
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        if (!Schema::hasTable('WBO_UserSessions')) {
+            return response()->json([
+                'user' => $user,
+                'sessions' => [],
+            ]);
+        }
+
+        $currentTrackingId = (string) session('auth_session_id', '');
+
+        $sessions = DB::table('WBO_UserSessions')
+            ->where('user_id', $userId)
+            ->orderByDesc('last_activity_at')
+            ->orderByDesc('logged_in_at')
+            ->get()
+            ->map(function ($session) use ($currentTrackingId) {
+                return [
+                    'session_id' => (string) $session->session_id,
+                    'device_name' => $session->device_name ?: 'Unknown Device',
+                    'browser_name' => $session->browser_name ?: 'Unknown Browser',
+                    'operating_system' => $session->operating_system ?: 'Unknown OS',
+                    'ip_address' => $session->ip_address ?: 'Unknown',
+                    'logged_in_at' => $this->sessionDate($session->logged_in_at),
+                    'last_activity_at' => $this->sessionDate($session->last_activity_at),
+                    'logged_out_at' => $this->sessionDate($session->logged_out_at),
+                    'is_active' => (bool) $session->is_active,
+                    'is_current_session' =>
+                        $currentTrackingId !== ''
+                        && hash_equals($currentTrackingId, (string) $session->session_id),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'user' => $user,
+            'sessions' => $sessions,
+            'timezone' => 'Asia/Manila',
+        ]);
+    }
+
+    public function revokeUserSession(
+        Request $request,
+        int $userId,
+        string $sessionId
+    ): JsonResponse {
+        $this->authorizeSuperAdmin();
+
+        $user = DB::table('WBO_Users')
+            ->select('user_id', 'name')
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        if (!Schema::hasTable('WBO_UserSessions')) {
+            return response()->json([
+                'message' => 'Session tracking is not installed.',
+            ], 409);
+        }
+
+        $tracked = DB::table('WBO_UserSessions')
+            ->where('user_id', $userId)
+            ->where('session_id', $sessionId)
+            ->first();
+
+        if (!$tracked) {
+            return response()->json([
+                'message' => 'Session not found.',
+            ], 404);
+        }
+
+        $currentUserId = (int) session('user_id');
+        $currentTrackingId = (string) session('auth_session_id', '');
+
+        if (
+            $userId === $currentUserId
+            && $currentTrackingId !== ''
+            && hash_equals($currentTrackingId, $sessionId)
+        ) {
+            throw ValidationException::withMessages([
+                'session' => [
+                    'You cannot revoke the Super Admin session you are currently using. Use Sign Out for the current session.',
+                ],
+            ]);
+        }
+
+        if ((bool) $tracked->is_active) {
+            DB::table('WBO_UserSessions')
+                ->where('user_id', $userId)
+                ->where('session_id', $sessionId)
+                ->update([
+                    'is_active' => false,
+                    'logged_out_at' => now(),
+                ]);
+
+            $this->deleteLaravelSessions([$sessionId]);
+            $this->clearPresenceWhenNoActiveSession($userId);
+        }
+
+        $this->audit(
+            $request,
+            'SESSION_REVOKED_BY_ADMIN',
+            "Super Admin revoked a session for user #{$userId} ({$user->name})."
+        );
+
+        return response()->json([
+            'message' => 'Session revoked successfully.',
+        ]);
+    }
+
+    public function revokeAllUserSessions(
+        Request $request,
+        int $userId
+    ): JsonResponse {
+        $this->authorizeSuperAdmin();
+
+        $user = DB::table('WBO_Users')
+            ->select('user_id', 'name')
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        $exceptSessionId = null;
+
+        if ($userId === (int) session('user_id')) {
+            $currentTrackingId = (string) session('auth_session_id', '');
+            $exceptSessionId = $currentTrackingId !== ''
+                ? $currentTrackingId
+                : null;
+        }
+
+        $revoked = $this->revokeSessionsForUser(
+            $userId,
+            $exceptSessionId
+        );
+
+        $this->clearPresenceWhenNoActiveSession($userId);
+
+        $description = $exceptSessionId
+            ? "Super Admin revoked {$revoked} other session(s) from their own account."
+            : "Super Admin revoked {$revoked} session(s) for user #{$userId} ({$user->name}).";
+
+        $this->audit(
+            $request,
+            'USER_SESSIONS_REVOKED',
+            $description
+        );
+
+        return response()->json([
+            'message' => $exceptSessionId
+                ? 'Other sessions revoked successfully.'
+                : 'All active sessions revoked successfully.',
+            'revoked_sessions' => $revoked,
+        ]);
+    }
+
+    public function deleteUser(Request $request, int $userId): JsonResponse
+    {
+        $this->authorizeSuperAdmin();
+
+        $validated = $request->validate([
+            'confirmation' => ['required', Rule::in(['DELETE'])],
+        ]);
+
+        $user = DB::table('WBO_Users')
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        if ($userId === (int) session('user_id')) {
+            throw ValidationException::withMessages([
+                'user' => [
+                    'You cannot permanently delete the Super Admin account you are currently using.',
+                ],
+            ]);
+        }
+
+        if (
+            $user->role === 'super_admin'
+            && DB::table('WBO_Users')
+                ->where('role', 'super_admin')
+                ->count() <= 1
+        ) {
+            throw ValidationException::withMessages([
+                'user' => [
+                    'The last Super Admin account cannot be deleted.',
+                ],
+            ]);
+        }
+
+        $references = $this->userDeletionReferences($userId);
+
+        if ($references !== []) {
+            return response()->json([
+                'message' =>
+                    'This account has stored business or audit history and cannot be permanently deleted. Disable the account instead so historical records remain intact.',
+                'references' => $references,
+            ], 409);
+        }
+
+        try {
+            DB::transaction(function () use ($userId) {
+                $this->revokeSessionsForUser($userId);
+                $this->revokeTrustedDevicesForUser($userId);
+
+                if (Schema::hasTable('WBO_UserSessions')) {
+                    DB::table('WBO_UserSessions')
+                        ->where('user_id', $userId)
+                        ->delete();
+                }
+
+                if (Schema::hasTable('WBO_TrustedDevices')) {
+                    DB::table('WBO_TrustedDevices')
+                        ->where('user_id', $userId)
+                        ->delete();
+                }
+
+                if (Schema::hasTable('WBO_UserProfilePhotos')) {
+                    DB::table('WBO_UserProfilePhotos')
+                        ->where('user_id', $userId)
+                        ->delete();
+                }
+
+                DB::table('WBO_Users')
+                    ->where('user_id', $userId)
+                    ->delete();
+            });
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            return response()->json([
+                'message' =>
+                    'The account is still referenced by protected system records. Disable it instead of permanently deleting it.',
+            ], 409);
+        }
+
+        $this->audit(
+            $request,
+            'USER_DELETED',
+            "Permanently deleted unused account #{$userId} ({$user->email})."
+        );
+
+        return response()->json([
+            'message' => 'Unused account deleted permanently.',
+        ]);
+    }
+
+    private function revokeSessionsForUser(
+        int $userId,
+        ?string $exceptSessionId = null
+    ): int {
+        if (!Schema::hasTable('WBO_UserSessions')) {
+            return 0;
+        }
+
+        $query = DB::table('WBO_UserSessions')
+            ->where('user_id', $userId)
+            ->where('is_active', true);
+
+        if ($exceptSessionId) {
+            $query->where('session_id', '<>', $exceptSessionId);
+        }
+
+        $sessionIds = (clone $query)
+            ->pluck('session_id')
+            ->map(fn ($value) => (string) $value)
+            ->values()
+            ->all();
+
+        if ($sessionIds === []) {
+            return 0;
+        }
+
+        $updated = $query->update([
+            'is_active' => false,
+            'logged_out_at' => now(),
+        ]);
+
+        $this->deleteLaravelSessions($sessionIds);
+
+        return (int) $updated;
+    }
+
+    private function deleteLaravelSessions(array $sessionIds): void
+    {
+        if (
+            $sessionIds === []
+            || !Schema::hasTable('sessions')
+            || !Schema::hasColumn('sessions', 'id')
+        ) {
+            return;
+        }
+
+        DB::table('sessions')
+            ->whereIn('id', $sessionIds)
+            ->delete();
+    }
+
+    private function revokeTrustedDevicesForUser(int $userId): int
+    {
+        if (!Schema::hasTable('WBO_TrustedDevices')) {
+            return 0;
+        }
+
+        return DB::table('WBO_TrustedDevices')
+            ->where('user_id', $userId)
+            ->whereNull('revoked_at')
+            ->update([
+                'revoked_at' => now(),
+            ]);
+    }
+
+    private function clearPresenceWhenNoActiveSession(int $userId): void
+    {
+        if (!Schema::hasTable('WBO_UserSessions')) {
+            return;
+        }
+
+        $hasActiveSession = DB::table('WBO_UserSessions')
+            ->where('user_id', $userId)
+            ->where('is_active', true)
+            ->exists();
+
+        if (!$hasActiveSession) {
+            DB::table('WBO_Users')
+                ->where('user_id', $userId)
+                ->update([
+                    'last_seen_at' => null,
+                ]);
+        }
+    }
+
+    private function sessionDate($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        return Carbon::parse((string) $value, 'UTC')
+            ->setTimezone('Asia/Manila')
+            ->toIso8601String();
+    }
+
+    private function userDeletionReferences(int $userId): array
+    {
+        $references = [];
+        $checked = [];
+
+        $cleanupTables = [
+            'WBO_UserSessions',
+            'WBO_TrustedDevices',
+            'WBO_UserProfilePhotos',
+        ];
+
+        try {
+            $foreignKeys = DB::table('information_schema.KEY_COLUMN_USAGE')
+                ->select('TABLE_NAME', 'COLUMN_NAME')
+                ->where('TABLE_SCHEMA', DB::getDatabaseName())
+                ->where('REFERENCED_TABLE_NAME', 'WBO_Users')
+                ->where('REFERENCED_COLUMN_NAME', 'user_id')
+                ->get();
+
+            foreach ($foreignKeys as $foreignKey) {
+                $table = (string) $foreignKey->TABLE_NAME;
+                $column = (string) $foreignKey->COLUMN_NAME;
+
+                if (
+                    in_array($table, $cleanupTables, true)
+                    || $table === 'WBO_Users'
+                ) {
+                    continue;
+                }
+
+                $key = "{$table}.{$column}";
+                $checked[$key] = true;
+
+                if (
+                    Schema::hasTable($table)
+                    && Schema::hasColumn($table, $column)
+                ) {
+                    $count = DB::table($table)
+                        ->where($column, $userId)
+                        ->count();
+
+                    if ($count > 0) {
+                        $references[] = [
+                            'source' => $key,
+                            'count' => (int) $count,
+                        ];
+                    }
+                }
+            }
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+
+        $knownReferences = [
+            ['WBO_Orders', 'customer_user_id'],
+            ['WBO_Transactions', 'performed_by_user_id'],
+            ['WBO_PurchaseOrders', 'created_by_user_id'],
+            ['WBO_PurchaseOrders', 'approved_by_user_id'],
+            ['WBO_Notifications', 'recipient_user_id'],
+            ['WBO_AuditLogs', 'user_id'],
+            ['WBO_SystemSettings', 'updated_by_user_id'],
+            ['WBO_DataImports', 'user_id'],
+            ['WBO_DataImports', 'imported_by_user_id'],
+            ['WBO_DataImports', 'uploaded_by_user_id'],
+            ['WBO_DataImports', 'created_by_user_id'],
+        ];
+
+        foreach ($knownReferences as [$table, $column]) {
+            $key = "{$table}.{$column}";
+
+            if (isset($checked[$key])) {
+                continue;
+            }
+
+            if (
+                !Schema::hasTable($table)
+                || !Schema::hasColumn($table, $column)
+            ) {
+                continue;
+            }
+
+            $count = DB::table($table)
+                ->where($column, $userId)
+                ->count();
+
+            if ($count > 0) {
+                $references[] = [
+                    'source' => $key,
+                    'count' => (int) $count,
+                ];
+            }
+        }
+
+        return $references;
     }
 
     public function updateNotification(Request $request, int $notificationId): JsonResponse
@@ -295,7 +778,18 @@ class SuperAdminController extends Controller
             ->where('notification_id', $notificationId)
             ->update([
                 'status' => $validated['status'],
-                'resolved_at' => $validated['status'] === 'RESOLVED' ? now() : null,
+                'acknowledged_at' =>
+                    $validated['status'] === 'ACKNOWLEDGED'
+                        ? now()
+                        : (
+                            $validated['status'] === 'UNREAD'
+                                ? null
+                                : $notification->acknowledged_at
+                        ),
+                'resolved_at' =>
+                    $validated['status'] === 'RESOLVED'
+                        ? now()
+                        : null,
             ]);
 
         $this->audit(

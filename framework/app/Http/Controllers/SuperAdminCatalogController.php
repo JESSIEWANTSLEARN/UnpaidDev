@@ -92,6 +92,155 @@ class SuperAdminCatalogController extends Controller
         ], 201);
     }
 
+    public function updateProduct(
+        Request $request,
+        int $productId
+    ): JsonResponse {
+        $this->authorizeSuperAdmin();
+
+        $product = DB::table('WBO_Products')
+            ->where('product_id', $productId)
+            ->first();
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found.',
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'sku' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('WBO_Products', 'sku')
+                    ->ignore($productId, 'product_id'),
+            ],
+            'name' => ['required', 'string', 'max:150'],
+            'description' => ['nullable', 'string'],
+            'category_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('WBO_Categories', 'category_id'),
+            ],
+            'category' => ['nullable', 'string', 'max:100'],
+            'supplier_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('WBO_Suppliers', 'supplier_id'),
+            ],
+            'abc_class' => ['required', Rule::in(['A', 'B', 'C'])],
+            'is_seasonal' => ['required', 'boolean'],
+            'is_visible' => ['required', 'boolean'],
+            'is_featured' => ['required', 'boolean'],
+            'unit_cost' => ['required', 'numeric', 'min:0'],
+            'unit_price' => ['required', 'numeric', 'min:0'],
+            'image' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
+        ]);
+
+        $categoryId = $this->resolveCategoryId($validated);
+        $newImagePath = $request->hasFile('image')
+            ? $request->file('image')->store('products', 'public')
+            : null;
+
+        $oldImagePath = null;
+
+        try {
+            DB::transaction(function () use (
+                $validated,
+                $categoryId,
+                $newImagePath,
+                $productId,
+                &$oldImagePath
+            ) {
+                DB::table('WBO_Products')
+                    ->where('product_id', $productId)
+                    ->update([
+                        'sku' => $validated['sku'],
+                        'name' => $validated['name'],
+                        'description' =>
+                            $validated['description'] ?? null,
+                        'category_id' => $categoryId,
+                        'supplier_id' =>
+                            $validated['supplier_id'] ?? null,
+                        'abc_class' => $validated['abc_class'],
+                        'is_seasonal' =>
+                            (bool) $validated['is_seasonal'],
+                        'is_visible' =>
+                            (bool) $validated['is_visible'],
+                        'is_featured' =>
+                            (bool) $validated['is_featured'],
+                        'unit_cost' => $validated['unit_cost'],
+                        'unit_price' => $validated['unit_price'],
+                        'updated_at' => now(),
+                    ]);
+
+                if (!$newImagePath) {
+                    return;
+                }
+
+                $primaryImage = DB::table('WBO_ProductImages')
+                    ->where('product_id', $productId)
+                    ->where('is_primary', true)
+                    ->orderBy('sort_order')
+                    ->first();
+
+                if ($primaryImage) {
+                    $oldImagePath = $primaryImage->image_path;
+
+                    DB::table('WBO_ProductImages')
+                        ->where('product_id', $productId)
+                        ->where('is_primary', true)
+                        ->update([
+                            'image_path' => $newImagePath,
+                            'alt_text' => $validated['name'],
+                            'uploaded_by' => session('user_id'),
+                        ]);
+                } else {
+                    DB::table('WBO_ProductImages')->insert([
+                        'product_id' => $productId,
+                        'image_path' => $newImagePath,
+                        'alt_text' => $validated['name'],
+                        'is_primary' => true,
+                        'sort_order' => 0,
+                        'uploaded_by' => session('user_id'),
+                        'created_at' => now(),
+                    ]);
+                }
+            });
+        } catch (\Throwable $exception) {
+            if ($newImagePath) {
+                Storage::disk('public')->delete($newImagePath);
+            }
+
+            throw $exception;
+        }
+
+        if (
+            $oldImagePath
+            && $oldImagePath !== $newImagePath
+            && Storage::disk('public')->exists($oldImagePath)
+        ) {
+            Storage::disk('public')->delete($oldImagePath);
+        }
+
+        $this->audit(
+            $request,
+            'PRODUCT_UPDATED',
+            "Updated product #{$productId} {$validated['sku']} ({$validated['name']})."
+        );
+
+        return response()->json([
+            'message' => 'Product updated successfully.',
+            'product_id' => $productId,
+        ]);
+    }
+
     public function storeCategory(Request $request): JsonResponse
     {
         $this->authorizeSuperAdmin();
@@ -130,6 +279,7 @@ class SuperAdminCatalogController extends Controller
             ],
         ], 201);
     }
+
     public function stockIn(Request $request): JsonResponse
     {
         $this->authorizeSuperAdmin();

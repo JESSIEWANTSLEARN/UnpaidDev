@@ -26,6 +26,14 @@ export const navSections = [
       { name: "Settings", icon: "settings" },
     ],
   },
+  {
+    label: "System Access",
+    items: [
+      { name: "Landing Page", icon: "home", href: "/" },
+      { name: "Customer Store", icon: "cart", href: "/store-preview" },
+      { name: "Website Content", icon: "settings", href: "/super-admin/content" },
+    ],
+  },
 ];
 
 
@@ -61,4 +69,5 @@ export const INITIAL_FORMS = {
     company_name: "Walang Brownout", company_email: "", company_contact: "", company_address: "", logo: null,
   },
   editUser: { user_id: "", name: "", email: "", contact_number: "", role: "System_User", account_status: "active" },
+  deleteUser: { confirmation: "" },
 };

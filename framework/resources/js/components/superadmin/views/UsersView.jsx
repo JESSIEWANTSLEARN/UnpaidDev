@@ -45,7 +45,13 @@ const formatLastSeen = (value) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
 
-export default function UsersView({ data, openModal, openUserEditor }) {
+export default function UsersView({
+  data,
+  openModal,
+  openUserEditor,
+  openUserSessions,
+  openUserDelete,
+}) {
   const [selectedRole, setSelectedRole] = useState("all");
   const [status, setStatus] = useState("all");
   const [presence, setPresence] = useState("all");
@@ -173,7 +179,7 @@ export default function UsersView({ data, openModal, openUserEditor }) {
       <div className="section-head">
         <div>
           <h2>User Management</h2>
-          <p>Select a role category to view only the users assigned to that role.</p>
+          <p>Manage roles, account status, device sessions, and safe account deletion.</p>
         </div>
 
         <button className="btn-primary" type="button" onClick={() => openModal("addUser")}>
@@ -303,33 +309,47 @@ export default function UsersView({ data, openModal, openUserEditor }) {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.user_id}>
-                    <td>{user.user_id}</td>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.contact_number || "—"}</td>
-                    <td><span className="user-role-label">{roleLabel(user.role)}</span></td>
-                    <td>
-                      <span className={`status-badge ${statusClass(user.account_status)}`}>
-                        {user.account_status}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`presence-badge ${user.is_online ? "online" : "offline"}`}>
-                        <span className={`presence-dot ${user.is_online ? "is-online" : "is-offline"}`} />
-                        {user.is_online ? "Online" : "Offline"}
-                      </span>
-                    </td>
-                    <td>{formatLastSeen(user.last_seen_at)}</td>
-                    <td>{user.email_verified_at ? "Yes" : "No"}</td>
-                    <td>
-                      <button className="row-action row-action-wide" type="button" onClick={() => openUserEditor(user)}>
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredUsers.map((user) => {
+                  const isCurrentAccount = Number(user.user_id) === Number(data.current_user?.user_id);
+
+                  return (
+                    <tr key={user.user_id}>
+                      <td>{user.user_id}</td>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.contact_number || "-"}</td>
+                      <td><span className="user-role-label">{roleLabel(user.role)}</span></td>
+                      <td>
+                        <span className={`status-badge ${statusClass(user.account_status)}`}>
+                          {user.account_status}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`presence-badge ${user.is_online ? "online" : "offline"}`}>
+                          <span className={`presence-dot ${user.is_online ? "is-online" : "is-offline"}`} />
+                          {user.is_online ? "Online" : "Offline"}
+                        </span>
+                      </td>
+                      <td>{formatLastSeen(user.last_seen_at)}</td>
+                      <td>{user.email_verified_at ? "Yes" : "No"}</td>
+                      <td>
+                        <div className="user-row-actions">
+                          <button className="row-action row-action-wide" type="button" onClick={() => openUserEditor(user)}>
+                            Edit
+                          </button>
+                          <button className="row-action row-action-wide" type="button" onClick={() => openUserSessions(user)}>
+                            Sessions
+                          </button>
+                          {!isCurrentAccount && (
+                            <button className="row-action row-action-wide row-action-danger" type="button" onClick={() => openUserDelete(user)}>
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

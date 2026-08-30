@@ -4,6 +4,7 @@ import {
   BackupModal,
   CompanyInfoModal,
   CategoryModal,
+  DeleteUserModal,
   InfoModal,
   NotificationsModal,
   ProductModal,
@@ -13,6 +14,7 @@ import {
   StockInModal,
   SupplierModal,
   UserModal,
+  UserSessionsModal,
 } from "./modals/index.js";
 
 const TITLES = {
@@ -23,6 +25,8 @@ const TITLES = {
   stockIn: "Stock In",
   addUser: "Add User",
   editUser: "Edit User",
+  userSessions: "Devices & Sessions",
+  deleteUser: "Delete Account",
   addSupplier: "Add Supplier",
   addPurchaseOrder: "New Purchase Order",
   categoryInfo: "Add Category",
@@ -50,6 +54,10 @@ function ModalContent(props) {
       return <UserModal mode="add" {...props} />;
     case "editUser":
       return <UserModal mode="edit" {...props} />;
+    case "userSessions":
+      return <UserSessionsModal {...props} />;
+    case "deleteUser":
+      return <DeleteUserModal {...props} />;
     case "addSupplier":
       return <SupplierModal {...props} />;
     case "addPurchaseOrder":
@@ -73,7 +81,7 @@ export default function SuperAdminModal(props) {
   return (
     <div className="admin-modal-backdrop" onClick={onClose}>
       <div
-        className="admin-modal"
+        className={`admin-modal ${type === "userSessions" ? "admin-modal-wide admin-modal-sessions" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="admin-modal-title"
@@ -91,7 +99,7 @@ export default function SuperAdminModal(props) {
             onClick={onClose}
             disabled={busy}
           >
-            ×
+            x
           </button>
         </div>
 

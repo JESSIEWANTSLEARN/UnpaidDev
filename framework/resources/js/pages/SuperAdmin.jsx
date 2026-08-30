@@ -32,6 +32,8 @@ export default function SuperAdmin() {
             setActiveMenu={admin.setActiveMenu}
             openModal={admin.openModal}
             openUserEditor={admin.openUserEditor}
+            openUserSessions={admin.openUserSessions}
+            openUserDelete={admin.openUserDelete}
             handleExportReport={admin.handleExportReport}
           />
         </main>

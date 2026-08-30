@@ -21,7 +21,9 @@ function Dashboard({ data, setActiveMenu }) {
         <StatCard title="Total Users" value={number(metrics.total_users)} icon="users" accent="teal" />
       </div>
 
-      <div className="ops-panel">
+      <UserActivityPanel activity={data.user_activity} />
+
+      <div className="ops-panel dashboard-inventory-panel">
         <div className="panel-head">
           <h2>Inventory Overview</h2>
           <button type="button" className="panel-link" onClick={() => setActiveMenu("Inventory")}>View All →</button>
@@ -77,6 +79,322 @@ function Dashboard({ data, setActiveMenu }) {
   );
 }
 
+
+function UserActivityPanel({ activity = {} }) {
+  const [range, setRange] = React.useState(7);
+
+  const activityMetrics = activity.metrics ?? {};
+  const daily =
+    range === 30
+      ? activity.daily_30 ?? []
+      : activity.daily_7 ?? [];
+
+  const hourly = activity.hourly_today ?? [];
+
+  const activeValues = daily.map((item) =>
+    Number(item.active_users || 0)
+  );
+
+  const maxActive = Math.max(
+    1,
+    ...activeValues
+  );
+
+  const lineWidth = 560;
+  const lineHeight = 170;
+  const linePadding = 16;
+
+  const lineStep =
+    daily.length > 1
+      ? (lineWidth - linePadding * 2) /
+        (daily.length - 1)
+      : 0;
+
+  const points = daily.map((item, index) => {
+    const x =
+      linePadding + index * lineStep;
+
+    const y =
+      lineHeight -
+      linePadding -
+      (Number(item.active_users || 0) /
+        maxActive) *
+        (lineHeight - linePadding * 2);
+
+    return [x, y];
+  });
+
+  const pointString = points
+    .map(([x, y]) => `${x},${y}`)
+    .join(" ");
+
+  const maxHourly = Math.max(
+    1,
+    ...hourly.map((item) =>
+      Number(item.count || 0)
+    )
+  );
+
+  const visibleHourly = hourly.filter(
+    (item) =>
+      Number(item.hour) % 2 === 0
+  );
+
+  const formatMetric = (value) =>
+    Number(value || 0).toLocaleString();
+
+  return (
+    <section className="ops-panel padded user-activity-panel">
+      <div className="panel-head user-activity-head">
+        <div>
+          <h2>User Activity</h2>
+          <span>
+            Authenticated sessions Â· Asia/Manila
+          </span>
+        </div>
+
+        <div
+          className="user-activity-range"
+          aria-label="User activity range"
+        >
+          <button
+            type="button"
+            className={range === 7 ? "is-active" : ""}
+            onClick={() => setRange(7)}
+          >
+            7 Days
+          </button>
+
+          <button
+            type="button"
+            className={range === 30 ? "is-active" : ""}
+            onClick={() => setRange(30)}
+          >
+            30 Days
+          </button>
+        </div>
+      </div>
+
+      <div className="user-activity-kpis">
+        <div className="user-activity-kpi">
+          <span>Active Users Today</span>
+          <strong>
+            {formatMetric(
+              activityMetrics.active_users_today
+            )}
+          </strong>
+          <small>Unique authenticated users</small>
+        </div>
+
+        <div className="user-activity-kpi">
+          <span>Sessions Today</span>
+          <strong>
+            {formatMetric(
+              activityMetrics.sessions_today
+            )}
+          </strong>
+          <small>Login sessions started today</small>
+        </div>
+
+        <div className="user-activity-kpi">
+          <span>Currently Online</span>
+          <strong>
+            {formatMetric(
+              activityMetrics.currently_online
+            )}
+          </strong>
+          <small>Active within the last 5 minutes</small>
+        </div>
+
+        <div className="user-activity-kpi">
+          <span>Peak Activity Hour</span>
+          <strong className="user-activity-time-value">
+            {activityMetrics.peak_activity_hour ||
+              "No activity"}
+          </strong>
+          <small>
+            {formatMetric(
+              activityMetrics.peak_activity_count
+            )}{" "}
+            session activity point(s)
+          </small>
+        </div>
+      </div>
+
+      <div className="user-activity-charts">
+        <div className="user-activity-chart-card">
+          <div className="user-activity-chart-title">
+            <div>
+              <strong>
+                Daily Active Users
+              </strong>
+              <span>
+                Unique users by local date
+              </span>
+            </div>
+
+            <small>
+              {range}-day view
+            </small>
+          </div>
+
+          {daily.length === 0 ? (
+            <EmptyState text="No session activity yet." />
+          ) : (
+            <>
+              <div className="user-activity-line-scroll">
+                <svg
+                  viewBox={`0 0 ${lineWidth} ${lineHeight}`}
+                  className="user-activity-line-chart"
+                  role="img"
+                  aria-label={`Daily active users for the last ${range} days`}
+                >
+                  <line
+                    x1={linePadding}
+                    y1={lineHeight - linePadding}
+                    x2={lineWidth - linePadding}
+                    y2={lineHeight - linePadding}
+                    stroke="var(--border)"
+                    strokeWidth="1"
+                  />
+
+                  <polyline
+                    points={pointString}
+                    fill="none"
+                    stroke="var(--primary)"
+                    strokeWidth="3"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+
+                  {points.map(
+                    ([x, y], index) => (
+                      <g
+                        key={`${daily[index]?.date}-${index}`}
+                      >
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r="4"
+                          fill="var(--primary)"
+                        />
+
+                        <title>
+                          {daily[index]?.label}:{" "}
+                          {daily[index]?.active_users} active user(s)
+                        </title>
+                      </g>
+                    )
+                  )}
+                </svg>
+              </div>
+
+              <div
+                className={`user-activity-date-labels ${
+                  range === 30
+                    ? "is-thirty"
+                    : ""
+                }`}
+              >
+                {daily.map((item, index) => {
+                  const show =
+                    range === 7 ||
+                    index === 0 ||
+                    index === daily.length - 1 ||
+                    index % 5 === 0;
+
+                  return (
+                    <span key={item.date}>
+                      {show
+                        ? range === 7
+                          ? item.short_label
+                          : item.label
+                        : ""}
+                    </span>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="user-activity-chart-card">
+          <div className="user-activity-chart-title">
+            <div>
+              <strong>Activity by Hour</strong>
+              <span>
+                Today's session activity
+              </span>
+            </div>
+
+            <small>
+              {activityMetrics.peak_activity_hour
+                ? `Peak ${activityMetrics.peak_activity_hour}`
+                : "No peak yet"}
+            </small>
+          </div>
+
+          <div className="user-activity-bars">
+            {visibleHourly.map((item) => {
+              const height =
+                Math.max(
+                  Number(item.count || 0) > 0
+                    ? 12
+                    : 3,
+                  (Number(item.count || 0) /
+                    maxHourly) *
+                    100
+                );
+
+              return (
+                <div
+                  className="user-activity-bar-column"
+                  key={item.hour}
+                >
+                  <div className="user-activity-bar-track">
+                    <span
+                      className="user-activity-bar"
+                      style={{
+                        height: `${height}%`,
+                      }}
+                      title={`${item.label}: ${item.count} activity point(s)`}
+                    />
+                  </div>
+
+                  <span>{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="user-activity-footnote">
+        <span>
+          30-day tracked sessions:{" "}
+          <strong>
+            {formatMetric(
+              activityMetrics.tracked_sessions_30d
+            )}
+          </strong>
+        </span>
+
+        <span>
+          Distinct users:{" "}
+          <strong>
+            {formatMetric(
+              activityMetrics.distinct_users_30d
+            )}
+          </strong>
+        </span>
+
+        <span>
+          Anonymous landing-page visitors are not included yet.
+        </span>
+      </div>
+    </section>
+  );
+}
 function TrendPanel({ trend }) {
   const values = trend.map((item) => Number(item.net_movement || 0));
   const maxAbs = Math.max(1, ...values.map((value) => Math.abs(value)));

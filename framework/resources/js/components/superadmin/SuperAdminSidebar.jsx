@@ -34,10 +34,16 @@ export default function SuperAdminSidebar({
                                 <button
                                     type="button"
                                     key={item.name}
-                                    className={`ops-nav-link ${activeMenu === item.name ? "active" : ""}`}
+                                    className={`ops-nav-link ${!item.href && activeMenu === item.name ? "active" : ""}`}
                                     onClick={() => {
-                                        setActiveMenu(item.name);
                                         setSidebarOpen(false);
+
+                                        if (item.href) {
+                                            window.location.href = item.href;
+                                            return;
+                                        }
+
+                                        setActiveMenu(item.name);
                                     }}
                                 >
                                     <span className="ops-nav-icon">
