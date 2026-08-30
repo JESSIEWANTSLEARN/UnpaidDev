@@ -73,7 +73,7 @@ class OtpService
         string $otp,
         string $purpose
     ): void {
-        if (!in_array($purpose, ['login', 'signup'], true)) {
+        if (!in_array($purpose, ['login', 'signup', 'password_reset'], true)) {
             throw new InvalidArgumentException('Invalid OTP purpose.');
         }
 
@@ -106,8 +106,13 @@ if ($purpose === 'login') {
     $subject .= " - {$requestReference}";
 }
 
-        // Keep the existing OTP Blade design exactly as-is.
-        $html = view('emails.otp', [
+        // Keep login/signup email design unchanged. Password reset has its own
+        // purpose-specific template.
+        $view = $purpose === 'password_reset'
+            ? 'emails.password-reset-otp'
+            : 'emails.otp';
+
+        $html = view($view, [
             'otpCode' => $otp,
             'userName' => $user->name,
             'purpose' => $purpose,

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/LogIn.css";
+import "../css/PasswordReset.css";
 
 import { authFetch } from "./utils/authRequest.js";
 const Logo = "/storage/site/Logo.png";
@@ -216,6 +217,10 @@ function LogIn() {
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
+          </div>
+
+          <div className="login-forgot-row">
+            <Link to="/forgot-password">Forgot password?</Link>
           </div>
 
           <label className="login-remember-device">

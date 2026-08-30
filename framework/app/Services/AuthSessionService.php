@@ -13,8 +13,16 @@ class AuthSessionService
     ) {
     }
 
-    public function idleSeconds(): int
+    public function idleSeconds(?string $role = null): int
     {
+        $roleSeconds = $role
+            ? config("auth_security.role_idle_seconds.{$role}")
+            : null;
+
+        if ($roleSeconds !== null) {
+            return max(30, (int) $roleSeconds);
+        }
+
         return max(
             30,
             (int) config(
@@ -24,10 +32,10 @@ class AuthSessionService
         );
     }
 
-    public function warningSeconds(): int
+    public function warningSeconds(?string $role = null): int
     {
         return min(
-            $this->idleSeconds() - 1,
+            $this->idleSeconds($role) - 1,
             max(
                 5,
                 (int) config(
@@ -149,7 +157,7 @@ class AuthSessionService
 
         if (
             now()->timestamp - $lastActivity >=
-            $this->idleSeconds()
+            $this->idleSeconds((string) $user->role)
         ) {
             $this->invalidate(
                 $request,

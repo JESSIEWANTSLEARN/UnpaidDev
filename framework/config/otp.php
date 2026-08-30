@@ -24,6 +24,11 @@ return [
 
     'max_attempts' => (int) env('OTP_MAX_ATTEMPTS', 5),
 
+    'password_reset_completion_minutes' => (int) env(
+        'PASSWORD_RESET_COMPLETION_MINUTES',
+        10
+    ),
+
     'subjects' => [
         'login' => env(
             'OTP_LOGIN_SUBJECT',
@@ -33,6 +38,11 @@ return [
         'signup' => env(
             'OTP_SIGNUP_SUBJECT',
             'WalangBrownout - Account Verification'
+        ),
+
+        'password_reset' => env(
+            'OTP_PASSWORD_RESET_SUBJECT',
+            'WalangBrownout - Password Reset Code'
         ),
     ],
 ];

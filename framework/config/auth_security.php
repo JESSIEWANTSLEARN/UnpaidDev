@@ -21,6 +21,15 @@ return [
         (int) env('SESSION_IDLE_WARNING_SECONDS', 15)
     ),
 
+    // Role-specific inactivity overrides.
+    // Super Admin receives a 24-hour inactivity window.
+    'role_idle_seconds' => [
+        'super_admin' => max(
+            60,
+            (int) env('SUPER_ADMIN_IDLE_SECONDS', 86400)
+        ),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Trusted device policy

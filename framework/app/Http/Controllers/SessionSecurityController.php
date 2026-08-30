@@ -27,11 +27,16 @@ class SessionSecurityController extends Controller
         $userId =
             (int) $request->session()->get('user_id');
 
+        $role =
+            (string) $request->session()->get('role', '');
+
         return response()->json([
             'authenticated' => true,
-            'idle_seconds' => $sessions->idleSeconds(),
+            'role' => $role,
+            'name' => (string) $request->session()->get('name', ''),
+            'idle_seconds' => $sessions->idleSeconds($role),
             'warning_seconds' =>
-                $sessions->warningSeconds(),
+                $sessions->warningSeconds($role),
             'trusted_device' =>
                 $trustedDevices->currentIsTrusted(
                     $request,
