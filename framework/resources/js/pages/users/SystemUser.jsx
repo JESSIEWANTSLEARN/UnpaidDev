@@ -1,6 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import {
+  cartItemCount,
+  clearGuestCart,
+  mergeCartsWithProducts,
+  readGuestCart,
+  readUserCart,
+  writeUserCart,
+} from "../../utils/cartStorage.js";
+
+
 import "../../../css/ImageHoverEffects.css";
 const Logo = "/storage/site/Logo.png";
 
@@ -22,7 +31,7 @@ const imagePath = (value) => {
 };
 
 const normalizeProduct = (p, i) => ({
-  product_id: p.product_id ?? p.id ?? i,
+  product_id: Number(p.product_id ?? p.id ?? i),
   sku: p.sku ?? "",
   name: p.name ?? "Product",
   description: p.description ?? "",
@@ -129,8 +138,31 @@ export default function SystemUser() {
         ? productData
         : productData.products ?? productData.data ?? [];
 
-      setProducts(list.map(normalizeProduct));
+      const normalizedProducts = list.map(normalizeProduct);
+      const userId = Number(me.user?.user_id);
+      const guestCart = readGuestCart();
+      const savedUserCart = readUserCart(userId);
+      const mergedCart = mergeCartsWithProducts(
+        normalizedProducts,
+        savedUserCart,
+        guestCart
+      );
+      const importedGuestCount = cartItemCount(guestCart);
+
+      setProducts(normalizedProducts);
+      setCart(mergedCart);
       setOrders(orderData.orders ?? []);
+
+      if (Number.isInteger(userId) && userId > 0) {
+        writeUserCart(userId, mergedCart);
+      }
+
+      if (importedGuestCount > 0) {
+        clearGuestCart();
+        setNotice(
+          `${importedGuestCount} guest cart item(s) moved into your account.`
+        );
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -139,6 +171,15 @@ export default function SystemUser() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    const userId = Number(user?.user_id);
+
+    if (!Number.isInteger(userId) || userId <= 0) return;
+
+    writeUserCart(userId, cart);
+  }, [cart, user?.user_id]);
+
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(""), 3500);
@@ -202,6 +243,9 @@ export default function SystemUser() {
         body: JSON.stringify({ items: cartItems.map((i) => ({ product_id: i.product_id, quantity: i.quantity })) }),
       });
       setCart({});
+      if (user?.user_id) {
+        writeUserCart(user.user_id, {});
+      }
       setCartOpen(false);
       setTab("orders");
       setNotice(data.message);

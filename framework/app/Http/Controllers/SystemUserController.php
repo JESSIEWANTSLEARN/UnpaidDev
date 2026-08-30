@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\WBOUser;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -60,6 +62,120 @@ class SystemUserController extends Controller
         }
     }
 
+
+    public function notifications(
+        Request $request,
+        NotificationService $notifications
+    ) {
+        $user = $this->currentUser($request);
+
+        $notifications->syncCustomerOrderNotifications(
+            (int) $user->user_id
+        );
+
+        $items = Schema::hasTable('WBO_Notifications')
+            ? DB::table('WBO_Notifications')
+                ->where(
+                    'recipient_user_id',
+                    $user->user_id
+                )
+                ->orderByDesc('triggered_at')
+                ->orderByDesc('notification_id')
+                ->limit(30)
+                ->get()
+                ->map(fn ($item) => [
+                    'notification_id' =>
+                        (int) $item->notification_id,
+                    'alert_tier' => $item->alert_tier,
+                    'title' => $item->title,
+                    'message' => $item->message,
+                    'related_product_id' =>
+                        $item->related_product_id,
+                    'related_batch_id' =>
+                        $item->related_batch_id,
+                    'triggered_at' => $item->triggered_at,
+                    'status' => $item->status,
+                    'acknowledged_at' =>
+                        $item->acknowledged_at,
+                ])
+                ->values()
+            : collect();
+
+        return response()->json([
+            'success' => true,
+            'notifications' => $items,
+            'unread_count' =>
+                $items
+                    ->where('status', 'UNREAD')
+                    ->count(),
+        ]);
+    }
+
+    public function readNotification(
+        Request $request,
+        int $notificationId
+    ) {
+        $user = $this->currentUser($request);
+
+        $notification = DB::table(
+            'WBO_Notifications'
+        )
+            ->where(
+                'notification_id',
+                $notificationId
+            )
+            ->where(
+                'recipient_user_id',
+                $user->user_id
+            )
+            ->first();
+
+        if (!$notification) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification not found.',
+            ], 404);
+        }
+
+        if ($notification->status === 'UNREAD') {
+            DB::table('WBO_Notifications')
+                ->where(
+                    'notification_id',
+                    $notificationId
+                )
+                ->update([
+                    'status' => 'ACKNOWLEDGED',
+                    'acknowledged_at' => now(),
+                ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification marked as read.',
+        ]);
+    }
+
+    public function readAllNotifications(
+        Request $request
+    ) {
+        $user = $this->currentUser($request);
+
+        DB::table('WBO_Notifications')
+            ->where(
+                'recipient_user_id',
+                $user->user_id
+            )
+            ->where('status', 'UNREAD')
+            ->update([
+                'status' => 'ACKNOWLEDGED',
+                'acknowledged_at' => now(),
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All notifications marked as read.',
+        ]);
+    }
     public function me(Request $request)
     {
         $user = $this->currentUser($request);
@@ -71,6 +187,20 @@ class SystemUserController extends Controller
             ->selectRaw("SUM(CASE WHEN status = 'FULFILLED' THEN 1 ELSE 0 END) AS fulfilled_orders")
             ->first();
 
+        $profilePhoto = Schema::hasTable('WBO_UserProfilePhotos')
+            ? DB::table('WBO_UserProfilePhotos')
+                ->where('user_id', $user->user_id)
+                ->select('updated_at')
+                ->first()
+            : null;
+
+        $hasDeliveryAddress =
+            trim((string) ($user->street_address ?? '')) !== '' ||
+            trim((string) ($user->barangay ?? '')) !== '' ||
+            trim((string) ($user->city_municipality ?? '')) !== '' ||
+            trim((string) ($user->province ?? '')) !== '' ||
+            trim((string) ($user->postal_code ?? '')) !== '';
+
         return response()->json([
             'success' => true,
             'user' => [
@@ -80,7 +210,18 @@ class SystemUserController extends Controller
                 'contact_number' => $user->contact_number,
                 'role' => $user->role,
                 'account_status' => $user->account_status,
+                'has_profile_photo' => $profilePhoto !== null,
+                'profile_photo_version' => $profilePhoto
+                    ? (string) $profilePhoto->updated_at
+                    : null,
             ],
+            'delivery_address' => $hasDeliveryAddress ? [
+                'street_address' => $user->street_address,
+                'barangay' => $user->barangay,
+                'city_municipality' => $user->city_municipality,
+                'province' => $user->province,
+                'postal_code' => $user->postal_code,
+            ] : null,
             'stats' => [
                 'total_orders' => (int) ($stats->total_orders ?? 0),
                 'pending_orders' => (int) ($stats->pending_orders ?? 0),
@@ -111,17 +252,50 @@ class SystemUserController extends Controller
         }
 
         $payload = $orders->map(function ($order) use ($details) {
-            $items = collect($details->get($order->order_id, []))->map(function ($item) {
-                return [
-                    'order_detail_id' => $item->order_detail_id,
-                    'product_id' => $item->product_id,
-                    'product_name' => $item->product_name,
-                    'sku' => $item->sku,
-                    'quantity' => (int) $item->quantity,
-                    'unit_price' => (float) $item->unit_price,
-                    'line_total' => (float) $item->unit_price * (int) $item->quantity,
-                ];
-            })->values();
+            $items = collect($details->get($order->order_id, []))
+                ->map(function ($item) {
+                    return [
+                        'order_detail_id' => $item->order_detail_id,
+                        'product_id' => $item->product_id,
+                        'product_name' => $item->product_name,
+                        'sku' => $item->sku,
+                        'quantity' => (int) $item->quantity,
+                        'unit_price' => (float) $item->unit_price,
+                        'line_total' =>
+                            (float) $item->unit_price *
+                            (int) $item->quantity,
+                    ];
+                })
+                ->values();
+
+            $hasDelivery =
+                $order->delivery_street_address !== null ||
+                $order->delivery_email !== null;
+
+            $delivery = $hasDelivery ? [
+                'full_name' => $order->customer_name,
+                'email' => $order->delivery_email,
+                'contact_number' => $order->customer_contact,
+                'street_address' => $order->delivery_street_address,
+                'barangay' => $order->delivery_barangay,
+                'city_municipality' =>
+                    $order->delivery_city_municipality,
+                'province' => $order->delivery_province,
+                'postal_code' => $order->delivery_postal_code,
+                'delivery_notes' => $order->delivery_notes,
+            ] : null;
+
+            $payment = $order->payment_method !== null ? [
+                'payment_method' => $order->payment_method,
+                'payment_status' => $order->payment_status,
+                'amount' => (float) (
+                    $order->payment_amount ??
+                    $order->total_amount
+                ),
+                'reference_number' =>
+                    $order->payment_reference_number,
+                'paid_at' => $order->paid_at,
+            ] : null;
 
             return [
                 'order_id' => $order->order_id,
@@ -129,20 +303,71 @@ class SystemUserController extends Controller
                 'status' => $order->status,
                 'items' => $items,
                 'total' => (float) $items->sum('line_total'),
+                'delivery' => $delivery,
+                'payment' => $payment,
             ];
         });
 
-        return response()->json(['success' => true, 'orders' => $payload]);
+        return response()->json([
+            'success' => true,
+            'orders' => $payload,
+        ]);
     }
 
-    public function placeOrder(Request $request)
-    {
+    public function placeOrder(
+        Request $request
+    ) {
         $user = $this->currentUser($request);
+
+        $requiredOrderColumns = [
+            'delivery_email',
+            'delivery_street_address',
+            'delivery_barangay',
+            'delivery_city_municipality',
+            'delivery_province',
+            'delivery_postal_code',
+            'delivery_notes',
+            'payment_method',
+            'payment_status',
+            'payment_amount',
+            'payment_reference_number',
+            'paid_at',
+        ];
+
+        foreach ($requiredOrderColumns as $column) {
+            if (!Schema::hasColumn('WBO_Orders', $column)) {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'The simplified checkout database patch is not installed yet.',
+                ], 409);
+            }
+        }
 
         $validator = Validator::make($request->all(), [
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer'],
-            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:99'],
+            'items.*.quantity' =>
+                ['required', 'integer', 'min:1'],
+            'delivery' => ['required', 'array'],
+            'delivery.full_name' =>
+                ['required', 'string', 'max:100'],
+            'delivery.contact_number' =>
+                ['required', 'string', 'max:20'],
+            'delivery.street_address' =>
+                ['required', 'string', 'max:255'],
+            'delivery.barangay' =>
+                ['required', 'string', 'max:100'],
+            'delivery.city_municipality' =>
+                ['required', 'string', 'max:100'],
+            'delivery.province' =>
+                ['required', 'string', 'max:100'],
+            'delivery.postal_code' =>
+                ['required', 'string', 'max:20'],
+            'delivery.delivery_notes' =>
+                ['nullable', 'string', 'max:500'],
+            'payment_method' =>
+                ['required', 'string', 'in:CASH_ON_DELIVERY'],
         ]);
 
         if ($validator->fails()) {
@@ -153,36 +378,85 @@ class SystemUserController extends Controller
             ], 422);
         }
 
-        $items = collect($validator->validated()['items'])
+        $validated = $validator->validated();
+
+        $items = collect($validated['items'])
             ->groupBy('product_id')
             ->map(fn ($rows, $productId) => [
                 'product_id' => (int) $productId,
-                'quantity' => (int) collect($rows)->sum('quantity'),
-            ])->values();
+                'quantity' =>
+                    (int) collect($rows)->sum('quantity'),
+            ])
+            ->values();
+
+        $paymentMethod = $validated['payment_method'];
+
+        $delivery = [
+            'full_name' =>
+                trim($validated['delivery']['full_name']),
+            'email' => $user->email,
+            'contact_number' =>
+                trim($validated['delivery']['contact_number']),
+            'street_address' =>
+                trim($validated['delivery']['street_address']),
+            'barangay' =>
+                trim($validated['delivery']['barangay']),
+            'city_municipality' =>
+                trim($validated['delivery']['city_municipality']),
+            'province' =>
+                trim($validated['delivery']['province']),
+            'postal_code' =>
+                trim($validated['delivery']['postal_code']),
+            'delivery_notes' =>
+                isset($validated['delivery']['delivery_notes']) &&
+                trim(
+                    (string) $validated['delivery']['delivery_notes']
+                ) !== ''
+                    ? trim(
+                        $validated['delivery']['delivery_notes']
+                    )
+                    : null,
+        ];
 
         try {
-            $orderId = DB::transaction(function () use ($items, $user, $request) {
+            $orderId = DB::transaction(function () use (
+                $items,
+                $user,
+                $request,
+                $delivery,
+                $paymentMethod
+            ) {
                 $prepared = [];
 
                 foreach ($items as $item) {
                     $product = DB::table('WBO_Products')
-                        ->where('product_id', $item['product_id'])
+                        ->where(
+                            'product_id',
+                            $item['product_id']
+                        )
                         ->where('is_visible', true)
                         ->first();
 
                     if (!$product) {
                         throw ValidationException::withMessages([
-                            'items' => ['One selected product is no longer available.'],
+                            'items' => [
+                                'One selected product is no longer available.',
+                            ],
                         ]);
                     }
 
                     $stock = (int) DB::table('WBO_Batches')
-                        ->where('product_id', $product->product_id)
+                        ->where(
+                            'product_id',
+                            $product->product_id
+                        )
                         ->sum('current_quantity');
 
                     if ($item['quantity'] > $stock) {
                         throw ValidationException::withMessages([
-                            'items' => ["{$product->name} only has {$stock} unit(s) available."],
+                            'items' => [
+                                "{$product->name} only has {$stock} unit(s) available.",
+                            ],
                         ]);
                     }
 
@@ -193,13 +467,41 @@ class SystemUserController extends Controller
                     ];
                 }
 
-                $orderId = DB::table('WBO_Orders')->insertGetId([
-                    'customer_user_id' => $user->user_id,
-                    'customer_name' => $user->name,
-                    'customer_contact' => $user->contact_number,
-                    'order_date' => now(),
-                    'status' => 'PENDING',
-                ]);
+                $totalAmount = (float) collect($prepared)
+                    ->sum(
+                        fn ($item) =>
+                            (float) $item['unit_price'] *
+                            (int) $item['quantity']
+                    );
+
+                $orderId = DB::table('WBO_Orders')
+                    ->insertGetId([
+                        'customer_user_id' => $user->user_id,
+                        'customer_name' => $delivery['full_name'],
+                        'customer_contact' =>
+                            $delivery['contact_number'],
+                        'delivery_email' => $delivery['email'],
+                        'delivery_street_address' =>
+                            $delivery['street_address'],
+                        'delivery_barangay' =>
+                            $delivery['barangay'],
+                        'delivery_city_municipality' =>
+                            $delivery['city_municipality'],
+                        'delivery_province' =>
+                            $delivery['province'],
+                        'delivery_postal_code' =>
+                            $delivery['postal_code'],
+                        'delivery_notes' =>
+                            $delivery['delivery_notes'],
+                        'order_date' => now(),
+                        'status' => 'PENDING',
+                        'total_amount' => $totalAmount,
+                        'payment_method' => $paymentMethod,
+                        'payment_status' => 'PENDING',
+                        'payment_amount' => $totalAmount,
+                        'payment_reference_number' => null,
+                        'paid_at' => null,
+                    ]);
 
                 foreach ($prepared as $item) {
                     DB::table('WBO_OrderDetails')->insert([
@@ -210,23 +512,140 @@ class SystemUserController extends Controller
                     ]);
                 }
 
-                $this->audit($request, $user->user_id, 'ORDER_CREATED', "Customer placed order #{$orderId}");
+                $this->audit(
+                    $request,
+                    $user->user_id,
+                    'ORDER_CREATED',
+                    "Customer placed order #{$orderId}"
+                );
 
                 return $orderId;
             });
 
+            $amount = (float) DB::table('WBO_Orders')
+                ->where('order_id', $orderId)
+                ->value('total_amount');
+
             return response()->json([
                 'success' => true,
-                'message' => 'Order placed successfully. Waiting for Sales Staff review.',
+                'message' => 'Order placed successfully.',
                 'order_id' => $orderId,
+                'total_amount' => $amount,
+                'payment' => [
+                    'payment_method' => $paymentMethod,
+                    'payment_status' => 'PENDING',
+                    'amount' => $amount,
+                ],
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => collect($e->errors())->flatten()->first(),
+                'message' =>
+                    collect($e->errors())->flatten()->first(),
                 'errors' => $e->errors(),
             ], 422);
         }
+    }
+
+    public function profilePhoto(Request $request)
+    {
+        $user = $this->currentUser($request);
+
+        if (!Schema::hasTable('WBO_UserProfilePhotos')) {
+            abort(404);
+        }
+
+        $photo = DB::table('WBO_UserProfilePhotos')
+            ->where('user_id', $user->user_id)
+            ->first();
+
+        if (!$photo) {
+            abort(404);
+        }
+
+        return response($photo->photo_data, 200, [
+            'Content-Type' => $photo->mime_type,
+            'Content-Disposition' => 'inline',
+            'Cache-Control' => 'private, max-age=300',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function updateProfilePhoto(Request $request)
+    {
+        $user = $this->currentUser($request);
+
+        if (!Schema::hasTable('WBO_UserProfilePhotos')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile photo storage is not installed yet.',
+            ], 409);
+        }
+
+        $validated = $request->validate([
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        $file = $validated['photo'];
+        $bytes = file_get_contents($file->getRealPath());
+
+        if ($bytes === false) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to read the selected image.',
+            ], 422);
+        }
+
+        DB::table('WBO_UserProfilePhotos')->updateOrInsert(
+            ['user_id' => $user->user_id],
+            [
+                'photo_data' => $bytes,
+                'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                'file_size' => (int) $file->getSize(),
+                'updated_at' => now(),
+            ]
+        );
+
+        $this->audit(
+            $request,
+            $user->user_id,
+            'PROFILE_PHOTO_UPDATED',
+            'System User updated account profile photo'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile photo updated successfully.',
+            'profile_photo_version' => now()->timestamp,
+        ]);
+    }
+
+    public function deleteProfilePhoto(Request $request)
+    {
+        $user = $this->currentUser($request);
+
+        if (!Schema::hasTable('WBO_UserProfilePhotos')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile photo storage is not installed yet.',
+            ], 409);
+        }
+
+        DB::table('WBO_UserProfilePhotos')
+            ->where('user_id', $user->user_id)
+            ->delete();
+
+        $this->audit(
+            $request,
+            $user->user_id,
+            'PROFILE_PHOTO_REMOVED',
+            'System User removed account profile photo'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile photo removed successfully.',
+        ]);
     }
 
     public function updateProfile(Request $request)
@@ -255,6 +674,74 @@ class SystemUserController extends Controller
                 'contact_number' => $user->contact_number,
                 'role' => $user->role,
             ],
+        ]);
+    }
+
+
+    public function updateDeliveryAddress(Request $request)
+    {
+        $user = $this->currentUser($request);
+
+        $requiredUserColumns = [
+            'street_address',
+            'barangay',
+            'city_municipality',
+            'province',
+            'postal_code',
+        ];
+
+        foreach ($requiredUserColumns as $column) {
+            if (!Schema::hasColumn('WBO_Users', $column)) {
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'The simplified user-address database patch is not installed yet.',
+                ], 409);
+            }
+        }
+
+        $validated = $request->validate([
+            'street_address' =>
+                ['required', 'string', 'max:255'],
+            'barangay' =>
+                ['required', 'string', 'max:100'],
+            'city_municipality' =>
+                ['required', 'string', 'max:100'],
+            'province' =>
+                ['required', 'string', 'max:100'],
+            'postal_code' =>
+                ['required', 'string', 'max:20'],
+        ]);
+
+        $deliveryAddress = [
+            'street_address' =>
+                trim($validated['street_address']),
+            'barangay' =>
+                trim($validated['barangay']),
+            'city_municipality' =>
+                trim($validated['city_municipality']),
+            'province' =>
+                trim($validated['province']),
+            'postal_code' =>
+                trim($validated['postal_code']),
+        ];
+
+        DB::table('WBO_Users')
+            ->where('user_id', $user->user_id)
+            ->update($deliveryAddress);
+
+        $this->audit(
+            $request,
+            $user->user_id,
+            'DELIVERY_ADDRESS_UPDATED',
+            'System User updated default delivery address'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' =>
+                'Delivery information saved successfully.',
+            'delivery_address' => $deliveryAddress,
         ]);
     }
 
