@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../css/LandingPage.css";
+import {
+  cartItemCount,
+  readGuestCart,
+  reconcileCartWithProducts,
+  writeGuestCart,
+} from "./utils/cartStorage.js";
 
 const Logo = "/storage/site/Logo.png";
 const mainpic = "/storage/site/mainpic.jpg";
@@ -113,13 +119,66 @@ function formatPeso(value) {
 
 function LandingPage() {
   const pageRef = useRef(null);
-  const [cartCount, setCartCount] = useState(0);
+  const [cart, setCart] = useState(() => readGuestCart());
   const [products, setProducts] = useState(fallbackProducts);
+  const [productsAreLive, setProductsAreLive] = useState(false);
+  const [activeSession, setActiveSession] = useState(null);
+  const [websiteContent, setWebsiteContent] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/public/website-content", {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then((payload) => {
+        if (active && payload) {
+          setWebsiteContent(payload);
+        }
+      })
+      .catch(() => {
+        // Keep the existing landing-page fallback content.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
   const [collapsed, setCollapsed] = useState({
     about: false,
     services: false,
     products: false,
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/session/status", {
+      credentials: "same-origin",
+      headers: { Accept: "application/json" },
+    })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then((data) => {
+        if (!cancelled && data?.authenticated) {
+          setActiveSession(data);
+        }
+      })
+      .catch(() => {
+        // Public landing page remains usable when no session is active.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -142,7 +201,18 @@ function LandingPage() {
           : payload.products ?? payload.data ?? [];
 
         if (active && Array.isArray(list) && list.length > 0) {
-          setProducts(list.map(normalizeProduct));
+          const normalizedProducts = list.map(normalizeProduct);
+
+          setProducts(normalizedProducts);
+          setProductsAreLive(true);
+          setCart((current) => {
+            const reconciled = reconcileCartWithProducts(
+              current,
+              normalizedProducts
+            );
+            writeGuestCart(reconciled);
+            return reconciled;
+          });
         }
       } catch {
         // Keep the design visible with fallback cards if the API is temporarily unavailable.
@@ -206,9 +276,51 @@ function LandingPage() {
     }));
   };
 
+  const cartCount = cartItemCount(cart);
+
+  const activeDashboardPath =
+    activeSession?.role === "super_admin"
+      ? "/super-admin"
+      : activeSession?.role === "System_User"
+        ? "/user"
+        : null;
+
+  const activeDashboardLabel =
+    activeSession?.role === "super_admin"
+      ? "Back to Super Admin"
+      : "Back to Account";
+
   const addToCart = (product) => {
-    if (Number(product.available_stock) <= 0) return;
-    setCartCount((count) => count + 1);
+    const productId = Number(product.product_id);
+    const stock = Math.max(0, Math.floor(Number(product.available_stock) || 0));
+
+    if (
+      !productsAreLive ||
+      !Number.isInteger(productId) ||
+      productId <= 0 ||
+      stock <= 0
+    ) {
+      return;
+    }
+
+    setCart((current) => {
+      const quantity = current[productId]?.quantity ?? 0;
+
+      if (quantity >= stock) {
+        return current;
+      }
+
+      const next = {
+        ...current,
+        [productId]: {
+          product_id: productId,
+          quantity: quantity + 1,
+        },
+      };
+
+      writeGuestCart(next);
+      return next;
+    });
   };
 
   const handleNewsletter = (event) => {
@@ -238,13 +350,21 @@ function LandingPage() {
           </div>
 
           <div className="nav-actions">
-            <Link to="/login" className="nav-button">
-              Login
-            </Link>
+            {activeDashboardPath ? (
+              <Link to={activeDashboardPath} className="nav-button primary-nav-button">
+                {activeDashboardLabel}
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="nav-button">
+                  Login
+                </Link>
 
-            <Link to="/signup" className="nav-button primary-nav-button">
-              Create Account
-            </Link>
+                <Link to="/signup" className="nav-button primary-nav-button">
+                  Create Account
+                </Link>
+              </>
+            )}
 
             <button className="cart-button" type="button" aria-label={`${cartCount} item${cartCount === 1 ? "" : "s"} in cart`}>
               Cart (<span aria-live="polite">{cartCount}</span>)
@@ -258,6 +378,7 @@ function LandingPage() {
           <a href="#features">Features</a>
           <a href="#inventory">Inventory</a>
           <a href="#about">About</a>
+          <Link to="/faq">FAQ</Link>
         </nav>
       </header>
 
@@ -279,8 +400,11 @@ function LandingPage() {
                 Explore Solutions
               </a>
 
-              <Link to="/login" className="secondary-link">
-                View Dashboard
+              <Link
+                to={activeDashboardPath || "/login"}
+                className="secondary-link"
+              >
+                {activeDashboardPath ? activeDashboardLabel : "View Dashboard"}
               </Link>
             </div>
           </div>
@@ -292,12 +416,13 @@ function LandingPage() {
 
         <section
           id="about"
+          style={websiteContent?.about?.visible === false ? { display: "none" } : undefined}
           className={`categories-section ${
             collapsed.about ? "collapsed" : ""
           }`}
         >
           <div className="section-heading">
-            <h2>About Walang BrownOut</h2>
+            <h2>{websiteContent?.about?.title || "About Walang BrownOut"}</h2>
             <a href="#about">Learn more</a>
 
             <button
@@ -313,11 +438,8 @@ function LandingPage() {
 
           <div className="about-box reveal-up">
             <p>
-              Walang BrownOut Appliances is a regional distributor of home
-              comfort products dedicated to improving everyday living through
-              dependable cooling, clean air, and smarter energy use. We serve
-              households, offices, and retail partners with efficient solutions
-              built for comfort, health, and performance.
+              {websiteContent?.about?.description ||
+                "Walang BrownOut Appliances is a regional distributor of home comfort products dedicated to improving everyday living through dependable cooling, clean air, and smarter energy use. We serve households, offices, and retail partners with efficient solutions built for comfort, health, and performance."}
             </p>
           </div>
         </section>
@@ -415,11 +537,15 @@ function LandingPage() {
                     <button
                       type="button"
                       onClick={() => addToCart(product)}
-                      disabled={product.available_stock <= 0}
+                      disabled={
+                        product.available_stock <= 0 || !productsAreLive
+                      }
                     >
-                      {product.available_stock > 0
-                        ? "Add to cart"
-                        : "Out of stock"}
+                      {!productsAreLive
+                        ? "Catalog unavailable"
+                        : product.available_stock > 0
+                          ? "Add to cart"
+                          : "Out of stock"}
                     </button>
                   </div>
                 </div>
@@ -489,7 +615,7 @@ function LandingPage() {
             <h4>Support</h4>
             <a href="#solutions">Solutions</a>
             <a href="#inventory">Inventory</a>
-            <a href="#about">FAQs</a>
+            <Link to="/faq">FAQs</Link>
             <a href="#about">Privacy</a>
           </div>
         </div>
