@@ -4,13 +4,16 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import LandingPage from "./LandingPage.jsx";
+import FAQ from "./FAQ.jsx";
 import LogIn from "./LogIn.jsx";
 import Signup from "./Signup.jsx";
 import LoginOtp from "./LoginOtp.jsx";
 import SignupVerify from "./SignupVerify.jsx";
+import ForgotPassword from "./ForgotPassword.jsx";
 
-import SystemUser from "./pages/users/SystemUser.jsx";
+import SystemUser from "./pages/users/SystemUserPremium.jsx";
 import SuperAdmin from "./pages/SuperAdmin.jsx";
+import WebsiteContentAdmin from "./pages/WebsiteContentAdmin.jsx";
 
 import PresenceTracker from "./components/PresenceTracker.jsx";
 
@@ -179,6 +182,7 @@ function AnimatedRoutes() {
                         ===================================== */}
 
                     <Route path="/" element={<LandingPage />} />
+                    <Route path="/faq" element={<FAQ />} />
 
                     <Route path="/login" element={<LogIn />} />
 
@@ -191,6 +195,7 @@ function AnimatedRoutes() {
                     <Route path="/login-otp" element={<LoginOtp />} />
 
                     <Route path="/signup-verify" element={<SignupVerify />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
 
                     {/* =====================================
                         SYSTEM USER
@@ -203,6 +208,8 @@ function AnimatedRoutes() {
                         ===================================== */}
 
                     <Route path="/super-admin" element={<SuperAdmin />} />
+                    <Route path="/super-admin/content" element={<WebsiteContentAdmin />} />
+                    <Route path="/store-preview" element={<SystemUser previewMode />} />
                 </Routes>
             </div>
         </div>
