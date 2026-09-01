@@ -432,7 +432,7 @@ function LandingPage() {
               onClick={() => toggleSection("about")}
               type="button"
             >
-              <span className="chev">▾</span>
+              <span className="chev" aria-hidden="true">{"\u25BE"}</span>
             </button>
           </div>
 
@@ -461,7 +461,7 @@ function LandingPage() {
               onClick={() => toggleSection("services")}
               type="button"
             >
-              <span className="chev">▾</span>
+              <span className="chev" aria-hidden="true">{"\u25BE"}</span>
             </button>
           </div>
 
@@ -497,7 +497,7 @@ function LandingPage() {
               onClick={() => toggleSection("products")}
               type="button"
             >
-              <span className="chev">▾</span>
+              <span className="chev" aria-hidden="true">{"\u25BE"}</span>
             </button>
           </div>
 
@@ -622,7 +622,7 @@ function LandingPage() {
 
         <div className="footer-bottom">
           <span>
-            <strong>© 2026 WalangBrownOut.</strong> All rights reserved.
+            <strong>&copy; 2026 WalangBrownOut.</strong> All rights reserved.
           </span>
 
           <div className="social-links">
