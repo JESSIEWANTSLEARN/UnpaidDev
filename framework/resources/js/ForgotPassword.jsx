@@ -255,7 +255,7 @@ export default function ForgotPassword() {
 
       <main className="password-reset-main">
         <Link to="/login" className="password-reset-back">
-          â† Back to Login
+          &larr; Back to Login
         </Link>
 
         <section className="password-reset-card">
@@ -326,7 +326,7 @@ export default function ForgotPassword() {
                   onChange={(event) =>
                     setOtp(event.target.value.replace(/\D/g, ""))
                   }
-                  placeholder={"â€¢".repeat(otpLength)}
+                  placeholder={"\u2022".repeat(otpLength)}
                   disabled={busy}
                 />
               </label>
@@ -429,7 +429,7 @@ export default function ForgotPassword() {
       </main>
 
       <footer className="password-reset-footer">
-        <strong>Â© 2026 WalangBrownOut.</strong> All rights reserved.
+        <strong>&copy; 2026 WalangBrownOut.</strong> All rights reserved.
       </footer>
     </div>
   );

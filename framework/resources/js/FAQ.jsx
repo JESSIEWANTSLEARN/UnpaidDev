@@ -173,9 +173,19 @@ function FAQ() {
 
         <div className="faq-shell faq-search-row">
           <label className="faq-search">
-            <span aria-hidden="true">
-              âŒ•
-            </span>
+            <svg
+              className="faq-search-icon"
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
 
             <input
               type="search"
@@ -197,7 +207,7 @@ function FAQ() {
                 }
                 aria-label="Clear search"
               >
-                Ã—
+                &times;
               </button>
             ) : null}
           </label>
@@ -421,8 +431,7 @@ function FAQ() {
       <footer className="faq-footer">
         <div className="faq-shell">
           <span>
-            Â© 2026 Walang BrownOut. All
-            rights reserved.
+&copy; 2026 Walang BrownOut. All rights reserved.
           </span>
           <Link to="/">Home</Link>
         </div>
