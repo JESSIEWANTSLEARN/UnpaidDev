@@ -31,8 +31,28 @@ Route::view('/forgot-password', 'react');
 
 // React role pages
 Route::view('/faq', 'react');
-Route::view('/user', 'react');
-Route::view('/super-admin', 'react');
+// Customer dashboard must never render for a logged-out visitor.
+Route::get('/user', function () {
+    if (
+        session('logged_in') !== true ||
+        session('role') !== 'System_User'
+    ) {
+        return redirect('/login');
+    }
+
+    return view('react');
+});
+// Super Admin dashboard is restricted to the Super Admin role.
+Route::get('/super-admin', function () {
+    if (
+        session('logged_in') !== true ||
+        session('role') !== 'super_admin'
+    ) {
+        return redirect('/login');
+    }
+
+    return view('react');
+});
 Route::get('/store-preview', function () {
     if (
         session('logged_in') !== true ||
@@ -123,8 +143,17 @@ Route::post('/api/super-admin/backups/{filename}/restore', [SuperAdminBackupCont
 // =========================================================
 // PHASE 3 - PUBLIC / SUPER ADMIN WEBSITE CONTENT
 // =========================================================
-Route::view('/faq', 'react');
-Route::view('/super-admin/content', 'react');
+// Website Content management is restricted to Super Admin.
+Route::get('/super-admin/content', function () {
+    if (
+        session('logged_in') !== true ||
+        session('role') !== 'super_admin'
+    ) {
+        return redirect('/login');
+    }
+
+    return view('react');
+});
 
 Route::get(
     '/api/public/website-content',

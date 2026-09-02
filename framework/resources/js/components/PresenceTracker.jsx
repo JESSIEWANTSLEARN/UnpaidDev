@@ -107,12 +107,17 @@ export default function PresenceTracker() {
 
             if (disposed) return;
 
-            if (response.status === 401) {
+            // The status endpoint returns HTTP 200 for a normal guest session.
+            // On protected pages, authenticated=false still means go to login.
+            if (
+                response.status === 401 ||
+                (response.ok && !data.authenticated)
+            ) {
                 redirectToLogin();
                 return;
             }
 
-            if (!response.ok || !data.authenticated) {
+            if (!response.ok) {
                 return;
             }
 

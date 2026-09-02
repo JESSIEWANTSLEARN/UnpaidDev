@@ -18,10 +18,22 @@ class SessionSecurityController extends Controller
             $request->session()->get('logged_in') !== true ||
             !$request->session()->get('user_id')
         ) {
+            /*
+            |--------------------------------------------------------------------------
+            | Guest session status
+            |--------------------------------------------------------------------------
+            |
+            | Public pages use this endpoint only to detect an existing login.
+            | Being logged out is therefore a normal state, not an API error.
+            | Protected pages still redirect guests through PresenceTracker and
+            | the server-side role routes below.
+            |
+            */
+
             return response()->json([
                 'authenticated' => false,
                 'redirect' => '/login',
-            ], 401);
+            ]);
         }
 
         $userId =

@@ -18,6 +18,7 @@ function isOtpSendingEndpoint(url) {
   const value = String(url);
   return (
     value === "/login" ||
+    value === "/register" ||
     value === "/login/resend-otp" ||
     value === "/signup/resend-otp"
   );
