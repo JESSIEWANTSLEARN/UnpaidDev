@@ -746,3 +746,39 @@
   }
 }
 /* === WBO PHASE 4 FINAL END === */
+
+/* WBO_MOBILE_AUTH_PERFORMANCE_V2 */
+@media (max-width: 768px) {
+  .signup-page::before,
+  .signup-page::after,
+  .signup-shell::before,
+  .signup-shell::after,
+  .signup-bg-orb,
+  .signup-orb,
+  .signup-blob,
+  [class*="signup-orb"],
+  [class*="signup-blob"] {
+    animation: none !important;
+    filter: none !important;
+  }
+
+  .signup-card,
+  .signup-panel,
+  .signup-form-card,
+  [class*="signup-card"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+    animation-duration: 320ms !important;
+    animation-delay: 0ms !important;
+  }
+
+  .signup-header,
+  .signup-field,
+  .signup-actions,
+  .signup-footer,
+  [class*="signup-field"] {
+    animation-duration: 260ms !important;
+    animation-delay: 0ms !important;
+  }
+}

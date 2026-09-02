@@ -767,3 +767,42 @@
   }
 }
 /* === WBO PHASE 4 FINAL END === */
+
+/* WBO_MOBILE_AUTH_PERFORMANCE_V2
+ * Keep the desktop appearance unchanged. On phones, stop continuous decorative
+ * movement and remove blur/backdrop work during authentication rendering.
+ */
+@media (max-width: 768px) {
+  .login-page::before,
+  .login-page::after,
+  .login-shell::before,
+  .login-shell::after,
+  .login-bg-orb,
+  .login-orb,
+  .login-blob,
+  [class*="login-orb"],
+  [class*="login-blob"] {
+    animation: none !important;
+    filter: none !important;
+  }
+
+  .login-card,
+  .login-panel,
+  .login-form-card,
+  [class*="login-card"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+    animation-duration: 320ms !important;
+    animation-delay: 0ms !important;
+  }
+
+  .login-header,
+  .login-field,
+  .login-actions,
+  .login-footer,
+  [class*="login-field"] {
+    animation-duration: 260ms !important;
+    animation-delay: 0ms !important;
+  }
+}

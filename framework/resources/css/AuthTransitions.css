@@ -190,3 +190,19 @@ body {
         animation: none !important;
     }
 }
+
+/* WBO_MOBILE_AUTH_PERFORMANCE_V2 */
+@media (max-width: 768px) {
+  .auth-page-exit-left,
+  .auth-page-enter-right,
+  .auth-page-exit-right,
+  .auth-page-enter-left {
+    animation-duration: 180ms !important;
+  }
+
+  .auth-color-wipe,
+  .auth-color-wipe-forward,
+  .auth-color-wipe-backward {
+    animation-duration: 180ms !important;
+  }
+}

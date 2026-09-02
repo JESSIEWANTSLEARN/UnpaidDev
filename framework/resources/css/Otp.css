@@ -619,3 +619,39 @@
   }
 }
 /* === WBO PHASE 4 FINAL END === */
+
+/* WBO_MOBILE_AUTH_PERFORMANCE_V2 */
+@media (max-width: 768px) {
+  .otp-page::before,
+  .otp-page::after,
+  .otp-shell::before,
+  .otp-shell::after,
+  .otp-bg-orb,
+  .otp-orb,
+  .otp-blob,
+  [class*="otp-orb"],
+  [class*="otp-blob"] {
+    animation: none !important;
+    filter: none !important;
+  }
+
+  .otp-card,
+  .otp-panel,
+  .otp-form-card,
+  [class*="otp-card"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+    animation-duration: 300ms !important;
+    animation-delay: 0ms !important;
+  }
+
+  .otp-header,
+  .otp-field,
+  .otp-actions,
+  .otp-footer,
+  [class*="otp-field"] {
+    animation-duration: 240ms !important;
+    animation-delay: 0ms !important;
+  }
+}
