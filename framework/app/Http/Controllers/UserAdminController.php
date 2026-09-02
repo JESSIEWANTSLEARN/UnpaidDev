@@ -485,11 +485,15 @@ class UserAdminController extends Controller
                     $userId
                 )
                 ->orderByDesc(
+                    'is_active'
+                )
+                ->orderByDesc(
                     'last_activity_at'
                 )
                 ->orderByDesc(
                     'logged_in_at'
                 )
+                ->limit(30)
                 ->get()
                 ->map(
                     function (

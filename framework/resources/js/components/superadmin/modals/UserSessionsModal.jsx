@@ -46,7 +46,7 @@ export default function UserSessionsModal({
       <ErrorMessage error={error} />
 
       <p className="ops-subtext">
-        Session details come from WBO_UserSessions. Revoking a session signs that browser/device out on its next request.
+        Session details come from WBO_UserSessions. Showing up to 30 recent sessions with active sessions first. Revoking a session signs that browser/device out on its next request.
       </p>
 
       {sessionsLoading ? (

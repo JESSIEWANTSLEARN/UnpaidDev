@@ -520,7 +520,7 @@ function SessionsPanel({
   return (
     <Section
       title={`${user.name} â€” Sessions`}
-      description="Session revocation is unavailable in Super Admin preview mode."
+      description="Showing up to 30 recent sessions with active sessions first. Session revocation is unavailable in Super Admin preview mode."
     >
       <div className="user-admin-session-toolbar">
         <button

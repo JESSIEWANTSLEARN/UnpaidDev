@@ -336,8 +336,10 @@ class SuperAdminController extends Controller
 
         $sessions = DB::table('WBO_UserSessions')
             ->where('user_id', $userId)
+            ->orderByDesc('is_active')
             ->orderByDesc('last_activity_at')
             ->orderByDesc('logged_in_at')
+            ->limit(30)
             ->get()
             ->map(function ($session) use ($currentTrackingId) {
                 return [
