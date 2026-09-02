@@ -18,6 +18,9 @@ use App\Http\Controllers\SessionSecurityController;
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdminDashboardController;
+use App\Http\Controllers\RoleDashboardController;
+use App\Http\Controllers\SalesRoleController;
+use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\SuperAdminCatalogController;
 use App\Http\Controllers\SuperAdminBackupController;
 
@@ -53,6 +56,58 @@ Route::get('/super-admin', function () {
 
     return view('react');
 });
+// Staff role dashboards. The database/session role remains the source of truth.
+$staffDashboard = function (string $expectedRole) {
+    return function () use ($expectedRole) {
+        if (
+            session('logged_in') !== true ||
+            session('role') !== $expectedRole
+        ) {
+            return redirect('/login');
+        }
+
+        return view('react');
+    };
+};
+
+Route::get('/operations-manager', $staffDashboard('Operations_Manager'));
+Route::get('/purchasing-manager', $staffDashboard('Purchasing_Manager'));
+Route::get('/purchasing-staff', $staffDashboard('Purchasing_Staff'));
+Route::get('/warehouse-admin', $staffDashboard('Warehouse_Admin'));
+Route::get('/inventory-controller', $staffDashboard('Inventory_Controller'));
+Route::get('/sales-manager', $staffDashboard('Sales_Manager'));
+Route::get('/sales-staff', $staffDashboard('Sales_Staff'));
+Route::get('/user-admin', $staffDashboard('User_Admin'));
+
+unset($staffDashboard);
+
+// Super Admin role preview never changes session role or impersonates a user.
+Route::get('/super-admin/role-preview/{role}', function (string $role) {
+    $previewRoles = [
+        'Operations_Manager',
+        'Purchasing_Manager',
+        'Warehouse_Admin',
+        'Sales_Manager',
+        'Purchasing_Staff',
+        'Inventory_Controller',
+        'Sales_Staff',
+        'User_Admin',
+    ];
+
+    if (
+        session('logged_in') !== true ||
+        session('role') !== 'super_admin'
+    ) {
+        return redirect('/login');
+    }
+
+    abort_unless(in_array($role, $previewRoles, true), 404);
+
+    return view('react');
+})->where(
+    'role',
+    'Operations_Manager|Purchasing_Manager|Warehouse_Admin|Sales_Manager|Purchasing_Staff|Inventory_Controller|Sales_Staff|User_Admin'
+);
 Route::get('/store-preview', function () {
     if (
         session('logged_in') !== true ||
@@ -106,6 +161,87 @@ Route::put('/api/user/password', [SystemUserController::class, 'updatePassword']
 Route::post('/api/presence/heartbeat', [PresenceController::class, 'heartbeat']);
 Route::post('/api/presence/offline', [PresenceController::class, 'offline']);
 
+// Staff role data. Each request is authorized again inside RoleDashboardController.
+Route::get(
+    '/api/role-dashboard/{role}',
+    [RoleDashboardController::class, 'show']
+)->where(
+    'role',
+    'Operations_Manager|Purchasing_Manager|Purchasing_Staff|Warehouse_Admin|Inventory_Controller'
+);
+
+Route::post(
+    '/api/role-dashboard/stock-in',
+    [RoleDashboardController::class, 'stockIn']
+);
+
+Route::post(
+    '/api/role-dashboard/adjust-stock',
+    [RoleDashboardController::class, 'adjustStock']
+);
+Route::post(
+    '/api/role-dashboard/suppliers',
+    [RoleDashboardController::class, 'storeSupplier']
+);
+
+Route::put(
+    '/api/role-dashboard/suppliers/{supplierId}',
+    [RoleDashboardController::class, 'updateSupplier']
+)->whereNumber('supplierId');
+
+Route::post(
+    '/api/role-dashboard/purchase-orders',
+    [RoleDashboardController::class, 'storePurchaseOrder']
+);
+
+Route::put(
+    '/api/role-dashboard/purchase-orders/{poId}/status',
+    [RoleDashboardController::class, 'updatePurchaseOrderStatus']
+)->whereNumber('poId');
+// Sales staff/manager API. Super Admin may GET with preview=1,
+// while all status-changing endpoints authorize the actual sales role.
+Route::get(
+    '/api/sales-role/{role}',
+    [SalesRoleController::class, 'dashboard']
+)->where(
+    'role',
+    'Sales_Manager|Sales_Staff'
+);
+
+Route::put(
+    '/api/sales-role/orders/{orderId}/status',
+    [SalesRoleController::class, 'updateOrderStatus']
+)->whereNumber('orderId');
+// User Admin API. Super Admin may GET with preview=1; writes require actual User_Admin.
+Route::get(
+    '/api/user-admin/dashboard',
+    [UserAdminController::class, 'dashboard']
+);
+
+Route::post(
+    '/api/user-admin/users',
+    [UserAdminController::class, 'storeUser']
+);
+
+Route::put(
+    '/api/user-admin/users/{userId}',
+    [UserAdminController::class, 'updateUser']
+)->whereNumber('userId');
+
+Route::get(
+    '/api/user-admin/users/{userId}/sessions',
+    [UserAdminController::class, 'sessions']
+)->whereNumber('userId');
+
+Route::delete(
+    '/api/user-admin/users/{userId}/sessions',
+    [UserAdminController::class, 'revokeAllSessions']
+)->whereNumber('userId');
+
+Route::delete(
+    '/api/user-admin/users/{userId}/sessions/{sessionId}',
+    [UserAdminController::class, 'revokeSession']
+)->whereNumber('userId');
 // Super Admin dashboard + report
 Route::get('/api/super-admin/dashboard-data', [SuperAdminDashboardController::class, 'index']);
 Route::get('/api/super-admin/audit-logs', [SuperAdminDashboardController::class, 'auditLogs']);
