@@ -125,7 +125,7 @@ function FAQ() {
   }, [content.faqs, query, category]);
 
   return (
-    <div className="faq-page">
+    <div className="faq-page faq-page-enter">
       <header className="faq-header">
         <div className="faq-shell faq-header-inner">
           <Link

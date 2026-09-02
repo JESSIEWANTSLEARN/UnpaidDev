@@ -643,3 +643,46 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* WBO_FAQ_PAGE_TRANSITION_V2
+ * Lightweight page entry motion using compositor-friendly properties.
+ */
+.faq-page-enter {
+  animation: faqPageEnter 220ms ease-out both;
+}
+
+@keyframes faqPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .faq-page-enter {
+    animation-duration: 170ms;
+  }
+
+  @keyframes faqPageEnter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-page-enter {
+    animation: none !important;
+  }
+}
