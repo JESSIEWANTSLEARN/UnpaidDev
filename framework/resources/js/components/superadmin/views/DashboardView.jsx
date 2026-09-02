@@ -26,7 +26,7 @@ function Dashboard({ data, setActiveMenu }) {
       <div className="ops-panel dashboard-inventory-panel">
         <div className="panel-head">
           <h2>Inventory Overview</h2>
-          <button type="button" className="panel-link" onClick={() => setActiveMenu("Inventory")}>View All â†’</button>
+          <button type="button" className="panel-link" onClick={() => setActiveMenu("Inventory")}>View All →</button>
         </div>
         <div className="table-wrap">
           <table className="ops-table">
@@ -484,7 +484,7 @@ function AlertsPanel({ data, setActiveMenu }) {
   const rows = unread.length > 0
     ? unread.map((item) => ({
         title: `${item.alert_tier} Alert`,
-        text: item.product_name ? `${item.product_name}${item.batch_number ? ` Â· ${item.batch_number}` : ""}` : `Notification #${item.notification_id}`,
+        text: item.product_name ? `${item.product_name}${item.batch_number ? ` · ${item.batch_number}` : ""}` : `Notification #${item.notification_id}`,
         tone: item.alert_tier === "Red" ? "bad" : item.alert_tier === "Orange" ? "warn" : "info",
         icon: item.alert_tier === "Red" ? "close-circle" : "warning",
         menu: "Inventory",
@@ -512,7 +512,7 @@ function RecentActivity({ auditLogs, setActiveMenu }) {
       {auditLogs.length === 0 ? <EmptyState text="No activity recorded yet." /> : auditLogs.map((log) => (
         <ActivityItem key={log.log_id} icon="user" title={`${log.user_name || "System"}: ${log.action}`} time={formatDate(log.created_at)} type="success" />
       ))}
-      {auditLogs.length > 0 && <button type="button" className="panel-link panel-link-block" onClick={() => setActiveMenu("Audit Logs")}>View All Activity â†’</button>}
+      {auditLogs.length > 0 && <button type="button" className="panel-link panel-link-block" onClick={() => setActiveMenu("Audit Logs")}>View All Activity →</button>}
     </div>
   );
 }
@@ -522,9 +522,9 @@ function RecentAudit({ auditLogs, setActiveMenu }) {
     <div className="ops-panel">
       <div className="panel-head"><h2>Recent Audit Logs</h2></div>
       {auditLogs.length === 0 ? <EmptyState text="No audit logs yet." /> : auditLogs.map((log) => (
-        <AuditItem key={log.log_id} user={log.user_name || "System"} action={log.action} ip={log.ip_address || "â€”"} time={formatDate(log.created_at)} />
+        <AuditItem key={log.log_id} user={log.user_name || "System"} action={log.action} ip={log.ip_address || "—"} time={formatDate(log.created_at)} />
       ))}
-      {auditLogs.length > 0 && <button type="button" className="panel-link panel-link-block" onClick={() => setActiveMenu("Audit Logs")}>View All Audit Logs â†’</button>}
+      {auditLogs.length > 0 && <button type="button" className="panel-link panel-link-block" onClick={() => setActiveMenu("Audit Logs")}>View All Audit Logs →</button>}
     </div>
   );
 }
@@ -535,7 +535,7 @@ function ActivityItem({ icon, title, time, type }) {
     <div className="activity-row">
       <div className="activity-avatar"><Icon name={icon} size={15} /></div>
       <div className="list-body"><strong>{title}</strong><span className="activity-time">{time}</span></div>
-      <span className={`activity-status ${type}`}>{type === "success" ? "âœ“" : "â€¢"}</span>
+      <span className={`activity-status ${type}`}>{type === "success" ? "✓" : "•"}</span>
     </div>
   );
 }

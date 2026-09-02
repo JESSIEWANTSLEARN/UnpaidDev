@@ -14,6 +14,15 @@ import ForgotPassword from "./ForgotPassword.jsx";
 import SystemUser from "./pages/users/SystemUserPremium.jsx";
 import SuperAdmin from "./pages/SuperAdmin.jsx";
 import WebsiteContentAdmin from "./pages/WebsiteContentAdmin.jsx";
+import OperationsManager from "./pages/operations/OperationsManager.jsx";
+import PurchasingManager from "./pages/purchasing/PurchasingManager.jsx";
+import PurchasingStaff from "./pages/purchasing/PurchasingStaff.jsx";
+import WarehouseAdmin from "./pages/warehouse/WarehouseAdmin.jsx";
+import InventoryController from "./pages/warehouse/InventoryController.jsx";
+import SalesManager from "./pages/sales/SalesManager.jsx";
+import SalesStaff from "./pages/sales/SalesStaff.jsx";
+import UserAdmin from "./pages/users/UserAdmin.jsx";
+import RolePreview from "./pages/RolePreview.jsx";
 
 import PresenceTracker from "./components/PresenceTracker.jsx";
 
@@ -202,12 +211,22 @@ function AnimatedRoutes() {
                         ===================================== */}
 
                     <Route path="/user" element={<SystemUser />} />
+                    {/* STAFF ROLE DASHBOARDS */}
+                    <Route path="/operations-manager" element={<OperationsManager />} />
+                    <Route path="/purchasing-manager" element={<PurchasingManager />} />
+                    <Route path="/purchasing-staff" element={<PurchasingStaff />} />
+                    <Route path="/warehouse-admin" element={<WarehouseAdmin />} />
+                    <Route path="/inventory-controller" element={<InventoryController />} />
+                    <Route path="/sales-manager" element={<SalesManager />} />
+                    <Route path="/sales-staff" element={<SalesStaff />} />
+                    <Route path="/user-admin" element={<UserAdmin />} />
 
                     {/* =====================================
                         SUPER ADMIN
                         ===================================== */}
 
                     <Route path="/super-admin" element={<SuperAdmin />} />
+                    <Route path="/super-admin/role-preview/:roleKey" element={<RolePreview />} />
                     <Route path="/super-admin/content" element={<WebsiteContentAdmin />} />
                     <Route path="/store-preview" element={<SystemUser previewMode />} />
                 </Routes>

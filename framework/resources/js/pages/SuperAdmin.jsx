@@ -1,5 +1,6 @@
 import React from "react";
 import "../../css/SuperAdmin.css";
+import "../../css/AppLoadingScreen.css";
 import useSuperAdmin from "../hooks/useSuperAdmin.js";
 import SuperAdminSidebar from "../components/superadmin/SuperAdminSidebar.jsx";
 import SuperAdminHeader from "../components/superadmin/SuperAdminHeader.jsx";
@@ -8,9 +9,12 @@ import SuperAdminPageContent from "../components/superadmin/SuperAdminPageConten
 
 export default function SuperAdmin() {
   const admin = useSuperAdmin();
+  React.useEffect(() => {
+    localStorage.setItem("wbo-ui-theme", admin.theme);
+  }, [admin.theme]);
 
   return (
-    <div className={`ops-portal ${admin.sidebarOpen ? "sidebar-open" : ""}`} data-theme={admin.theme}>
+    <div className={`ops-portal app-page-enter ${admin.sidebarOpen ? "sidebar-open" : ""}`} data-theme={admin.theme}>
       <SuperAdminSidebar
         activeMenu={admin.activeMenu}
         setActiveMenu={admin.setActiveMenu}

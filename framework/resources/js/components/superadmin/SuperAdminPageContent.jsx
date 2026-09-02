@@ -12,6 +12,7 @@ import UsersView from "./views/UsersView.jsx";
 import ReportsView from "./views/ReportsView.jsx";
 import AuditLogsView from "./views/AuditLogsView.jsx";
 import SettingsView from "./views/SettingsView.jsx";
+import RolePreviewView from "./views/RolePreviewView.jsx";
 
 const PAGE_COMPONENTS = {
   Dashboard: DashboardView,
@@ -23,6 +24,7 @@ const PAGE_COMPONENTS = {
   "Stock Movement": StockMovementView,
   "Purchase Orders": PurchaseOrdersView,
   Users: UsersView,
+  "View as Role": RolePreviewView,
   Reports: ReportsView,
   "Audit Logs": AuditLogsView,
   Settings: SettingsView,

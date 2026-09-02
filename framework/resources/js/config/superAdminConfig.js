@@ -21,6 +21,7 @@ export const navSections = [
     label: "System",
     items: [
       { name: "Users", icon: "users" },
+      { name: "View as Role", icon: "users" },
       { name: "Reports", icon: "reports" },
       { name: "Audit Logs", icon: "search" },
       { name: "Settings", icon: "settings" },
