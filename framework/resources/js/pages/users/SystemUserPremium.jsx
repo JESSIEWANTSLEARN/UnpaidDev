@@ -1655,7 +1655,7 @@ export default function SystemUser({ previewMode = false }) {
                           <strong>{order.delivery.full_name}</strong>
                           <small>
                             {order.delivery.contact_number}
-                            {" Â· "}
+                            {"\u00B7"}
                             {order.delivery.email}
                           </small>
                         </div>
@@ -1979,7 +1979,7 @@ export default function SystemUser({ previewMode = false }) {
           role="status"
           aria-live="polite"
         >
-          <span>{cartFeedback.type === "success" ? "âœ“" : "!"}</span>
+          <span>{cartFeedback.type === "success" ? <Icon name="check" size={17} /> : "!"}</span>
           <p>{cartFeedback.message}</p>
         </div>
       )}
@@ -2288,7 +2288,7 @@ export default function SystemUser({ previewMode = false }) {
                     <div className="customer-checkout-items">
                       {cartItems.map((item) => (
                         <div key={item.product_id}>
-                          <span>{item.quantity} Ã— {item.name}</span>
+                          <span>{item.quantity} {"\u00D7"} {item.name}</span>
                           <strong>{money(item.line_total)}</strong>
                         </div>
                       ))}
