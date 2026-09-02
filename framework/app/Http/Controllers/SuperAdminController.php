@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\HandlesSuperAdminSupport;
+use App\Services\PasswordHistoryService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -59,7 +60,10 @@ class SuperAdminController extends Controller
         ]);
     }
 
-    public function updatePassword(Request $request): JsonResponse
+    public function updatePassword(
+        Request $request,
+        PasswordHistoryService $passwordHistory
+    ): JsonResponse
     {
         $this->authorizeSuperAdmin();
 
@@ -79,11 +83,28 @@ class SuperAdminController extends Controller
             ]);
         }
 
-        DB::table('WBO_Users')
-            ->where('user_id', $user->user_id)
-            ->update([
-                'password_hash' => Hash::make($validated['password']),
-            ]);
+        $passwordHistory->assertNotReused(
+            (int) $user->user_id,
+            $validated['password'],
+            $user->password_hash
+        );
+
+        DB::transaction(function () use (
+            $user,
+            $validated,
+            $passwordHistory
+        ) {
+            $passwordHistory->rememberCurrent(
+                (int) $user->user_id,
+                $user->password_hash
+            );
+
+            DB::table('WBO_Users')
+                ->where('user_id', $user->user_id)
+                ->update([
+                    'password_hash' => Hash::make($validated['password']),
+                ]);
+        });
 
         $this->audit($request, 'PASSWORD_UPDATED', 'Super Admin changed their account password.');
 
@@ -540,6 +561,12 @@ class SuperAdminController extends Controller
                         ->delete();
                 }
 
+                if (Schema::hasTable('WBO_PasswordHistory')) {
+                    DB::table('WBO_PasswordHistory')
+                        ->where('user_id', $userId)
+                        ->delete();
+                }
+
                 DB::table('WBO_Users')
                     ->where('user_id', $userId)
                     ->delete();
@@ -669,6 +696,7 @@ class SuperAdminController extends Controller
             'WBO_UserSessions',
             'WBO_TrustedDevices',
             'WBO_UserProfilePhotos',
+            'WBO_PasswordHistory',
         ];
 
         try {

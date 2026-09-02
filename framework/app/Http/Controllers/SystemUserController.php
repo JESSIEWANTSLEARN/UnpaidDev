@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WBOUser;
 use App\Services\NotificationService;
+use App\Services\PasswordHistoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -745,7 +746,10 @@ class SystemUserController extends Controller
         ]);
     }
 
-    public function updatePassword(Request $request)
+    public function updatePassword(
+        Request $request,
+        PasswordHistoryService $passwordHistory
+    )
     {
         $user = $this->currentUser($request);
 
@@ -761,8 +765,25 @@ class SystemUserController extends Controller
             ], 422);
         }
 
-        $user->password_hash = Hash::make($validated['password']);
-        $user->save();
+        $passwordHistory->assertNotReused(
+            (int) $user->user_id,
+            $validated['password'],
+            $user->password_hash
+        );
+
+        DB::transaction(function () use (
+            $user,
+            $validated,
+            $passwordHistory
+        ) {
+            $passwordHistory->rememberCurrent(
+                (int) $user->user_id,
+                $user->password_hash
+            );
+
+            $user->password_hash = Hash::make($validated['password']);
+            $user->save();
+        });
 
         $this->audit($request, $user->user_id, 'PASSWORD_CHANGED', 'System User changed account password');
 

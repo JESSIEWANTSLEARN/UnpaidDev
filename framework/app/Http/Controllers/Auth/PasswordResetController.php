@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\WBOUser;
 use App\Services\OtpService;
+use App\Services\PasswordHistoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -314,7 +315,10 @@ class PasswordResetController extends Controller
         ]);
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(
+        Request $request,
+        PasswordHistoryService $passwordHistory
+    )
     {
         $validated = $request->validate([
             'password' => [
@@ -370,7 +374,23 @@ class PasswordResetController extends Controller
             ], 403);
         }
 
-        DB::transaction(function () use ($user, $validated, $request) {
+        $passwordHistory->assertNotReused(
+            (int) $user->user_id,
+            $validated['password'],
+            $user->password_hash
+        );
+
+        DB::transaction(function () use (
+            $user,
+            $validated,
+            $request,
+            $passwordHistory
+        ) {
+            $passwordHistory->rememberCurrent(
+                (int) $user->user_id,
+                $user->password_hash
+            );
+
             $user->password_hash = Hash::make($validated['password']);
             $user->last_seen_at = null;
             $user->save();
