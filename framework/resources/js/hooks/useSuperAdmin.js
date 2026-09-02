@@ -211,7 +211,7 @@ export default function useSuperAdmin() {
   const handleExportReport = (type = "complete") => download(`/api/super-admin/export-report?type=${encodeURIComponent(type)}`);
   const handleLogout = async () => {
     setDropdownOpen(false);
-    try { await logoutRequest(); navigate("/login", { replace: true }); }
+    try { await logoutRequest(); window.location.href = "/login"; }
     catch (err) { setError(err.message || "Logout failed."); }
   };
 
