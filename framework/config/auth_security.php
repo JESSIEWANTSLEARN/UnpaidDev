@@ -72,4 +72,25 @@ return [
             (int) env('LOGIN_LOCK_SECONDS', 300)
         ),
     ],
+    // WBO Phase 3 tracked-session housekeeping.
+    // A browser that disappears without logging out eventually becomes stale.
+    'tracked_session_stale_hours' => max(
+        1,
+        (int) env('TRACKED_SESSION_STALE_HOURS', 24)
+    ),
+
+    // Ended tracked-session rows older than this are removed.
+    // Login/security events should remain in WBO_AuditLogs.
+    'tracked_session_retention_days' => max(
+        7,
+        (int) env('TRACKED_SESSION_RETENTION_DAYS', 90)
+    ),
+
+    'tracked_session_page_size' => min(
+        25,
+        max(
+            5,
+            (int) env('TRACKED_SESSION_PAGE_SIZE', 10)
+        )
+    ),
 ];

@@ -22,6 +22,12 @@ export default function useSuperAdmin() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userSessions, setUserSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [userSessionPagination, setUserSessionPagination] = useState({
+    page: 1,
+    per_page: 10,
+    total: 0,
+    total_pages: 1,
+  });
 
   const setForm = (key, update) => setForms((all) => ({
     ...all,
@@ -118,16 +124,39 @@ export default function useSuperAdmin() {
     })
   );
 
-  const loadUserSessions = async (userId) => {
+  const loadUserSessions = async (userId, page = 1) => {
     setSessionsLoading(true);
     setModalError("");
+
     try {
-      const result = await apiRequest(`/api/super-admin/users/${userId}/sessions`);
+      const result = await apiRequest(
+        `/api/super-admin/users/${userId}/sessions?page=${encodeURIComponent(page)}&per_page=10`,
+      );
+
       setUserSessions(result.sessions || []);
+      setUserSessionPagination(
+        result.pagination || {
+          page: 1,
+          per_page: 10,
+          total: (result.sessions || []).length,
+          total_pages: 1,
+        },
+      );
     } catch (err) {
-      if (err.status === 401) navigate("/login", { replace: true });
-      setModalError(err.message || "Unable to load user sessions.");
+      if (err.status === 401) {
+        navigate("/login", { replace: true });
+      }
+
+      setModalError(
+        err.message || "Unable to load user sessions.",
+      );
       setUserSessions([]);
+      setUserSessionPagination({
+        page: 1,
+        per_page: 10,
+        total: 0,
+        total_pages: 1,
+      });
     } finally {
       setSessionsLoading(false);
     }
@@ -150,7 +179,7 @@ export default function useSuperAdmin() {
         `/api/super-admin/users/${selectedUser.user_id}/sessions/${encodeURIComponent(sessionId)}`,
         { method: "DELETE" }
       );
-      await loadUserSessions(selectedUser.user_id);
+      await loadUserSessions(selectedUser.user_id, userSessionPagination.page);
       refresh();
     } catch (err) {
       if (err.status === 401) navigate("/login", { replace: true });
@@ -174,7 +203,7 @@ export default function useSuperAdmin() {
       await apiRequest(`/api/super-admin/users/${selectedUser.user_id}/sessions`, {
         method: "DELETE",
       });
-      await loadUserSessions(selectedUser.user_id);
+      await loadUserSessions(selectedUser.user_id, userSessionPagination.page);
       refresh();
     } catch (err) {
       if (err.status === 401) navigate("/login", { replace: true });
@@ -201,6 +230,10 @@ export default function useSuperAdmin() {
     resetForm("deleteUser");
   });
 
+  const handleUserSessionPageChange = (page) => {
+    if (!selectedUser || sessionsLoading) return;
+    loadUserSessions(selectedUser.user_id, page);
+  };
   const handleNotificationStatus = (id, status) => runModalAction(() => apiRequest(`/api/super-admin/notifications/${id}`, { method: "PUT", body: { status } }), true);
   const handleCreateBackup = () => runModalAction(() => apiRequest("/api/super-admin/backups", { method: "POST" }), true);
   const handleRestoreBackup = (filename) => {
@@ -233,7 +266,8 @@ export default function useSuperAdmin() {
       profileForm: forms.profile, passwordForm: forms.password, productForm: forms.product, categoryForm: forms.category, stockForm: forms.stock,
       userForm: forms.user, supplierForm: forms.supplier, purchaseOrderForm: forms.purchaseOrder,
       companyForm: forms.company, editUserForm: forms.editUser, deleteUserForm: forms.deleteUser,
-      selectedUser, userSessions, sessionsLoading, ...setters,
+      selectedUser, userSessions, sessionsLoading, userSessionPagination,
+      onUserSessionPageChange: handleUserSessionPageChange, ...setters,
       onProfileSave: handleProfileSave, onPasswordUpdate: handlePasswordUpdate, onAddProduct: handleAddProduct, onAddCategory: handleAddCategory,
       onStockIn: handleStockIn, onAddUser: handleAddUser, onAddSupplier: handleAddSupplier,
       onAddPurchaseOrder: handleAddPurchaseOrder, onCompanySave: handleCompanySave, onUpdateUser: handleUpdateUser,

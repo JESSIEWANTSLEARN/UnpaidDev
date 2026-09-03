@@ -14,6 +14,8 @@ export default function UserSessionsModal({
   selectedUser,
   userSessions,
   sessionsLoading,
+  userSessionPagination,
+  onUserSessionPageChange,
   onRevokeUserSession,
   onRevokeAllUserSessions,
 }) {
@@ -25,6 +27,12 @@ export default function UserSessionsModal({
   const activeRevocable = (userSessions || []).filter(
     (session) => session.is_active && !session.is_current_session
   );
+  const sessionPage = Number(userSessionPagination?.page || 1);
+  const sessionPages = Math.max(
+    1,
+    Number(userSessionPagination?.total_pages || 1),
+  );
+  const sessionTotal = Number(userSessionPagination?.total || 0);
 
   return (
     <div className="admin-modal-body">
@@ -89,6 +97,40 @@ export default function UserSessionsModal({
               </div>
             </article>
           ))}
+        </div>
+      )}
+
+      {sessionTotal > 0 && (
+        <div className="user-session-pagination">
+          <span>
+            {sessionTotal} tracked session{sessionTotal === 1 ? "" : "s"}
+          </span>
+
+          <div>
+            <button
+              type="button"
+              disabled={busy || sessionsLoading || sessionPage <= 1}
+              onClick={() => onUserSessionPageChange(sessionPage - 1)}
+            >
+              Previous
+            </button>
+
+            <strong>
+              Page {sessionPage} of {sessionPages}
+            </strong>
+
+            <button
+              type="button"
+              disabled={
+                busy ||
+                sessionsLoading ||
+                sessionPage >= sessionPages
+              }
+              onClick={() => onUserSessionPageChange(sessionPage + 1)}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>

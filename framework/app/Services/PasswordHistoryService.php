@@ -69,9 +69,11 @@ class PasswordHistoryService
     private function assertTableReady(): void
     {
         if (!Schema::hasTable('WBO_PasswordHistory')) {
-            throw new \RuntimeException(
-                'WBO_PasswordHistory is not installed. Run the Batch 3 database migration.'
-            );
+            throw ValidationException::withMessages([
+                'password' => [
+                    'Password history storage is not initialized. Run the required database migration before changing a password.',
+                ],
+            ]);
         }
     }
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/PasswordReset.css";
 
@@ -80,6 +80,65 @@ export default function ForgotPassword() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  // WBO PHASE 3: reconcile password recovery with server session
+  useEffect(() => {
+    let active = true;
+
+    // Transient messages are never persisted.
+    setError("");
+    setMessage("");
+
+    fetch("/forgot-password/status", {
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+      },
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message || "Unable to validate password recovery state.",
+          );
+        }
+
+        return data;
+      })
+      .then((data) => {
+        if (!active) return;
+
+        const serverStage = ["request", "verify", "reset"].includes(data?.stage)
+          ? data.stage
+          : "request";
+
+        if (serverStage === "request") {
+          sessionStorage.removeItem("wbo_password_reset_stage");
+          sessionStorage.removeItem("wbo_password_reset_email");
+          sessionStorage.removeItem("wbo_password_reset_policy");
+          setStage("request");
+          setEmail("");
+          setOtp("");
+          return;
+        }
+
+        sessionStorage.setItem("wbo_password_reset_stage", serverStage);
+        setStage(serverStage);
+
+        if (data?.email) {
+          sessionStorage.setItem("wbo_password_reset_email", data.email);
+          setEmail(data.email);
+        }
+      })
+      .catch(() => {
+        // A temporary status-check failure must not become a sticky error.
+        // Keep the current client recovery step so the user can retry.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const otpLength = Number(policy.length || 6);
 
@@ -225,20 +284,35 @@ export default function ForgotPassword() {
     }
   };
 
-  const restart = () => {
-    sessionStorage.removeItem("wbo_password_reset_stage");
-    sessionStorage.removeItem("wbo_password_reset_email");
-    sessionStorage.removeItem("wbo_password_reset_policy");
-
-    setStage("request");
-    setEmail("");
-    setOtp("");
-    setPassword({
-      password: "",
-      password_confirmation: "",
-    });
+  const restart = async () => {
     setError("");
     setMessage("");
+
+    try {
+      setBusy(true);
+
+      await postJson("/forgot-password/restart", {});
+
+      sessionStorage.removeItem("wbo_password_reset_stage");
+      sessionStorage.removeItem("wbo_password_reset_email");
+      sessionStorage.removeItem("wbo_password_reset_policy");
+
+      setStage("request");
+      setEmail("");
+      setOtp("");
+      setPassword({
+        password: "",
+        password_confirmation: "",
+      });
+      setShowPassword(false);
+      setShowConfirmation(false);
+    } catch (err) {
+      setError(
+        err.message || "Unable to restart password recovery.",
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -352,7 +426,7 @@ export default function ForgotPassword() {
                   onClick={restart}
                   disabled={busy}
                 >
-                  Use another email
+                  &larr; Back to Email
                 </button>
               </div>
             </form>
@@ -423,6 +497,18 @@ export default function ForgotPassword() {
               <button type="submit" disabled={busy}>
                 {busy ? "Updating..." : "Reset password"}
               </button>
+
+              <div
+                className="password-reset-secondary-actions password-reset-step3-back-email"
+              >
+                <button
+                  type="button"
+                  onClick={restart}
+                  disabled={busy}
+                >
+                  &larr; Back to Email
+                </button>
+              </div>
             </form>
           )}
         </section>

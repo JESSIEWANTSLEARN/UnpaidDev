@@ -315,6 +315,82 @@ class PasswordResetController extends Controller
         ]);
     }
 
+    public function restart(Request $request)
+    {
+        $this->clearResetSession($request);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password recovery restarted.',
+        ]);
+    }
+    public function status(Request $request)
+    {
+        $now = now()->timestamp;
+
+        $verifiedUserId = (int) $request->session()->get(
+            'password_reset_verified_user_id',
+            0
+        );
+
+        $verifiedExpiry = (int) $request->session()->get(
+            'password_reset_verified_expiry',
+            0
+        );
+
+        if (
+            $verifiedUserId > 0 &&
+            $verifiedExpiry > $now
+        ) {
+            $user = WBOUser::where('user_id', $verifiedUserId)->first();
+
+            if (
+                $user &&
+                in_array(
+                    $user->account_status,
+                    ['active', 'pending_verification'],
+                    true
+                )
+            ) {
+                return response()->json([
+                    'success' => true,
+                    'stage' => 'reset',
+                    'email' => $user->email,
+                    'expires_at' => $verifiedExpiry,
+                ]);
+            }
+        }
+
+        $pending = $request->session()->get(
+            'password_reset_pending_user'
+        );
+
+        $otpExpiry = (int) $request->session()->get(
+            'password_reset_otp_expiry',
+            0
+        );
+
+        if (
+            is_array($pending) &&
+            !empty($pending['email']) &&
+            $otpExpiry > $now
+        ) {
+            return response()->json([
+                'success' => true,
+                'stage' => 'verify',
+                'email' => (string) $pending['email'],
+                'expires_at' => $otpExpiry,
+            ]);
+        }
+
+        $this->clearResetSession($request);
+
+        return response()->json([
+            'success' => true,
+            'stage' => 'request',
+            'email' => null,
+        ]);
+    }
     public function resetPassword(
         Request $request,
         PasswordHistoryService $passwordHistory

@@ -329,17 +329,52 @@ class SuperAdminController extends Controller
             return response()->json([
                 'user' => $user,
                 'sessions' => [],
+                'pagination' => [
+                    'page' => 1,
+                    'per_page' => 10,
+                    'total' => 0,
+                    'total_pages' => 1,
+                ],
             ]);
         }
 
         $currentTrackingId = (string) session('auth_session_id', '');
 
-        $sessions = DB::table('WBO_UserSessions')
-            ->where('user_id', $userId)
+        $this->housekeepTrackedSessions(
+            $userId,
+            $userId === (int) session('user_id')
+                ? $currentTrackingId
+                : null
+        );
+
+        $page = max(1, (int) $request->query('page', 1));
+
+        $perPage = min(
+            25,
+            max(
+                5,
+                (int) $request->query(
+                    'per_page',
+                    (int) config(
+                        'auth_security.tracked_session_page_size',
+                        10
+                    )
+                )
+            )
+        );
+
+        $baseQuery = DB::table('WBO_UserSessions')
+            ->where('user_id', $userId);
+
+        $total = (clone $baseQuery)->count();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $totalPages);
+
+        $sessions = $baseQuery
             ->orderByDesc('is_active')
             ->orderByDesc('last_activity_at')
             ->orderByDesc('logged_in_at')
-            ->limit(30)
+            ->forPage($page, $perPage)
             ->get()
             ->map(function ($session) use ($currentTrackingId) {
                 return [
@@ -354,7 +389,10 @@ class SuperAdminController extends Controller
                     'is_active' => (bool) $session->is_active,
                     'is_current_session' =>
                         $currentTrackingId !== ''
-                        && hash_equals($currentTrackingId, (string) $session->session_id),
+                        && hash_equals(
+                            $currentTrackingId,
+                            (string) $session->session_id
+                        ),
                 ];
             })
             ->values();
@@ -362,6 +400,12 @@ class SuperAdminController extends Controller
         return response()->json([
             'user' => $user,
             'sessions' => $sessions,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
             'timezone' => 'Asia/Manila',
         ]);
     }
@@ -533,11 +577,42 @@ class SuperAdminController extends Controller
         $references = $this->userDeletionReferences($userId);
 
         if ($references !== []) {
+            $archivedEmail =
+                "deleted.{$userId}." .
+                bin2hex(random_bytes(6)) .
+                '@wbo.invalid';
+
+            DB::transaction(function () use (
+                $userId,
+                $archivedEmail
+            ) {
+                $this->revokeSessionsForUser($userId);
+                $this->revokeTrustedDevicesForUser($userId);
+
+                DB::table('WBO_Users')
+                    ->where('user_id', $userId)
+                    ->update([
+                        'email' => $archivedEmail,
+                        'password_hash' =>
+                            Hash::make(bin2hex(random_bytes(32))),
+                        'account_status' => 'disabled',
+                        'last_seen_at' => null,
+                    ]);
+            });
+
+            $this->audit(
+                $request,
+                'USER_ARCHIVED',
+                "Archived account #{$userId}, revoked access, preserved protected history, and released its previous email for a new registration."
+            );
+
             return response()->json([
                 'message' =>
-                    'This account has stored business or audit history and cannot be permanently deleted. Disable the account instead so historical records remain intact.',
+                    'Account archived successfully. Historical records were preserved and the previous email can now be registered as a new account.',
+                'archived' => true,
+                'email_released' => true,
                 'references' => $references,
-            ], 409);
+            ]);
         }
 
         try {
@@ -678,6 +753,75 @@ class SuperAdminController extends Controller
         }
     }
 
+    private function housekeepTrackedSessions(
+        int $userId,
+        ?string $exceptSessionId = null
+    ): void {
+        if (!Schema::hasTable('WBO_UserSessions')) {
+            return;
+        }
+
+        $staleHours = max(
+            1,
+            (int) config(
+                'auth_security.tracked_session_stale_hours',
+                24
+            )
+        );
+
+        $retentionDays = max(
+            7,
+            (int) config(
+                'auth_security.tracked_session_retention_days',
+                90
+            )
+        );
+
+        $staleCutoff = now()->subHours($staleHours);
+        $retentionCutoff = now()->subDays($retentionDays);
+
+        $stale = DB::table('WBO_UserSessions')
+            ->where('user_id', $userId)
+            ->where('is_active', true)
+            ->where(function ($query) use ($staleCutoff) {
+                $query
+                    ->whereNull('last_activity_at')
+                    ->orWhere('last_activity_at', '<', $staleCutoff);
+            });
+
+        if ($exceptSessionId) {
+            $stale->where(
+                'session_id',
+                '<>',
+                $exceptSessionId
+            );
+        }
+
+        $stale->update([
+            'is_active' => false,
+            'logged_out_at' => now(),
+        ]);
+
+        DB::table('WBO_UserSessions')
+            ->where('user_id', $userId)
+            ->where('is_active', false)
+            ->where(function ($query) use ($retentionCutoff) {
+                $query
+                    ->where('logged_out_at', '<', $retentionCutoff)
+                    ->orWhere(function ($nested) use ($retentionCutoff) {
+                        $nested
+                            ->whereNull('logged_out_at')
+                            ->where(
+                                'last_activity_at',
+                                '<',
+                                $retentionCutoff
+                            );
+                    });
+            })
+            ->delete();
+
+        $this->clearPresenceWhenNoActiveSession($userId);
+    }
     private function sessionDate($value): ?string
     {
         if (!$value) {

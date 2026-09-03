@@ -25,8 +25,8 @@ export default function DeleteUserModal({
           {selectedUser.name} ({selectedUser.email})
         </p>
         <p>
-          Permanent deletion is allowed only for unused accounts with no protected business or audit history.
-          If records exist, the server will refuse deletion and the account should be disabled instead.
+          Unused accounts with no protected business or audit history are permanently deleted.
+          If protected history exists, the account is archived instead: access is revoked, history stays attached to the old user ID, and the previous email is released for a new registration.
         </p>
       </div>
 
