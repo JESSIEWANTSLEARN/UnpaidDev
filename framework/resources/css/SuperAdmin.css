@@ -883,3 +883,51 @@
 }
 
 /* === WBO PHASE3 USER ACTIVITY END === */
+/* WBO PHASE 3: session pagination */
+.user-session-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ops-border, #e5e7eb);
+  color: var(--ops-muted, #64748b);
+  font-size: 13px;
+}
+
+.user-session-pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-session-pagination button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--ops-border, #dbe3ee);
+  border-radius: 8px;
+  background: var(--ops-card, #fff);
+  color: inherit;
+  cursor: pointer;
+}
+
+.user-session-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.user-session-pagination strong {
+  color: var(--ops-text, #172033);
+}
+
+@media (max-width: 620px) {
+  .user-session-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .user-session-pagination > div {
+    justify-content: space-between;
+  }
+}

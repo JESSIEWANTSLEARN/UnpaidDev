@@ -577,7 +577,7 @@ class SuperAdminReportService
             if (in_array($header, $currencyHeaders, true) && $rows !== []) {
                 $sheet->getStyle("{$column}{$firstDataRow}:{$column}{$lastRow}")
                     ->getNumberFormat()
-                    ->setFormatCode('"ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â±"#,##0.00');
+                    ->setFormatCode('"' . "\u{20B1}" . '"#,##0.00');
             }
 
             if (in_array($header, $integerHeaders, true) && $rows !== []) {

@@ -1,4 +1,6 @@
+import CustomerReviewsPanel from "../../components/customer/reviews/CustomerReviewsPanel.jsx";
 import React, { useEffect, useMemo, useState } from "react";
+import AppLoadingScreen from "../../components/common/AppLoadingScreen.jsx";
 import { useNavigate } from "react-router-dom";
 import {
   cartItemCount,
@@ -1042,20 +1044,16 @@ export default function SystemUser({ previewMode = false }) {
     ["dashboard", "Home", "home"],
     ["shop", "Products", "products"],
     ["orders", "Orders", "orders"],
+    ["reviews", "Reviews", "products"],
     ["account", "Account", "user"],
   ];
 
   if (loading) {
-    return (
-      <div className="customer-loading" data-theme={theme}>
-        <div className="customer-spinner" />
-        <p>Loading your store...</p>
-      </div>
-    );
+    return <AppLoadingScreen label="Loading your store..." theme={theme} />;
   }
 
   return (
-    <div className="customer-shell" data-theme={theme}>
+    <div className="customer-shell app-page-enter" data-theme={theme}>
       {previewMode && (
         <div className="customer-admin-preview-bar">
           <div>
@@ -1709,6 +1707,9 @@ export default function SystemUser({ previewMode = false }) {
               />
             )}
           </section>
+        )}
+        {tab === "reviews" && (
+          <CustomerReviewsPanel previewMode={previewMode} />
         )}
         {tab === "account" && (
           <section className="customer-page-section">

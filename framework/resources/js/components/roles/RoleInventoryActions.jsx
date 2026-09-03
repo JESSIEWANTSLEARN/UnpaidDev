@@ -86,7 +86,7 @@ export function StockInForm({
                 key={product.product_id}
                 value={product.product_id}
               >
-                {product.sku} â€” {product.name}
+                {product.sku} - {product.name}
               </option>
             ))}
           </select>
@@ -224,7 +224,7 @@ export function AdjustmentForm({
                 key={batch.batch_id}
                 value={batch.batch_id}
               >
-                {batch.batch_number} â€”{" "}
+                {batch.batch_number} -{" "}
                 {batch.product_name} (
                 {batch.current_quantity} available)
               </option>

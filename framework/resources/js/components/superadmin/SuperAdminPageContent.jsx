@@ -2,6 +2,7 @@ import React from "react";
 import { LoadingState, ErrorState, EmptyState } from "./common/AdminCommon.jsx";
 import DashboardView from "./views/DashboardView.jsx";
 import ProductsView from "./views/ProductsView.jsx";
+import ProductReviewsView from "./views/ProductReviewsView.jsx";
 import InventoryView from "./views/InventoryView.jsx";
 import CategoriesView from "./views/CategoriesView.jsx";
 import SalesOrdersView from "./views/SalesOrdersView.jsx";
@@ -12,11 +13,13 @@ import UsersView from "./views/UsersView.jsx";
 import ReportsView from "./views/ReportsView.jsx";
 import AuditLogsView from "./views/AuditLogsView.jsx";
 import SettingsView from "./views/SettingsView.jsx";
+import SystemHealthView from "./views/SystemHealthView.jsx";
 import RolePreviewView from "./views/RolePreviewView.jsx";
 
 const PAGE_COMPONENTS = {
   Dashboard: DashboardView,
   Products: ProductsView,
+  "Product Reviews": ProductReviewsView,
   Inventory: InventoryView,
   Categories: CategoriesView,
   "Sales Orders": SalesOrdersView,
@@ -27,6 +30,7 @@ const PAGE_COMPONENTS = {
   "View as Role": RolePreviewView,
   Reports: ReportsView,
   "Audit Logs": AuditLogsView,
+  "System Health": SystemHealthView,
   Settings: SettingsView,
 };
 

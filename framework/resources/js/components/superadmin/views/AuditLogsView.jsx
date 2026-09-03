@@ -63,6 +63,23 @@ function actionCategory(action = "") {
   return "System / Other";
 }
 
+function millisecondsUntilNextManilaMidnight() {
+  const MANILA_OFFSET_MS = 8 * 60 * 60 * 1000;
+  const nowMs = Date.now();
+  const manilaNow = new Date(nowMs + MANILA_OFFSET_MS);
+
+  const nextMidnightUtcMs =
+    Date.UTC(
+      manilaNow.getUTCFullYear(),
+      manilaNow.getUTCMonth(),
+      manilaNow.getUTCDate() + 1,
+      0,
+      0,
+      0,
+    ) - MANILA_OFFSET_MS;
+
+  return Math.max(1000, nextMidnightUtcMs - nowMs);
+}
 function roleLabel(role) {
   if (!role) return "System";
   return ROLE_OPTIONS.find(([value]) => value === role)?.[1] || role.replaceAll("_", " ");
@@ -75,6 +92,7 @@ export default function AuditLogs() {
   const [role, setRole] = useState("all");
   const [category, setCategory] = useState("all");
   const [page, setPage] = useState(1);
+  const [dailyResetToken, setDailyResetToken] = useState(0);
 
   const [logs, setLogs] = useState([]);
   const [pagination, setPagination] = useState({
@@ -94,6 +112,21 @@ export default function AuditLogs() {
 
     return () => window.clearTimeout(timer);
   }, [search]);
+  // WBO PHASE 3: reset Audit Logs view at Manila midnight.
+  // This resets only the UI filters; WBO_AuditLogs history is preserved.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearch("");
+      setDebouncedSearch("");
+      setPeriod("today");
+      setRole("all");
+      setCategory("all");
+      setPage(1);
+      setDailyResetToken((value) => value + 1);
+    }, millisecondsUntilNextManilaMidnight());
+
+    return () => window.clearTimeout(timer);
+  }, [dailyResetToken]);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,7 +174,7 @@ export default function AuditLogs() {
     return () => {
       cancelled = true;
     };
-  }, [period, role, category, page, debouncedSearch]);
+  }, [period, role, category, page, debouncedSearch, dailyResetToken]);
 
   const rangeText = useMemo(() => {
     const total = Number(pagination.total || 0);
@@ -242,7 +275,7 @@ export default function AuditLogs() {
 
         <div className="audit-filter-summary">
           <span>{rangeText}</span>
-          <span>Times shown in Philippine Time (Asia/Manila)</span>
+          <span>Daily view resets at 12:00 AM Philippine Time; history is preserved.</span>
         </div>
       </div>
 

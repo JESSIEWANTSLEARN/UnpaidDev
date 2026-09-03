@@ -16,7 +16,7 @@ const money = (value) =>
   }).format(Number(value || 0));
 
 const date = (value) => {
-  if (!value) return "â€”";
+  if (!value) return "-";
 
   const parsed = new Date(value);
 
@@ -209,7 +209,7 @@ function OrdersTable({
                   <small>
                     {order.customer_email ||
                       order.customer_contact ||
-                      "â€”"}
+                      "-"}
                   </small>
                 </td>
                 <td>
@@ -330,7 +330,7 @@ function OrdersTable({
                                 {
                                   item.quantity
                                 }{" "}
-                                Ã—{" "}
+                                x{" "}
                                 {money(
                                   item.unit_price,
                                 )}
@@ -401,7 +401,7 @@ function CustomersTable({
                 <td>
                   {
                     customer.contact_number ||
-                    "â€”"
+                    "-"
                   }
                 </td>
                 <td>
@@ -632,7 +632,7 @@ export default function RoleSalesContent({
     return (
       <Section
         title="Customer Orders"
-        description="PENDING â†’ PROCESSING reserves inventory using FEFO. FULFILLED converts that reservation into the completed sale."
+        description="PENDING -> PROCESSING reserves inventory using FEFO. FULFILLED converts that reservation into the completed sale."
       >
         <OrdersTable
           orders={data.orders || []}

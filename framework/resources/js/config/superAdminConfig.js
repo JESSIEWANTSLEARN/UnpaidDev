@@ -5,6 +5,7 @@ export const navSections = [
     items: [
       { name: "Inventory", icon: "package" },
       { name: "Products", icon: "warehouse" },
+      { name: "Product Reviews", icon: "search" },
       { name: "Categories", icon: "tag" },
       { name: "Suppliers", icon: "truck" },
     ],
@@ -24,6 +25,7 @@ export const navSections = [
       { name: "View as Role", icon: "users" },
       { name: "Reports", icon: "reports" },
       { name: "Audit Logs", icon: "search" },
+      { name: "System Health", icon: "settings" },
       { name: "Settings", icon: "settings" },
     ],
   },

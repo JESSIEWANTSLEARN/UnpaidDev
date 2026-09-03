@@ -131,6 +131,8 @@ Route::post('/signup/resend-otp', [SignupVerificationController::class, 'resend'
 Route::post('/forgot-password/request', [PasswordResetController::class, 'requestReset']);
 Route::post('/forgot-password/verify-otp', [PasswordResetController::class, 'verifyOtp']);
 Route::post('/forgot-password/resend-otp', [PasswordResetController::class, 'resend']);
+Route::get('/forgot-password/status', [PasswordResetController::class, 'status']);
+Route::post('/forgot-password/restart', [PasswordResetController::class, 'restart']);
 Route::post('/forgot-password/reset', [PasswordResetController::class, 'resetPassword']);
 
 Route::post('/logout', [LogoutController::class, 'logout']);
@@ -242,6 +244,16 @@ Route::delete(
     '/api/user-admin/users/{userId}/sessions/{sessionId}',
     [UserAdminController::class, 'revokeSession']
 )->whereNumber('userId');
+// Product Reviews
+Route::get('/api/store/reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'publicIndex']);
+Route::get('/api/user/reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'mine']);
+Route::post('/api/user/reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'store']);
+Route::get('/api/super-admin/product-reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'adminIndex']);
+Route::put('/api/super-admin/product-reviews/{reviewId}/moderate', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'moderate'])->whereNumber('reviewId');
+Route::delete('/api/super-admin/product-reviews/{reviewId}', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'destroy'])->whereNumber('reviewId');
+
+// Real system health checks only; no fabricated infrastructure percentages.
+Route::get('/api/super-admin/system-health', [\App\Http\Controllers\SuperAdmin\SystemHealthController::class, 'show']);
 // Super Admin dashboard + report
 Route::get('/api/super-admin/dashboard-data', [SuperAdminDashboardController::class, 'index']);
 Route::get('/api/super-admin/audit-logs', [SuperAdminDashboardController::class, 'auditLogs']);

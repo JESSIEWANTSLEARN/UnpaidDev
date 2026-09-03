@@ -27,7 +27,7 @@ const EMPTY_CREATE = {
 };
 
 const date = (value) => {
-  if (!value) return "â€”";
+  if (!value) return "-";
 
   const parsed = new Date(value);
 
@@ -519,7 +519,7 @@ function SessionsPanel({
 }) {
   return (
     <Section
-      title={`${user.name} â€” Sessions`}
+      title={`${user.name} - Sessions`}
       description="Showing up to 30 recent sessions with active sessions first. Session revocation is unavailable in Super Admin preview mode."
     >
       <div className="user-admin-session-toolbar">
@@ -561,7 +561,7 @@ function SessionsPanel({
                   {session.device_name}
                 </strong>
                 <span>
-                  {session.browser_name} Â·{" "}
+                  {session.browser_name}  - {" "}
                   {session.operating_system}
                 </span>
               </div>
@@ -586,7 +586,7 @@ function SessionsPanel({
                       ? "Active"
                       : "Closed"}
                     {session.is_current_session
-                      ? " Â· Current"
+                      ? " - Current"
                       : ""}
                   </dd>
                 </div>
@@ -654,8 +654,8 @@ function AccessTable({ rows }) {
                 )}
               </td>
               <td>{row.action}</td>
-              <td>{row.description || "â€”"}</td>
-              <td>{row.ip_address || "â€”"}</td>
+              <td>{row.description || "-"}</td>
+              <td>{row.ip_address || "-"}</td>
             </tr>
           ))}
         </tbody>

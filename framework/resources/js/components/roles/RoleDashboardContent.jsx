@@ -25,7 +25,7 @@ const money = (value) =>
   }).format(Number(value || 0));
 
 const date = (value) => {
-  if (!value) return "â€”";
+  if (!value) return "-";
 
   const parsed = new Date(value);
 
@@ -149,7 +149,7 @@ function ProductsTable({
               <td>{product.name}</td>
               <td>{product.category}</td>
               <td>
-                {product.supplier_name || "â€”"}
+                {product.supplier_name || "-"}
               </td>
               <td>
                 {number(product.available_stock)}
@@ -194,9 +194,9 @@ function SuppliersTable({
               </td>
               <td>
                 {supplier.contact_number ||
-                  "â€”"}
+                  "-"}
               </td>
-              <td>{supplier.email || "â€”"}</td>
+              <td>{supplier.email || "-"}</td>
               <td>
                 {number(
                   supplier.lead_time_days,
@@ -341,11 +341,11 @@ function TransactionsTable({
                 </td>
                 <td>
                   {transaction.performed_by ||
-                    "â€”"}
+                    "-"}
                 </td>
                 <td>
                   {transaction.reference_note ||
-                    "â€”"}
+                    "-"}
                 </td>
               </tr>
             ),
@@ -468,7 +468,7 @@ function PurchaseOrdersTable({
               <td>{po.po_number}</td>
               <td>{po.supplier_name}</td>
               <td>
-                {po.product_name || "â€”"}
+                {po.product_name || "-"}
               </td>
               <td>
                 {number(
@@ -482,8 +482,8 @@ function PurchaseOrdersTable({
               </td>
               <td>{money(po.unit_cost)}</td>
               <td>{po.status}</td>
-              <td>{po.created_by || "â€”"}</td>
-              <td>{po.approved_by || "â€”"}</td>
+              <td>{po.created_by || "-"}</td>
+              <td>{po.approved_by || "-"}</td>
               <td>
                 <div className="role-live-inline-actions">
                   {previewMode && (
@@ -1055,7 +1055,7 @@ export default function RoleDashboardContent({
       return (
         <Section
           title="Low Stock"
-          description={`Products with 1â€“${data.low_stock_threshold} units available.`}
+          description={`Products with 1-${data.low_stock_threshold} units available.`}
         >
           <ProductsTable
             products={

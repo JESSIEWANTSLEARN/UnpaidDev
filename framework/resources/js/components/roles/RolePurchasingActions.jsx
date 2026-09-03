@@ -373,7 +373,7 @@ export function PurchaseOrderForm({
                     product.product_id
                   }
                 >
-                  {product.sku} â€”{" "}
+                  {product.sku} -{" "}
                   {product.name}
                 </option>
               ),
