@@ -145,13 +145,6 @@ CREATE TABLE WBO_AuditLogs (
 INSERT INTO WBO_Users ( name,  email,  contact_number,   password_hash,  role,  account_status,  email_verified_at
 )
 VALUES
-('Jerome Raymundo','admin@wbo.ph','0911','admin123','super_admin','active',NOW()),
-
-('Jessie Palarao','palaraojessie19@gmail.com','0911','warehouse123','Warehouse_Admin','active',NOW()),
-
-('Jhon Paul Villasanta','jhonpaulvillasanta937@gmail.com','0911','operations123','Operations_Manager','active',NOW()),
-
-('Taironne James Sieteriales','staff@wbo.ph','0911','purchasing123','Purchasing_Manager','active',NOW());
 
 
 INSERT INTO WBO_Suppliers (name, contact_number, email, lead_time_days) VALUES
