@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Shared;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/** Cross-domain notification and inventory/order alert service. */
 class NotificationService
 {
     private const LOW_STOCK_THRESHOLD = 10;

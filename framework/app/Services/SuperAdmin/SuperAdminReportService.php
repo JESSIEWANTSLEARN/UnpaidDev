@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\SuperAdmin;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;

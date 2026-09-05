@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use App\Services\AuthSessionService;
-use App\Services\TrustedDeviceService;
+use App\Http\Controllers\Controller;
+use App\Services\Auth\AuthSessionService;
+use App\Services\Auth\TrustedDeviceService;
 use Illuminate\Http\Request;
 
 class LogoutController extends Controller

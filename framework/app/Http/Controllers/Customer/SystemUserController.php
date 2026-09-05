@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
+use App\Http\Controllers\Controller;
 use App\Models\WBOUser;
-use App\Services\NotificationService;
-use App\Services\PasswordHistoryService;
+use App\Services\Shared\NotificationService;
+use App\Services\Auth\PasswordHistoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
+/** Authenticated customer account, order, profile, notification, and password endpoints. */
 class SystemUserController extends Controller
 {
     private function currentUser(Request $request): WBOUser

@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\SuperAdmin;
 
-use App\Services\SuperAdminReportService;
-use App\Services\NotificationService;
+use App\Http\Controllers\Controller;
+use App\Services\SuperAdmin\SuperAdminReportService;
+use App\Services\Shared\NotificationService;
 
 use App\Http\Controllers\Concerns\HandlesSuperAdminSupport;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/** Super Admin dashboard, audit-log, and reporting endpoints. */
 class SuperAdminDashboardController extends Controller
 {
     use HandlesSuperAdminSupport;

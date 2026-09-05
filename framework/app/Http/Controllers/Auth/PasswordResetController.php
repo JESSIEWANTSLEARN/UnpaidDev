@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\WBOUser;
-use App\Services\OtpService;
-use App\Services\PasswordHistoryService;
+use App\Services\Auth\OtpService;
+use App\Services\Auth\PasswordHistoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

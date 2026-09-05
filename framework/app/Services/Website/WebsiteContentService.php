@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Website;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;

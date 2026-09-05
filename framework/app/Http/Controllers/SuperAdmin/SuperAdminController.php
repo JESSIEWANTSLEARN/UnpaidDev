@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\SuperAdmin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\HandlesSuperAdminSupport;
-use App\Services\PasswordHistoryService;
+use App\Services\Auth\PasswordHistoryService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
+/** Super Admin account, user, session, notification, and account-archive operations. */
 class SuperAdminController extends Controller
 {
     use HandlesSuperAdminSupport;

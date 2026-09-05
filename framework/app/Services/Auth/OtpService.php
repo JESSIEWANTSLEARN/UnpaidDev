@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Auth;
 
 use App\Models\WBOUser;
 use Illuminate\Support\Facades\Hash;

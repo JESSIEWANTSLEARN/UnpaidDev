@@ -10,19 +10,19 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SignupVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 
-use App\Http\Controllers\StoreProductController;
-use App\Http\Controllers\SystemUserController;
-use App\Http\Controllers\LogoutController;
-use App\Http\Controllers\SessionSecurityController;
+use App\Http\Controllers\Customer\StoreProductController;
+use App\Http\Controllers\Customer\SystemUserController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\SessionSecurityController;
 
-use App\Http\Controllers\PresenceController;
-use App\Http\Controllers\SuperAdminController;
-use App\Http\Controllers\SuperAdminDashboardController;
-use App\Http\Controllers\RoleDashboardController;
-use App\Http\Controllers\SalesRoleController;
-use App\Http\Controllers\UserAdminController;
-use App\Http\Controllers\SuperAdminCatalogController;
-use App\Http\Controllers\SuperAdminBackupController;
+use App\Http\Controllers\Shared\PresenceController;
+use App\Http\Controllers\SuperAdmin\SuperAdminController;
+use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
+use App\Http\Controllers\Staff\RoleDashboardController;
+use App\Http\Controllers\Sales\SalesRoleController;
+use App\Http\Controllers\UserAdmin\UserAdminController;
+use App\Http\Controllers\SuperAdmin\SuperAdminCatalogController;
+use App\Http\Controllers\SuperAdmin\SuperAdminBackupController;
 
 // React public pages
 Route::view('/', 'react');
@@ -305,48 +305,48 @@ Route::get('/super-admin/content', function () {
 
 Route::get(
     '/api/public/website-content',
-    [\App\Http\Controllers\WebsiteContentController::class, 'publicIndex']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'publicIndex']
 );
 Route::get(
     '/api/public/team/{teamMemberId}/photo',
-    [\App\Http\Controllers\WebsiteContentController::class, 'teamPhoto']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'teamPhoto']
 )->whereNumber('teamMemberId');
 
 Route::get(
     '/api/super-admin/website-content',
-    [\App\Http\Controllers\WebsiteContentController::class, 'adminIndex']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'adminIndex']
 );
 Route::put(
     '/api/super-admin/website-content/about',
-    [\App\Http\Controllers\WebsiteContentController::class, 'updateAbout']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'updateAbout']
 );
 Route::post(
     '/api/super-admin/website-content/faqs',
-    [\App\Http\Controllers\WebsiteContentController::class, 'createFaq']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'createFaq']
 );
 Route::put(
     '/api/super-admin/website-content/faqs/{faqId}',
-    [\App\Http\Controllers\WebsiteContentController::class, 'updateFaq']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'updateFaq']
 )->whereNumber('faqId');
 Route::delete(
     '/api/super-admin/website-content/faqs/{faqId}',
-    [\App\Http\Controllers\WebsiteContentController::class, 'deleteFaq']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'deleteFaq']
 )->whereNumber('faqId');
 Route::post(
     '/api/super-admin/website-content/team',
-    [\App\Http\Controllers\WebsiteContentController::class, 'createTeamMember']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'createTeamMember']
 );
 Route::post(
     '/api/super-admin/website-content/team/{teamMemberId}',
-    [\App\Http\Controllers\WebsiteContentController::class, 'updateTeamMember']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'updateTeamMember']
 )->whereNumber('teamMemberId');
 Route::delete(
     '/api/super-admin/website-content/team/{teamMemberId}/photo',
-    [\App\Http\Controllers\WebsiteContentController::class, 'deleteTeamPhoto']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'deleteTeamPhoto']
 )->whereNumber('teamMemberId');
 Route::delete(
     '/api/super-admin/website-content/team/{teamMemberId}',
-    [\App\Http\Controllers\WebsiteContentController::class, 'deleteTeamMember']
+    [\App\Http\Controllers\Website\WebsiteContentController::class, 'deleteTeamMember']
 )->whereNumber('teamMemberId');
 // =========================================================
 // END PHASE 3 WEBSITE CONTENT

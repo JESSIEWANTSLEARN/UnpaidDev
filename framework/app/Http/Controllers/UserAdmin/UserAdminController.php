@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\UserAdmin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Rule;
  * - Disabling/pending an account revokes its sessions and trusted devices.
  * - Super Admin role preview has read-only GET access only.
  */
+/** User Admin customer-account and customer-session administration endpoints. */
 class UserAdminController extends Controller
 {
     private const MANAGEABLE_ROLES = [
