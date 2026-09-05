@@ -41,6 +41,9 @@ INSTALL_*.ps1
 # Database exports / SQL dumps
 *.sql
 
+# Canonical schema is source-controlled for reproducible setup.
+!database/schema/walangbrownout_baseline.sql
+
 # Backup files
 *.bak
 *.backup
