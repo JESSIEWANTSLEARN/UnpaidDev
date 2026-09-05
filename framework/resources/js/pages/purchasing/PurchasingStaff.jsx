@@ -1,6 +1,6 @@
-/* WBO_ROLE_WRAPPER */
+// Purchasing Staff route wrapper using the shared staff dashboard shell.
 import React from "react";
-import RoleDashboardShell from "../../components/roles/RoleDashboardShell.jsx";
+import RoleDashboardShell from "../../components/shared/role-dashboard/RoleDashboardShell.jsx";
 export default function PurchasingStaff() {
   return <RoleDashboardShell roleKey="Purchasing_Staff" />;
 }

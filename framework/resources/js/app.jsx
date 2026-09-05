@@ -3,30 +3,30 @@ import { createRoot } from "react-dom/client";
 
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
-import LandingPage from "./LandingPage.jsx";
-import FAQ from "./FAQ.jsx";
-import LogIn from "./LogIn.jsx";
-import Signup from "./Signup.jsx";
-import LoginOtp from "./LoginOtp.jsx";
-import SignupVerify from "./SignupVerify.jsx";
-import ForgotPassword from "./ForgotPassword.jsx";
+import LandingPage from "./pages/public/LandingPage.jsx";
+import FAQ from "./pages/public/FAQ.jsx";
+import LogIn from "./pages/auth/LogIn.jsx";
+import Signup from "./pages/auth/Signup.jsx";
+import LoginOtp from "./pages/auth/LoginOtp.jsx";
+import SignupVerify from "./pages/auth/SignupVerify.jsx";
+import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
-import SystemUser from "./pages/users/SystemUserPremium.jsx";
-import SuperAdmin from "./pages/SuperAdmin.jsx";
-import WebsiteContentAdmin from "./pages/WebsiteContentAdmin.jsx";
+import SystemUser from "./pages/customer/SystemUser.jsx";
+import SuperAdmin from "./pages/super-admin/SuperAdmin.jsx";
+import WebsiteContentAdmin from "./pages/super-admin/WebsiteContentAdmin.jsx";
 import OperationsManager from "./pages/operations/OperationsManager.jsx";
 import PurchasingManager from "./pages/purchasing/PurchasingManager.jsx";
 import PurchasingStaff from "./pages/purchasing/PurchasingStaff.jsx";
 import WarehouseAdmin from "./pages/warehouse/WarehouseAdmin.jsx";
-import InventoryController from "./pages/warehouse/InventoryController.jsx";
+import InventoryController from "./pages/inventory/InventoryController.jsx";
 import SalesManager from "./pages/sales/SalesManager.jsx";
 import SalesStaff from "./pages/sales/SalesStaff.jsx";
-import UserAdmin from "./pages/users/UserAdmin.jsx";
-import RolePreview from "./pages/RolePreview.jsx";
+import UserAdmin from "./pages/user-admin/UserAdmin.jsx";
+import RolePreview from "./pages/super-admin/RolePreview.jsx";
 
-import PresenceTracker from "./components/PresenceTracker.jsx";
+import PresenceTracker from "./components/shared/session/PresenceTracker.jsx";
 
-import "../css/AuthTransitions.css";
+import "../css/auth/transitions.css";
 
 /* =========================================================
    AUTH PAGE ORDER
