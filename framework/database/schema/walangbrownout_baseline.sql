@@ -743,6 +743,66 @@ CREATE TABLE IF NOT EXISTS WBO_NotificationState (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS WBO_Conversations (
+    conversation_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_user_id INT NOT NULL,
+    assigned_user_id INT NULL,
+    subject VARCHAR(150) NULL,
+    status ENUM('BOT','WAITING_STAFF','ACTIVE','CLOSED') NOT NULL DEFAULT 'BOT',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    closed_at DATETIME NULL,
+
+    CONSTRAINT fk_wbo_conv_customer
+        FOREIGN KEY (customer_user_id) REFERENCES WBO_Users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_wbo_conv_staff
+        FOREIGN KEY (assigned_user_id) REFERENCES WBO_Users(user_id)
+        ON DELETE SET NULL,
+
+    INDEX idx_wbo_conv_customer_status (customer_user_id, status),
+    INDEX idx_wbo_conv_staff_status (assigned_user_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS WBO_ConversationMessages (
+    message_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conversation_id BIGINT UNSIGNED NOT NULL,
+    sender_user_id INT NULL,
+    sender_type ENUM('CUSTOMER','BOT','STAFF','SYSTEM') NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_wbo_msg_conv
+        FOREIGN KEY (conversation_id) REFERENCES WBO_Conversations(conversation_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_wbo_msg_sender
+        FOREIGN KEY (sender_user_id) REFERENCES WBO_Users(user_id)
+        ON DELETE SET NULL,
+
+    INDEX idx_wbo_msg_conv_created (conversation_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS WBO_ConversationTransfers (
+    transfer_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conversation_id BIGINT UNSIGNED NOT NULL,
+    from_user_id INT NULL,
+    to_user_id INT NULL,
+    transfer_type ENUM('ESCALATED','ASSIGNED','REASSIGNED','CLOSED') NOT NULL,
+    note VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_wbo_transfer_conv
+        FOREIGN KEY (conversation_id) REFERENCES WBO_Conversations(conversation_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_wbo_transfer_from
+        FOREIGN KEY (from_user_id) REFERENCES WBO_Users(user_id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_wbo_transfer_to
+        FOREIGN KEY (to_user_id) REFERENCES WBO_Users(user_id)
+        ON DELETE SET NULL,
+
+    INDEX idx_wbo_transfer_conv_created (conversation_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS WBO_FAQs (
     faq_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 

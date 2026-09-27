@@ -68,6 +68,7 @@ trait HandlesSuperAdminSupport
             'WBO_Users', 'WBO_Suppliers', 'WBO_Products', 'WBO_ProductImages', 'WBO_Batches',
             'WBO_Orders', 'WBO_OrderDetails', 'WBO_Transactions', 'WBO_PurchaseOrders',
             'WBO_Notifications', 'WBO_AuditLogs', 'WBO_SystemSettings',
+            'WBO_Conversations', 'WBO_ConversationMessages', 'WBO_ConversationTransfers',
         ];
     }
 
