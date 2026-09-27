@@ -487,6 +487,155 @@ class RoleDashboardController extends Controller
         ]);
     }
 
+    public function writeOffStock(
+        Request $request,
+        NotificationService $notifications
+    ): JsonResponse {
+        $role = $this->authorizeAction([
+            'Inventory_Controller',
+        ]);
+
+        $request->merge([
+            'reference_note' =>
+                trim((string) $request->input('reference_note', '')),
+        ]);
+
+        $validated = $request->validate([
+            'batch_id' => [
+                'required',
+                'integer',
+                Rule::exists('WBO_Batches', 'batch_id'),
+            ],
+            'quantity' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+            'reason' => [
+                'required',
+                Rule::in([
+                    'DAMAGED',
+                    'MISSING',
+                    'EXPIRED',
+                ]),
+            ],
+            'reference_note' => [
+                'required',
+                'string',
+                'max:200',
+            ],
+        ]);
+
+        $result = DB::transaction(function () use ($validated) {
+            $batch = DB::table('WBO_Batches')
+                ->where('batch_id', $validated['batch_id'])
+                ->lockForUpdate()
+                ->first();
+
+            if (!$batch) {
+                throw ValidationException::withMessages([
+                    'batch_id' => [
+                        'The selected batch no longer exists.',
+                    ],
+                ]);
+            }
+
+            $currentQuantity =
+                (int) $batch->current_quantity;
+            $writeOffQuantity =
+                (int) $validated['quantity'];
+
+            if ($currentQuantity <= 0) {
+                throw ValidationException::withMessages([
+                    'quantity' => [
+                        'This batch has no stock left to write off.',
+                    ],
+                ]);
+            }
+
+            if ($writeOffQuantity > $currentQuantity) {
+                throw ValidationException::withMessages([
+                    'quantity' => [
+                        "Only {$currentQuantity} unit(s) remain in this batch.",
+                    ],
+                ]);
+            }
+
+            if ($validated['reason'] === 'EXPIRED') {
+                if (
+                    !$batch->expiry_date ||
+                    $batch->expiry_date >= now()->toDateString()
+                ) {
+                    throw ValidationException::withMessages([
+                        'reason' => [
+                            'Expired write-off can only be used for a batch whose expiry date has already passed.',
+                        ],
+                    ]);
+                }
+            }
+
+            $newQuantity =
+                $currentQuantity - $writeOffQuantity;
+
+            DB::table('WBO_Batches')
+                ->where('batch_id', $validated['batch_id'])
+                ->update([
+                    'current_quantity' => $newQuantity,
+                ]);
+
+            $note = sprintf(
+                '%s: %s',
+                $validated['reason'],
+                $validated['reference_note']
+            );
+
+            DB::table('WBO_Transactions')->insert([
+                'batch_id' => $validated['batch_id'],
+                'transaction_type' => 'WRITE_OFF',
+                'quantity_change' => -$writeOffQuantity,
+                'order_id' => null,
+                'purchase_order_id' => null,
+                'reference_note' => $note,
+                'performed_by_user_id' => (int) session('user_id'),
+                'timestamp' => now(),
+            ]);
+
+            return [
+                'batch_number' =>
+                    (string) $batch->batch_number,
+                'quantity' =>
+                    $writeOffQuantity,
+                'new_quantity' =>
+                    $newQuantity,
+                'reason' =>
+                    $validated['reason'],
+            ];
+        });
+
+        $this->audit(
+            $request,
+            'INVENTORY_WRITTEN_OFF',
+            sprintf(
+                '%s wrote off %d unit(s) from batch %s. Reason: %s. New quantity: %d. Note: %s',
+                $this->roleLabel($role),
+                $result['quantity'],
+                $result['batch_number'],
+                $result['reason'],
+                $result['new_quantity'],
+                $validated['reference_note']
+            )
+        );
+
+        $notifications->syncOperationalAlerts();
+
+        return response()->json([
+            'message' =>
+                'Inventory write-off recorded successfully.',
+            'new_quantity' =>
+                $result['new_quantity'],
+        ]);
+    }
+
     // =========================================================
     // PURCHASING ACTIONS
     // =========================================================

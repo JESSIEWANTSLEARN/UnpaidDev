@@ -191,6 +191,11 @@ Route::post(
     '/api/role-dashboard/adjust-stock',
     [RoleDashboardController::class, 'adjustStock']
 );
+
+Route::post(
+    '/api/role-dashboard/write-off',
+    [RoleDashboardController::class, 'writeOffStock']
+);
 Route::post(
     '/api/role-dashboard/suppliers',
     [RoleDashboardController::class, 'storeSupplier']
