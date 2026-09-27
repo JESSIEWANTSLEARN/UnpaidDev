@@ -16,8 +16,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
+
 # Allow Apache/PHP runtime user to read Render secret files
-RUN usermod -a -G 1000 www-data
+RUN groupadd -g 1000 render-secrets
+RUN usermod -a -G render-secrets www-data
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
