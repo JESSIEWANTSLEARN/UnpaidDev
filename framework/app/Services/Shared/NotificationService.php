@@ -346,7 +346,14 @@ class NotificationService
         if (
             !in_array(
                 $status,
-                ['PENDING', 'CONFIRMED', 'FULFILLED', 'CANCELLED'],
+                [
+                    'PENDING',
+                    'CONFIRMED',
+                    'PROCESSING',
+                    'FULFILLED',
+                    'UNFULFILLED',
+                    'CANCELLED',
+                ],
                 true
             )
         ) {
@@ -361,10 +368,15 @@ class NotificationService
         }
 
         [$tier, $title, $message] = match ($status) {
-            'CONFIRMED' => [
+            'CONFIRMED', 'PROCESSING' => [
                 'Yellow',
-                "Order #{$orderId} confirmed",
-                "Your order #{$orderId} has been confirmed and is being prepared.",
+                "Order #{$orderId} processing",
+                "Your order #{$orderId} is being prepared and inventory has been reserved.",
+            ],
+            'UNFULFILLED' => [
+                'Red',
+                "Order #{$orderId} unfulfilled",
+                "Order #{$orderId} could not be fulfilled. Open My Orders for the latest status.",
             ],
             'FULFILLED' => [
                 'Yellow',

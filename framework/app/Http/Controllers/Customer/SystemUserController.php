@@ -318,7 +318,8 @@ class SystemUserController extends Controller
     }
 
     public function placeOrder(
-        Request $request
+        Request $request,
+        NotificationService $notifications
     ) {
         $user = $this->currentUser($request);
 
@@ -537,6 +538,12 @@ class SystemUserController extends Controller
             $amount = (float) DB::table('WBO_Orders')
                 ->where('order_id', $orderId)
                 ->value('total_amount');
+
+            $notifications->recordNewOrder(
+                (int) $orderId,
+                (int) $user->user_id,
+                (string) $delivery['full_name']
+            );
 
             return response()->json([
                 'success' => true,

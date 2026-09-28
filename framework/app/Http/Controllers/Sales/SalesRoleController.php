@@ -183,6 +183,23 @@ class SalesRoleController extends Controller
                                 null,
                         ]);
 
+                    if (
+                        $order->payment_method ===
+                        'CASH_ON_DELIVERY'
+                    ) {
+                        DB::table('WBO_Orders')
+                            ->where(
+                                'order_id',
+                                $orderId
+                            )
+                            ->update([
+                                'payment_status' =>
+                                    'PAID',
+                                'paid_at' =>
+                                    now(),
+                            ]);
+                    }
+
                     return [
                         'status' =>
                             'FULFILLED',
@@ -232,6 +249,10 @@ class SalesRoleController extends Controller
                             'fulfilled_at' =>
                                 null,
                             'cancelled_at' =>
+                                null,
+                            'payment_status' =>
+                                'CANCELLED',
+                            'paid_at' =>
                                 null,
                         ]);
 
@@ -284,6 +305,10 @@ class SalesRoleController extends Controller
                             null,
                         'cancelled_at' =>
                             now(),
+                        'payment_status' =>
+                            'CANCELLED',
+                        'paid_at' =>
+                            null,
                     ]);
 
                 return [
@@ -307,6 +332,16 @@ class SalesRoleController extends Controller
                 $result['status']
             )
         );
+
+        $customerUserId = (int) DB::table('WBO_Orders')
+            ->where('order_id', $orderId)
+            ->value('customer_user_id');
+
+        if ($customerUserId > 0) {
+            $notifications->syncCustomerOrderNotifications(
+                $customerUserId
+            );
+        }
 
         // Stock reservation/release may change operational alert state.
         $notifications->syncOperationalAlerts();

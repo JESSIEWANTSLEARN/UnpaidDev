@@ -20,6 +20,7 @@ use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\Staff\RoleDashboardController;
 use App\Http\Controllers\Sales\SalesRoleController;
+use App\Http\Controllers\Support\SupportChatController;
 use App\Http\Controllers\UserAdmin\UserAdminController;
 use App\Http\Controllers\SuperAdmin\SuperAdminCatalogController;
 use App\Http\Controllers\SuperAdmin\SuperAdminBackupController;
@@ -234,6 +235,21 @@ Route::put(
     '/api/sales-role/orders/{orderId}/status',
     [SalesRoleController::class, 'updateOrderStatus']
 )->whereNumber('orderId');
+
+// Customer support / FAQ bot
+Route::get('/api/user/support/conversations', [SupportChatController::class, 'customerIndex']);
+Route::post('/api/user/support/conversations', [SupportChatController::class, 'customerStart']);
+Route::get('/api/user/support/conversations/{conversationId}', [SupportChatController::class, 'customerShow'])->whereNumber('conversationId');
+Route::post('/api/user/support/conversations/{conversationId}/messages', [SupportChatController::class, 'customerMessage'])->whereNumber('conversationId');
+Route::post('/api/user/support/conversations/{conversationId}/escalate', [SupportChatController::class, 'customerEscalate'])->whereNumber('conversationId');
+Route::post('/api/user/support/conversations/{conversationId}/close', [SupportChatController::class, 'customerClose'])->whereNumber('conversationId');
+
+// Sales support. Super Admin may read through preview=1 only.
+Route::get('/api/support/staff/conversations', [SupportChatController::class, 'staffIndex']);
+Route::get('/api/support/staff/conversations/{conversationId}', [SupportChatController::class, 'staffShow'])->whereNumber('conversationId');
+Route::post('/api/support/staff/conversations/{conversationId}/claim', [SupportChatController::class, 'staffClaim'])->whereNumber('conversationId');
+Route::post('/api/support/staff/conversations/{conversationId}/messages', [SupportChatController::class, 'staffMessage'])->whereNumber('conversationId');
+Route::post('/api/support/staff/conversations/{conversationId}/close', [SupportChatController::class, 'staffClose'])->whereNumber('conversationId');
 // User Admin API. Super Admin may GET with preview=1; writes require actual User_Admin.
 Route::get(
     '/api/user-admin/dashboard',
