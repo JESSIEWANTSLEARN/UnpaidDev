@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\WBOUser;
 use App\Services\Shared\NotificationService;
 use App\Services\Auth\PasswordHistoryService;
+use App\Services\Customer\CustomerOrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -233,87 +234,16 @@ class SystemUserController extends Controller
         ]);
     }
 
-    public function orders(Request $request)
-    {
+    public function orders(
+        Request $request,
+        CustomerOrderService $orders
+    ) {
         $user = $this->currentUser($request);
-
-        $orders = DB::table('WBO_Orders')
-            ->where('customer_user_id', $user->user_id)
-            ->orderByDesc('order_date')
-            ->get();
-
-        $ids = $orders->pluck('order_id')->all();
-        $details = collect();
-
-        if ($ids) {
-            $details = DB::table('WBO_OrderDetails as od')
-                ->join('WBO_Products as p', 'p.product_id', '=', 'od.product_id')
-                ->whereIn('od.order_id', $ids)
-                ->select('od.*', 'p.name as product_name', 'p.sku')
-                ->get()
-                ->groupBy('order_id');
-        }
-
-        $payload = $orders->map(function ($order) use ($details) {
-            $items = collect($details->get($order->order_id, []))
-                ->map(function ($item) {
-                    return [
-                        'order_detail_id' => $item->order_detail_id,
-                        'product_id' => $item->product_id,
-                        'product_name' => $item->product_name,
-                        'sku' => $item->sku,
-                        'quantity' => (int) $item->quantity,
-                        'unit_price' => (float) $item->unit_price,
-                        'line_total' =>
-                            (float) $item->unit_price *
-                            (int) $item->quantity,
-                    ];
-                })
-                ->values();
-
-            $hasDelivery =
-                $order->delivery_street_address !== null ||
-                $order->delivery_email !== null;
-
-            $delivery = $hasDelivery ? [
-                'full_name' => $order->customer_name,
-                'email' => $order->delivery_email,
-                'contact_number' => $order->customer_contact,
-                'street_address' => $order->delivery_street_address,
-                'barangay' => $order->delivery_barangay,
-                'city_municipality' =>
-                    $order->delivery_city_municipality,
-                'province' => $order->delivery_province,
-                'postal_code' => $order->delivery_postal_code,
-                'delivery_notes' => $order->delivery_notes,
-            ] : null;
-
-            $payment = $order->payment_method !== null ? [
-                'payment_method' => $order->payment_method,
-                'payment_status' => $order->payment_status,
-                'amount' => (float) (
-                    $order->payment_amount ??
-                    $order->total_amount
-                ),
-                'reference_number' =>
-                    $order->payment_reference_number,
-                'paid_at' => $order->paid_at,
-            ] : null;
-
-            return [
-                'order_id' => $order->order_id,
-                'order_date' => $order->order_date,
-                'status' => $order->status,
-                'items' => $items,
-                'total' => (float) $items->sum('line_total'),
-                'delivery' => $delivery,
-                'payment' => $payment,
-            ];
-        });
 
         return response()->json([
             'success' => true,
-            'orders' => $payload,
+            'orders' => $orders
+                ->forUser((int) $user->user_id),
         ]);
     }
 
@@ -370,8 +300,17 @@ class SystemUserController extends Controller
                 ['required', 'string', 'max:20'],
             'delivery.delivery_notes' =>
                 ['nullable', 'string', 'max:500'],
-            'payment_method' =>
-                ['required', 'string', 'in:CASH_ON_DELIVERY'],
+            'payment_method' => [
+                'required',
+                'string',
+                'in:CASH_ON_DELIVERY,GCASH,BANK_TRANSFER',
+            ],
+            'payment_reference_number' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_unless:payment_method,CASH_ON_DELIVERY',
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -394,6 +333,21 @@ class SystemUserController extends Controller
             ->values();
 
         $paymentMethod = $validated['payment_method'];
+
+        $paymentReference =
+            $paymentMethod === 'CASH_ON_DELIVERY'
+                ? null
+                : trim(
+                    (string)
+                    $validated[
+                        'payment_reference_number'
+                    ]
+                );
+
+        $paymentStatus =
+            $paymentMethod === 'CASH_ON_DELIVERY'
+                ? 'PENDING'
+                : 'AWAITING_VERIFICATION';
 
         $delivery = [
             'full_name' =>
@@ -428,7 +382,9 @@ class SystemUserController extends Controller
                 $user,
                 $request,
                 $delivery,
-                $paymentMethod
+                $paymentMethod,
+                $paymentReference,
+                $paymentStatus
             ) {
                 $prepared = [];
 
@@ -510,9 +466,10 @@ class SystemUserController extends Controller
                         'status' => 'PENDING',
                         'total_amount' => $totalAmount,
                         'payment_method' => $paymentMethod,
-                        'payment_status' => 'PENDING',
+                        'payment_status' => $paymentStatus,
                         'payment_amount' => $totalAmount,
-                        'payment_reference_number' => null,
+                        'payment_reference_number' =>
+                            $paymentReference,
                         'paid_at' => null,
                     ]);
 
@@ -552,8 +509,10 @@ class SystemUserController extends Controller
                 'total_amount' => $amount,
                 'payment' => [
                     'payment_method' => $paymentMethod,
-                    'payment_status' => 'PENDING',
+                    'payment_status' => $paymentStatus,
                     'amount' => $amount,
+                    'reference_number' =>
+                        $paymentReference,
                 ],
             ], 201);
         } catch (ValidationException $e) {

@@ -61,6 +61,7 @@ class SalesRoleController extends Controller
             'action' => [
                 'required',
                 Rule::in([
+                    'verify_payment',
                     'process',
                     'fulfill',
                     'unfulfill',
@@ -90,11 +91,67 @@ class SalesRoleController extends Controller
                     abort(404, 'Order not found.');
                 }
 
+                if ($action === 'verify_payment') {
+                    if (
+                        $order->payment_method ===
+                        'CASH_ON_DELIVERY'
+                    ) {
+                        throw ValidationException::withMessages([
+                            'action' => [
+                                'Cash on Delivery does not require payment verification.',
+                            ],
+                        ]);
+                    }
+
+                    if (
+                        $order->payment_status !==
+                        'AWAITING_VERIFICATION'
+                    ) {
+                        throw ValidationException::withMessages([
+                            'action' => [
+                                'Only payments awaiting verification can be verified.',
+                            ],
+                        ]);
+                    }
+
+                    DB::table('WBO_Orders')
+                        ->where(
+                            'order_id',
+                            $orderId
+                        )
+                        ->update([
+                            'payment_status' =>
+                                'PAID',
+                            'paid_at' => now(),
+                        ]);
+
+                    return [
+                        'status' =>
+                            $order->status,
+                        'message' =>
+                            "Payment for order #{$orderId} verified.",
+                        'audit_action' =>
+                            'ORDER_PAYMENT_VERIFIED',
+                    ];
+                }
+
                 if ($action === 'process') {
                     if ($order->status !== 'PENDING') {
                         throw ValidationException::withMessages([
                             'action' => [
                                 'Only pending orders can be moved to processing.',
+                            ],
+                        ]);
+                    }
+
+                    if (
+                        $order->payment_method !==
+                            'CASH_ON_DELIVERY' &&
+                        $order->payment_status !== 'PAID'
+                    ) {
+                        throw ValidationException::withMessages([
+                            'action' => [
+                                'Verify the demo online payment before processing this order.',
                             ],
                         ]);
                     }

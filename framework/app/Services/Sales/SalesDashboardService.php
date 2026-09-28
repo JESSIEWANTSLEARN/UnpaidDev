@@ -133,6 +133,10 @@ class SalesDashboardService
                     'o.order_date',
                     'o.status',
                     'o.total_amount',
+                    'o.payment_method',
+                    'o.payment_status',
+                    'o.payment_reference_number',
+                    'o.paid_at',
                     'o.fulfilled_at',
                     'o.cancelled_at'
                 )
@@ -227,6 +231,18 @@ class SalesDashboardService
                                 $items->sum(
                                     'quantity'
                                 ),
+                            'payment_method' =>
+                                $order
+                                    ->payment_method,
+                            'payment_status' =>
+                                $order
+                                    ->payment_status,
+                            'payment_reference_number' =>
+                                $order
+                                    ->payment_reference_number,
+                            'paid_at' =>
+                                $order
+                                    ->paid_at,
                             'fulfilled_at' =>
                                 $order
                                     ->fulfilled_at,
