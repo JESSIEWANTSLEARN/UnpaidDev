@@ -11,8 +11,8 @@ return new class extends Migration
         if (!Schema::hasTable('WBO_Conversations')) {
             Schema::create('WBO_Conversations', function (Blueprint $table) {
                 $table->bigIncrements('conversation_id');
-                $table->unsignedInteger('customer_user_id');
-                $table->unsignedInteger('assigned_user_id')->nullable();
+                $table->integer('customer_user_id');
+                $table->integer('assigned_user_id')->nullable();
                 $table->string('subject', 150)->nullable();
                 $table->enum('status', ['BOT', 'WAITING_STAFF', 'ACTIVE', 'CLOSED'])->default('BOT');
                 $table->timestamp('created_at')->useCurrent();
@@ -33,7 +33,7 @@ return new class extends Migration
             Schema::create('WBO_ConversationMessages', function (Blueprint $table) {
                 $table->bigIncrements('message_id');
                 $table->unsignedBigInteger('conversation_id');
-                $table->unsignedInteger('sender_user_id')->nullable();
+                $table->integer('sender_user_id')->nullable();
                 $table->enum('sender_type', ['CUSTOMER', 'BOT', 'STAFF', 'SYSTEM']);
                 $table->text('message');
                 $table->timestamp('created_at')->useCurrent();
@@ -51,8 +51,8 @@ return new class extends Migration
             Schema::create('WBO_ConversationTransfers', function (Blueprint $table) {
                 $table->bigIncrements('transfer_id');
                 $table->unsignedBigInteger('conversation_id');
-                $table->unsignedInteger('from_user_id')->nullable();
-                $table->unsignedInteger('to_user_id')->nullable();
+                $table->integer('from_user_id')->nullable();
+                $table->integer('to_user_id')->nullable();
                 $table->enum('transfer_type', ['ESCALATED', 'ASSIGNED', 'REASSIGNED', 'CLOSED']);
                 $table->string('note', 255)->nullable();
                 $table->timestamp('created_at')->useCurrent();
