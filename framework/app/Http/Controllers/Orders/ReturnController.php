@@ -17,9 +17,18 @@ class ReturnController extends Controller
 {
     use ReturnWorkflowHelpers;
 
-    private const STAFF_ROLES = [
+    private const SALES_ROLES = [
         'Sales_Manager',
         'Sales_Staff',
+    ];
+
+    private const RETURN_ROLES = [
+        'Sales_Manager',
+        'Sales_Staff',
+        'Warehouse_Admin',
+        'Inventory_Controller',
+        'Purchasing_Manager',
+        'Purchasing_Staff',
     ];
 
     private const DISPOSITIONS = [
@@ -237,10 +246,10 @@ class ReturnController extends Controller
     public function staffIndex(
         Request $request
     ): JsonResponse {
-        $preview = $this->staffRead($request);
+        $access = $this->staffRead($request);
         $this->ready();
 
-        $rows = DB::table(
+        $query = DB::table(
             'WBO_ReturnRequests as r'
         )
             ->join(
@@ -267,7 +276,44 @@ class ReturnController extends Controller
                 'u.name as customer_name',
                 'u.email as customer_email',
                 'h.name as handled_by_name'
+            );
+
+        $role = $access['role'];
+
+        if ($role === 'Warehouse_Admin') {
+            $query->whereIn(
+                'r.status',
+                [
+                    'APPROVED',
+                    'RECEIVED_FOR_INSPECTION',
+                ]
+            );
+        } elseif ($role === 'Inventory_Controller') {
+            $query->whereIn(
+                'r.status',
+                [
+                    'RECEIVED_FOR_INSPECTION',
+                    'REFUND_PENDING',
+                    'REFUNDED',
+                ]
+            );
+        } elseif (
+            in_array(
+                $role,
+                [
+                    'Purchasing_Manager',
+                    'Purchasing_Staff',
+                ],
+                true
             )
+        ) {
+            $query->where(
+                'r.inspection_disposition',
+                'RETURN_TO_SUPPLIER'
+            );
+        }
+
+        $rows = $query
             ->orderByRaw(
                 "CASE r.status
                     WHEN 'REQUESTED' THEN 0
@@ -290,7 +336,8 @@ class ReturnController extends Controller
 
         return response()->json([
             'success' => true,
-            'preview' => $preview,
+            'preview' => $access['preview'],
+            'role' => $access['role'],
             'returns' => $rows
                 ->map(
                     fn ($row) =>
@@ -307,7 +354,6 @@ class ReturnController extends Controller
         Request $request,
         int $returnId
     ): JsonResponse {
-        $staff = $this->staffAction();
         $this->ready();
 
         $validated = $request->validate([
@@ -333,6 +379,7 @@ class ReturnController extends Controller
         ]);
 
         $action = $validated['action'];
+        $staff = $this->staffAction($action);
 
         DB::transaction(
             function () use (
@@ -506,6 +553,45 @@ class ReturnController extends Controller
         $row = DB::table('WBO_ReturnRequests')
             ->where('return_id', $returnId)
             ->first();
+
+        if ($row->status === 'APPROVED') {
+            $this->notifyRoles(
+                ['Warehouse_Admin'],
+                "Approved return #{$returnId}",
+                "Return #{$returnId} is approved and ready for warehouse receiving."
+            );
+        } elseif (
+            $row->status ===
+            'RECEIVED_FOR_INSPECTION'
+        ) {
+            $this->notifyRoles(
+                ['Inventory_Controller'],
+                "Return #{$returnId} received",
+                "Return #{$returnId} is ready for inventory inspection."
+            );
+        } elseif (
+            $row->status === 'REFUND_PENDING'
+        ) {
+            $this->notifyRoles(
+                self::SALES_ROLES,
+                "Return #{$returnId} inspected",
+                "Return #{$returnId} is ready for refund processing."
+            );
+
+            if (
+                $row->inspection_disposition ===
+                'RETURN_TO_SUPPLIER'
+            ) {
+                $this->notifyRoles(
+                    [
+                        'Purchasing_Manager',
+                        'Purchasing_Staff',
+                    ],
+                    "Supplier return #{$returnId}",
+                    "Return #{$returnId} was marked Return to Supplier by Inventory Controller."
+                );
+            }
+        }
 
         $this->notifyUser(
             (int) $row->customer_user_id,

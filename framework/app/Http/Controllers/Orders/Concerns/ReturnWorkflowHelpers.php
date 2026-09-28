@@ -356,52 +356,102 @@ trait ReturnWorkflowHelpers
 
     private function staffRead(
         Request $request
-    ): bool {
-        if (session('logged_in') !== true) {
+    ): array {
+        if (
+            session('logged_in') !== true ||
+            !session('user_id')
+        ) {
             abort(
                 401,
                 'Authentication required.'
             );
         }
 
-        $role = (string) session('role');
+        $sessionRole =
+            (string) session('role');
 
         if (
             in_array(
-                $role,
-                self::STAFF_ROLES,
+                $sessionRole,
+                self::RETURN_ROLES,
                 true
             )
         ) {
-            return false;
+            $user = WBOUser::find(
+                (int) session('user_id')
+            );
+
+            abort_unless(
+                $user &&
+                $user->account_status === 'active',
+                401,
+                'Account unavailable.'
+            );
+
+            return [
+                'role' => $sessionRole,
+                'preview' => false,
+            ];
         }
 
         if (
-            $role === 'super_admin' &&
+            $sessionRole === 'super_admin' &&
             $request->boolean('preview')
         ) {
-            return true;
+            $previewRole = (string)
+                $request->query(
+                    'preview_role',
+                    'Sales_Manager'
+                );
+
+            abort_unless(
+                in_array(
+                    $previewRole,
+                    self::RETURN_ROLES,
+                    true
+                ),
+                403,
+                'Unsupported return-workflow preview role.'
+            );
+
+            return [
+                'role' => $previewRole,
+                'preview' => true,
+            ];
         }
 
         abort(
             403,
-            'Sales role required.'
+            'Return workflow role required.'
         );
     }
 
-    private function staffAction(): WBOUser
-    {
+    private function staffAction(
+        string $action
+    ): WBOUser {
+        $allowedRoles = match ($action) {
+            'approve',
+            'reject',
+            'refund' =>
+                self::SALES_ROLES,
+            'receive' =>
+                ['Warehouse_Admin'],
+            'inspect' =>
+                ['Inventory_Controller'],
+            default => [],
+        };
+
         if (
             session('logged_in') !== true ||
             !in_array(
                 (string) session('role'),
-                self::STAFF_ROLES,
+                $allowedRoles,
                 true
             )
         ) {
             abort(
                 403,
-                'Actual Sales role required.'
+                'Your role cannot perform this return action.'
             );
         }
 
@@ -412,7 +462,8 @@ trait ReturnWorkflowHelpers
         abort_unless(
             $user &&
             $user->account_status === 'active',
-            401
+            401,
+            'Account unavailable.'
         );
 
         return $user;
@@ -425,8 +476,30 @@ trait ReturnWorkflowHelpers
         $ids = DB::table('WBO_Users')
             ->whereIn(
                 'role',
-                self::STAFF_ROLES
+                self::SALES_ROLES
             )
+            ->where(
+                'account_status',
+                'active'
+            )
+            ->pluck('user_id');
+
+        foreach ($ids as $id) {
+            $this->notifyUser(
+                (int) $id,
+                $title,
+                $message
+            );
+        }
+    }
+
+    private function notifyRoles(
+        array $roles,
+        string $title,
+        string $message
+    ): void {
+        $ids = DB::table('WBO_Users')
+            ->whereIn('role', $roles)
             ->where(
                 'account_status',
                 'active'
