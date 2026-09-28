@@ -22,6 +22,7 @@ use App\Http\Controllers\Staff\RoleDashboardController;
 use App\Http\Controllers\Sales\SalesRoleController;
 use App\Http\Controllers\Support\SupportChatController;
 use App\Http\Controllers\Orders\ReturnController;
+use App\Http\Controllers\Imports\DataImportController;
 use App\Http\Controllers\UserAdmin\UserAdminController;
 use App\Http\Controllers\SuperAdmin\SuperAdminCatalogController;
 use App\Http\Controllers\SuperAdmin\SuperAdminBackupController;
@@ -250,6 +251,17 @@ Route::put(
     [ReturnController::class, 'staffUpdate']
 )->whereNumber('returnId');
 
+// Cross-role return workflow. Backend action authorization still decides
+// which role may approve, receive, inspect, or refund.
+Route::get(
+    '/api/returns',
+    [ReturnController::class, 'staffIndex']
+);
+Route::put(
+    '/api/returns/{returnId}',
+    [ReturnController::class, 'staffUpdate']
+)->whereNumber('returnId');
+
 // Customer support / FAQ bot
 Route::get('/api/user/support/conversations', [SupportChatController::class, 'customerIndex']);
 Route::post('/api/user/support/conversations', [SupportChatController::class, 'customerStart']);
@@ -337,6 +349,20 @@ Route::put(
     [SuperAdminCatalogController::class, 'updateSupplier']
 )->whereNumber('supplierId');
 Route::post('/api/super-admin/purchase-orders', [SuperAdminCatalogController::class, 'storePurchaseOrder']);
+
+// Role-based CSV / Excel data imports.
+Route::get(
+    '/api/data-imports',
+    [DataImportController::class, 'index']
+);
+Route::post(
+    '/api/data-imports/preview',
+    [DataImportController::class, 'preview']
+);
+Route::post(
+    '/api/data-imports',
+    [DataImportController::class, 'store']
+);
 
 // Super Admin backup / restore
 Route::post('/api/super-admin/backups', [SuperAdminBackupController::class, 'createBackup']);
