@@ -579,11 +579,97 @@ class SupportChatController extends Controller
 
     private function faqReply(string $input): string
     {
+        $normalized = mb_strtolower(trim($input));
+
+        if (
+            str_contains($normalized, 'place an order') ||
+            str_contains($normalized, 'order this product')
+        ) {
+            return 'Open Products, choose an item, add it to your cart, then open Cart and continue to checkout. Review the quantity, delivery information, and available payment option before submitting the order.';
+        }
+
+        if (
+            str_contains($normalized, 'track my order') ||
+            str_contains($normalized, 'status of this order') ||
+            str_contains($normalized, 'order status')
+        ) {
+            return 'Open Orders to view the current status of your submitted orders. You can also use the + button in Support to select a specific order before asking a question.';
+        }
+
+        if (str_contains($normalized, 'payment')) {
+            return 'Payment information and payment status are linked to your order. Complete checkout using an available payment option. If a submitted order shows an unexpected payment status, choose Talk to staff so Sales Support can review it.';
+        }
+
+        if (
+            str_contains($normalized, 'delivery information') ||
+            str_contains($normalized, 'change my delivery') ||
+            str_contains($normalized, 'delivery work')
+        ) {
+            return 'Your delivery information is entered during checkout and your saved default delivery details can be updated from Account. For an order that has already been submitted, choose Talk to staff before requesting a delivery change.';
+        }
+
+        if (
+            str_contains($normalized, 'cancel this order') ||
+            str_contains($normalized, 'cancel an order')
+        ) {
+            return 'Cancellation depends on the current order status. Choose Talk to staff so Sales Support can review the selected order before any cancellation is made.';
+        }
+
+        if (
+            str_contains($normalized, 'leave a review') ||
+            str_contains($normalized, 'review for this order')
+        ) {
+            return 'Fulfilled purchases become eligible for review. Open Reviews and choose the product under Ready to review.';
+        }
+
+        if (
+            str_contains($normalized, 'damaged') ||
+            str_contains($normalized, 'defective')
+        ) {
+            return 'Please keep the affected order selected and choose Talk to staff. Sales Support can review the order and the damaged or defective item concern with you.';
+        }
+
+        if (
+            str_contains($normalized, 'currently in stock') ||
+            str_contains($normalized, 'product in stock') ||
+            str_contains($normalized, 'product available')
+        ) {
+            return 'The product page shows the current available warehouse quantity. When you select a product in Support, its product card also shows the current stock available.';
+        }
+
+        if (
+            str_contains($normalized, 'more about this product') ||
+            str_contains($normalized, 'product details')
+        ) {
+            return 'Open the product from Products to view its current price, SKU, available stock, description, ratings, and related products.';
+        }
+
+        if (
+            str_contains($normalized, 'order these products again') ||
+            str_contains($normalized, 'reorder')
+        ) {
+            return 'Open Products, select the items you want again, and add them to your cart for a new checkout.';
+        }
+
+        if (
+            str_contains($normalized, 'when will this order be processed') ||
+            str_contains($normalized, 'when will this order be fulfilled')
+        ) {
+            return 'The order status shown in Orders is the current system status. If you need a more specific processing or fulfillment update, keep the order selected and choose Talk to staff.';
+        }
+
+        if (
+            str_contains($normalized, 'cancelled or unfulfilled') ||
+            str_contains($normalized, 'why was this order cancelled')
+        ) {
+            return 'A cancelled or unfulfilled order may require staff review to explain the exact reason. Keep the order selected and choose Talk to staff.';
+        }
+
         if (!Schema::hasTable('WBO_FAQs')) {
             return 'FAQ is unavailable right now. Choose Talk to staff.';
         }
 
-        $words = collect(preg_split('/[^a-z0-9]+/i', mb_strtolower($input), -1, PREG_SPLIT_NO_EMPTY))
+        $words = collect(preg_split('/[^a-z0-9]+/i', $normalized, -1, PREG_SPLIT_NO_EMPTY))
             ->filter(fn ($word) => mb_strlen($word) >= 4)
             ->unique()
             ->values();
