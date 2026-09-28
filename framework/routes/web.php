@@ -21,6 +21,7 @@ use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\Staff\RoleDashboardController;
 use App\Http\Controllers\Sales\SalesRoleController;
 use App\Http\Controllers\Support\SupportChatController;
+use App\Http\Controllers\Orders\ReturnController;
 use App\Http\Controllers\UserAdmin\UserAdminController;
 use App\Http\Controllers\SuperAdmin\SuperAdminCatalogController;
 use App\Http\Controllers\SuperAdmin\SuperAdminBackupController;
@@ -159,6 +160,10 @@ Route::get(
 Route::get('/api/user/me', [SystemUserController::class, 'me']);
 Route::get('/api/user/orders', [SystemUserController::class, 'orders']);
 Route::post('/api/user/orders', [SystemUserController::class, 'placeOrder']);
+Route::post(
+    '/api/user/orders/{orderId}/returns',
+    [ReturnController::class, 'customerCreate']
+)->whereNumber('orderId');
 Route::get('/api/user/notifications', [SystemUserController::class, 'notifications']);
 Route::put('/api/user/notifications/read-all', [SystemUserController::class, 'readAllNotifications']);
 Route::put('/api/user/notifications/{notificationId}/read', [SystemUserController::class, 'readNotification'])->whereNumber('notificationId');
@@ -235,6 +240,15 @@ Route::put(
     '/api/sales-role/orders/{orderId}/status',
     [SalesRoleController::class, 'updateOrderStatus']
 )->whereNumber('orderId');
+
+Route::get(
+    '/api/sales-role/returns',
+    [ReturnController::class, 'staffIndex']
+);
+Route::put(
+    '/api/sales-role/returns/{returnId}',
+    [ReturnController::class, 'staffUpdate']
+)->whereNumber('returnId');
 
 // Customer support / FAQ bot
 Route::get('/api/user/support/conversations', [SupportChatController::class, 'customerIndex']);
