@@ -116,7 +116,7 @@ class SupportChatController extends Controller
                     (int) $conversation->conversation_id,
                     null,
                     'BOT',
-                    $this->faqReply($text)
+                    $this->faqReply($text, (int) $user->user_id)
                 );
             }
         });
@@ -577,9 +577,102 @@ class SupportChatController extends Controller
         });
     }
 
-    private function faqReply(string $input): string
+    private function faqReply(string $input, int $customerUserId): string
     {
         $normalized = mb_strtolower(trim($input));
+        $product = $this->productFromMessage($input);
+        $order = $this->orderFromMessage($input, $customerUserId);
+
+        if ($product) {
+            $stock = $this->availableProductStock((int) $product->product_id);
+            $price = 'PHP ' . number_format((float) $product->unit_price, 2);
+            $description = trim((string) $product->description);
+
+            if (
+                str_contains($normalized, 'currently in stock') ||
+                str_contains($normalized, 'product in stock') ||
+                str_contains($normalized, 'product available')
+            ) {
+                return $stock > 0
+                    ? "{$product->name} currently has {$stock} unit(s) available."
+                    : "{$product->name} is currently out of stock.";
+            }
+
+            if (
+                str_contains($normalized, 'more about this product') ||
+                str_contains($normalized, 'product details')
+            ) {
+                $details = "{$product->name} ({$product->sku}) costs {$price} and currently has {$stock} unit(s) available.";
+
+                return $description !== ''
+                    ? $details . ' ' . $description
+                    : $details;
+            }
+
+            if (
+                str_contains($normalized, 'order this product') ||
+                str_contains($normalized, 'how do i order')
+            ) {
+                return $stock > 0
+                    ? "{$product->name} is available. Click its product card in Support to open the product page, choose the quantity, add it to Cart, then continue to checkout."
+                    : "{$product->name} is currently out of stock, so checkout is unavailable for this product.";
+            }
+        }
+
+        if ($order) {
+            $status = strtoupper((string) $order->status);
+            $paymentStatus = strtoupper((string) ($order->payment_status ?? 'PENDING'));
+            $paymentMethod = str_replace('_', ' ', strtoupper((string) ($order->payment_method ?? 'NOT SET')));
+
+            if (
+                str_contains($normalized, 'status of this order') ||
+                str_contains($normalized, 'track my order') ||
+                str_contains($normalized, 'order status') ||
+                str_contains($normalized, 'when will this order be processed') ||
+                str_contains($normalized, 'when will this order be fulfilled')
+            ) {
+                return "Order #{$order->order_id} is currently {$status}. Payment status: {$paymentStatus}. If you need a more specific processing update, choose Talk to staff.";
+            }
+
+            if (str_contains($normalized, 'payment')) {
+                return "Order #{$order->order_id} uses {$paymentMethod}. Its current payment status is {$paymentStatus}. Choose Talk to staff if this does not match your payment.";
+            }
+
+            if (
+                str_contains($normalized, 'cancel this order') ||
+                str_contains($normalized, 'cancel an order')
+            ) {
+                if (in_array($status, ['FULFILLED', 'CANCELLED'], true)) {
+                    return "Order #{$order->order_id} is already {$status}. Choose Talk to staff if you need help with this order.";
+                }
+
+                return "Order #{$order->order_id} is currently {$status}. Choose Talk to staff so Sales Support can review whether it can still be cancelled.";
+            }
+
+            if (
+                str_contains($normalized, 'leave a review') ||
+                str_contains($normalized, 'review for this order')
+            ) {
+                return $status === 'FULFILLED'
+                    ? "Order #{$order->order_id} is fulfilled. Open Reviews to review an eligible purchased product."
+                    : "Order #{$order->order_id} is currently {$status}. Reviews become available after an eligible purchase is fulfilled.";
+            }
+
+            if (
+                str_contains($normalized, 'damaged') ||
+                str_contains($normalized, 'defective') ||
+                str_contains($normalized, 'problem with this completed order')
+            ) {
+                return "Keep Order #{$order->order_id} selected and choose Talk to staff so Sales Support can review the item concern.";
+            }
+
+            if (
+                str_contains($normalized, 'cancelled or unfulfilled') ||
+                str_contains($normalized, 'why was this order cancelled')
+            ) {
+                return "Order #{$order->order_id} is currently {$status}. Choose Talk to staff if you need the specific reason recorded by Sales Support.";
+            }
+        }
 
         if (
             str_contains($normalized, 'place an order') ||
@@ -634,35 +727,14 @@ class SupportChatController extends Controller
             str_contains($normalized, 'product in stock') ||
             str_contains($normalized, 'product available')
         ) {
-            return 'The product page shows the current available warehouse quantity. When you select a product in Support, its product card also shows the current stock available.';
+            return 'Select a product with the + button in Support to see its current available stock and ask product-specific questions.';
         }
 
         if (
             str_contains($normalized, 'more about this product') ||
             str_contains($normalized, 'product details')
         ) {
-            return 'Open the product from Products to view its current price, SKU, available stock, description, ratings, and related products.';
-        }
-
-        if (
-            str_contains($normalized, 'order these products again') ||
-            str_contains($normalized, 'reorder')
-        ) {
-            return 'Open Products, select the items you want again, and add them to your cart for a new checkout.';
-        }
-
-        if (
-            str_contains($normalized, 'when will this order be processed') ||
-            str_contains($normalized, 'when will this order be fulfilled')
-        ) {
-            return 'The order status shown in Orders is the current system status. If you need a more specific processing or fulfillment update, keep the order selected and choose Talk to staff.';
-        }
-
-        if (
-            str_contains($normalized, 'cancelled or unfulfilled') ||
-            str_contains($normalized, 'why was this order cancelled')
-        ) {
-            return 'A cancelled or unfulfilled order may require staff review to explain the exact reason. Keep the order selected and choose Talk to staff.';
+            return 'Select a product with the + button in Support, then click its product card to open the full product page.';
         }
 
         if (!Schema::hasTable('WBO_FAQs')) {
@@ -690,6 +762,50 @@ class SupportChatController extends Controller
         return $best && $score > 0
             ? (string) $best->answer
             : 'I could not find a close FAQ match. Choose Talk to staff for human assistance.';
+    }
+
+    private function productFromMessage(string $input): ?object
+    {
+        if (!preg_match('/\[Product #(\d+)\s*-/i', $input, $matches)) {
+            return null;
+        }
+
+        return DB::table('WBO_Products')
+            ->select('product_id', 'sku', 'name', 'description', 'unit_price')
+            ->where('product_id', (int) $matches[1])
+            ->where('is_visible', true)
+            ->first();
+    }
+
+    private function availableProductStock(int $productId): int
+    {
+        return (int) DB::table('WBO_Batches')
+            ->where('product_id', $productId)
+            ->where(function ($query) {
+                $query
+                    ->whereNull('expiry_date')
+                    ->orWhereDate('expiry_date', '>=', now()->toDateString());
+            })
+            ->sum('current_quantity');
+    }
+
+    private function orderFromMessage(string $input, int $customerUserId): ?object
+    {
+        if (!preg_match('/\[Order #(\d+)\s*-/i', $input, $matches)) {
+            return null;
+        }
+
+        return DB::table('WBO_Orders')
+            ->select(
+                'order_id',
+                'status',
+                'total_amount',
+                'payment_method',
+                'payment_status'
+            )
+            ->where('order_id', (int) $matches[1])
+            ->where('customer_user_id', $customerUserId)
+            ->first();
     }
 
     private function notifySales(string $title, string $message): void
