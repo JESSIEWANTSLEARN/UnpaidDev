@@ -7,6 +7,7 @@ use App\Models\WBOUser;
 use App\Services\Shared\NotificationService;
 use App\Services\Auth\PasswordHistoryService;
 use App\Services\Customer\CustomerOrderService;
+use App\Services\Customer\CustomerWalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -64,6 +65,215 @@ class SystemUserController extends Controller
         } catch (\Throwable $e) {
             report($e);
         }
+    }
+
+
+    /**
+     * Customer self-service cancellation.
+     *
+     * Direct cancellation is intentionally limited to PENDING orders that
+     * have not already been paid. PENDING stock is not reserved yet, so no
+     * inventory reversal is required here.
+     */
+    /**
+     * Customer self-service cancellation.
+     *
+     * PENDING unpaid orders can be cancelled directly.
+     * PENDING WALLET orders can also be cancelled directly because the
+     * exact completed PURCHASE is refunded atomically before cancellation.
+     * Other paid methods still require support because their external/demo
+     * refund process is separate from the Wallet ledger.
+     */
+    /**
+     * Customer self-service cancellation.
+     *
+     * PENDING unpaid orders can be cancelled directly.
+     * PENDING WALLET orders can also be cancelled directly because the
+     * exact completed PURCHASE is refunded atomically before cancellation.
+     * Other paid methods still require support because their external/demo
+     * refund process is separate from the Wallet ledger.
+     */
+    /**
+     * Customer self-service cancellation.
+     *
+     * PENDING unpaid orders can be cancelled directly.
+     * PENDING WALLET orders can also be cancelled directly because the
+     * exact completed PURCHASE is refunded atomically before cancellation.
+     * Other paid methods still require support because their external/demo
+     * refund process is separate from the Wallet ledger.
+     */
+    public function cancelOrder(
+        Request $request,
+        int $orderId,
+        NotificationService $notifications,
+        CustomerWalletService $wallets
+    ) {
+        $user = $this->currentUser($request);
+
+        $validated = $request->validate([
+            'reason' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255',
+            ],
+        ]);
+
+        $result = DB::transaction(function () use (
+            $orderId,
+            $user,
+            $validated,
+            $request,
+            $wallets
+        ) {
+            $order = DB::table('WBO_Orders')
+                ->where('order_id', $orderId)
+                ->where(
+                    'customer_user_id',
+                    $user->user_id
+                )
+                ->lockForUpdate()
+                ->first();
+
+            if (!$order) {
+                abort(404, 'Order not found.');
+            }
+
+            if ($order->status !== 'PENDING') {
+                return [
+                    'ok' => false,
+                    'status' => 409,
+                    'message' =>
+                        'Only pending orders can be cancelled directly. Please contact support.',
+                ];
+            }
+
+            $paymentMethod = strtoupper(
+                (string) $order->payment_method
+            );
+
+            $paymentStatus = strtoupper(
+                (string) $order->payment_status
+            );
+
+            $isPaidWallet =
+                $paymentMethod === 'WALLET' &&
+                $paymentStatus === 'PAID';
+
+            if (
+                $paymentStatus === 'PAID' &&
+                !$isPaidWallet
+            ) {
+                return [
+                    'ok' => false,
+                    'status' => 409,
+                    'message' =>
+                        'This order is already paid. Please contact support for cancellation and refund assistance.',
+                ];
+            }
+
+            $walletRefund = null;
+
+            if ($isPaidWallet) {
+                $walletRefund =
+                    $wallets->refundOrder(
+                        (int) $user->user_id,
+                        $orderId
+                    );
+            }
+
+            DB::table('WBO_Orders')
+                ->where('order_id', $orderId)
+                ->update([
+                    'status' =>
+                        'CANCELLED',
+                    'fulfilled_at' =>
+                        null,
+                    'cancelled_at' =>
+                        now(),
+                    'payment_status' =>
+                        $walletRefund
+                            ? 'REFUNDED'
+                            : 'CANCELLED',
+                    // Preserve the original wallet payment timestamp for
+                    // refunded orders. Non-wallet cancelled payments keep
+                    // the old behavior.
+                    'paid_at' =>
+                        $walletRefund
+                            ? $order->paid_at
+                            : null,
+                ]);
+
+            $reason =
+                trim($validated['reason']);
+
+            $this->audit(
+                $request,
+                (int) $user->user_id,
+                'CUSTOMER_ORDER_CANCELLED',
+                "Customer cancelled order #{$orderId}. Reason: {$reason}"
+            );
+
+            if ($walletRefund) {
+                $this->audit(
+                    $request,
+                    (int) $user->user_id,
+                    'WALLET_REFUND',
+                    sprintf(
+                        'PHP %s returned to wallet for cancelled order #%d using wallet transaction #%d.',
+                        $walletRefund['amount'],
+                        $orderId,
+                        $walletRefund[
+                            'wallet_transaction_id'
+                        ]
+                    )
+                );
+            }
+
+            return [
+                'ok' =>
+                    true,
+                'status' =>
+                    200,
+                'message' =>
+                    $walletRefund
+                        ? sprintf(
+                            'Order #%d was cancelled and PHP %s was returned to your wallet.',
+                            $orderId,
+                            $walletRefund['amount']
+                        )
+                        : "Order #{$orderId} was cancelled successfully.",
+                'wallet_refund_amount' =>
+                    $walletRefund['amount'] ?? null,
+            ];
+        });
+
+        if (!$result['ok']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+            ], $result['status']);
+        }
+
+        $notifications->syncCustomerOrderNotifications(
+            (int) $user->user_id
+        );
+
+        if (!empty($result['wallet_refund_amount'])) {
+            $notifications->recordWalletRefund(
+                $orderId,
+                (int) $user->user_id,
+                (string)
+                    $result['wallet_refund_amount']
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $result['message'],
+            'wallet_refund_amount' =>
+                $result['wallet_refund_amount'],
+        ]);
     }
 
 
@@ -249,7 +459,8 @@ class SystemUserController extends Controller
 
     public function placeOrder(
         Request $request,
-        NotificationService $notifications
+        NotificationService $notifications,
+        CustomerWalletService $wallets
     ) {
         $user = $this->currentUser($request);
 
@@ -303,13 +514,18 @@ class SystemUserController extends Controller
             'payment_method' => [
                 'required',
                 'string',
-                'in:CASH_ON_DELIVERY,GCASH,BANK_TRANSFER',
+                'in:CASH_ON_DELIVERY,GCASH,BANK_TRANSFER,WALLET',
             ],
             'payment_reference_number' => [
                 'nullable',
                 'string',
                 'max:100',
-                'required_unless:payment_method,CASH_ON_DELIVERY',
+                'required_if:payment_method,GCASH,BANK_TRANSFER',
+            ],
+            'checkout_token' => [
+                'nullable',
+                'string',
+                'max:64',
             ],
         ]);
 
@@ -335,7 +551,11 @@ class SystemUserController extends Controller
         $paymentMethod = $validated['payment_method'];
 
         $paymentReference =
-            $paymentMethod === 'CASH_ON_DELIVERY'
+            in_array(
+                $paymentMethod,
+                ['CASH_ON_DELIVERY', 'WALLET'],
+                true
+            )
                 ? null
                 : trim(
                     (string)
@@ -344,10 +564,16 @@ class SystemUserController extends Controller
                     ]
                 );
 
-        $paymentStatus =
-            $paymentMethod === 'CASH_ON_DELIVERY'
-                ? 'PENDING'
-                : 'AWAITING_VERIFICATION';
+        $paymentStatus = match ($paymentMethod) {
+            'CASH_ON_DELIVERY' => 'PENDING',
+            'WALLET' => 'PAID',
+            default => 'AWAITING_VERIFICATION',
+        };
+
+        $checkoutToken = isset($validated['checkout_token']) &&
+            trim((string) $validated['checkout_token']) !== ''
+                ? trim((string) $validated['checkout_token'])
+                : null;
 
         $delivery = [
             'full_name' =>
@@ -377,15 +603,39 @@ class SystemUserController extends Controller
         ];
 
         try {
-            $orderId = DB::transaction(function () use (
+            $orderResult = DB::transaction(function () use (
                 $items,
                 $user,
                 $request,
                 $delivery,
                 $paymentMethod,
                 $paymentReference,
-                $paymentStatus
+                $paymentStatus,
+                $checkoutToken,
+                $wallets
             ) {
+                // Serialize checkout attempts per customer. When the same
+                // checkout token is submitted twice, the second request sees
+                // the first order instead of creating/deducting again.
+                DB::table('WBO_Users')
+                    ->where('user_id', $user->user_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($checkoutToken !== null) {
+                    $existingOrderId = DB::table('WBO_Orders')
+                        ->where('customer_user_id', $user->user_id)
+                        ->where('checkout_token', $checkoutToken)
+                        ->value('order_id');
+
+                    if ($existingOrderId) {
+                        return [
+                            'order_id' => (int) $existingOrderId,
+                            'created' => false,
+                        ];
+                    }
+                }
+
                 $prepared = [];
 
                 foreach ($items as $item) {
@@ -436,12 +686,21 @@ class SystemUserController extends Controller
                     ];
                 }
 
-                $totalAmount = (float) collect($prepared)
-                    ->sum(
-                        fn ($item) =>
-                            (float) $item['unit_price'] *
-                            (int) $item['quantity']
-                    );
+                // Product prices are stored with two decimal places, so use
+                // integer cents for the wallet-facing total.
+                $totalCents = (int) collect($prepared)->sum(
+                    fn ($item) =>
+                        (int) round(
+                            (float) $item['unit_price'] * 100
+                        ) * (int) $item['quantity']
+                );
+
+                $totalAmount = number_format(
+                    $totalCents / 100,
+                    2,
+                    '.',
+                    ''
+                );
 
                 $orderId = DB::table('WBO_Orders')
                     ->insertGetId([
@@ -470,7 +729,11 @@ class SystemUserController extends Controller
                         'payment_amount' => $totalAmount,
                         'payment_reference_number' =>
                             $paymentReference,
-                        'paid_at' => null,
+                        'paid_at' =>
+                            $paymentMethod === 'WALLET'
+                                ? now()
+                                : null,
+                        'checkout_token' => $checkoutToken,
                     ]);
 
                 foreach ($prepared as $item) {
@@ -482,6 +745,41 @@ class SystemUserController extends Controller
                     ]);
                 }
 
+                if ($paymentMethod === 'WALLET') {
+                    $walletTransaction = $wallets->purchase(
+                        (int) $user->user_id,
+                        (int) $orderId,
+                        $totalAmount
+                    );
+
+                    $walletReference =
+                        'WALLET-TXN-' .
+                        $walletTransaction['wallet_transaction_id'];
+
+                    DB::table('WBO_Orders')
+                        ->where('order_id', $orderId)
+                        ->update([
+                            'payment_status' => 'PAID',
+                            'payment_reference_number' =>
+                                $walletReference,
+                            'paid_at' => now(),
+                        ]);
+
+                    $this->audit(
+                        $request,
+                        $user->user_id,
+                        'WALLET_PURCHASE',
+                        sprintf(
+                            'Wallet paid PHP %s for order #%d using wallet transaction #%d.',
+                            $walletTransaction['amount'],
+                            $orderId,
+                            $walletTransaction[
+                                'wallet_transaction_id'
+                            ]
+                        )
+                    );
+                }
+
                 $this->audit(
                     $request,
                     $user->user_id,
@@ -489,32 +787,51 @@ class SystemUserController extends Controller
                     "Customer placed order #{$orderId}"
                 );
 
-                return $orderId;
+                return [
+                    'order_id' => (int) $orderId,
+                    'created' => true,
+                ];
             });
 
-            $amount = (float) DB::table('WBO_Orders')
-                ->where('order_id', $orderId)
-                ->value('total_amount');
+            $orderId = (int) $orderResult['order_id'];
 
-            $notifications->recordNewOrder(
-                (int) $orderId,
-                (int) $user->user_id,
-                (string) $delivery['full_name']
-            );
+            $placedOrder = DB::table('WBO_Orders')
+                ->where('order_id', $orderId)
+                ->select(
+                    'total_amount',
+                    'payment_method',
+                    'payment_status',
+                    'payment_reference_number'
+                )
+                ->first();
+
+            $amount = (float) ($placedOrder->total_amount ?? 0);
+
+            if ($orderResult['created']) {
+                $notifications->recordNewOrder(
+                    (int) $orderId,
+                    (int) $user->user_id,
+                    (string) $delivery['full_name']
+                );
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Order placed successfully.',
+                'message' => $orderResult['created']
+                    ? 'Order placed successfully.'
+                    : 'This checkout was already placed successfully.',
                 'order_id' => $orderId,
                 'total_amount' => $amount,
                 'payment' => [
-                    'payment_method' => $paymentMethod,
-                    'payment_status' => $paymentStatus,
+                    'payment_method' =>
+                        $placedOrder->payment_method ?? $paymentMethod,
+                    'payment_status' =>
+                        $placedOrder->payment_status ?? $paymentStatus,
                     'amount' => $amount,
                     'reference_number' =>
-                        $paymentReference,
+                        $placedOrder->payment_reference_number ?? null,
                 ],
-            ], 201);
+            ], $orderResult['created'] ? 201 : 200);
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
