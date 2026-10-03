@@ -161,6 +161,10 @@ Route::get(
 Route::get('/api/user/me', [SystemUserController::class, 'me']);
 Route::get('/api/user/orders', [SystemUserController::class, 'orders']);
 Route::post('/api/user/orders', [SystemUserController::class, 'placeOrder']);
+Route::put(
+    '/api/user/orders/{orderId}/cancel',
+    [SystemUserController::class, 'cancelOrder']
+)->whereNumber('orderId');
 Route::post(
     '/api/user/orders/{orderId}/returns',
     [ReturnController::class, 'customerCreate']
@@ -435,3 +439,22 @@ Route::delete(
 // =========================================================
 // END PHASE 3 WEBSITE CONTENT
 // =========================================================
+
+
+// Public email-updates signup using the existing Brevo integration.
+Route::post(
+    '/api/public/newsletter/subscribe',
+    [\App\Http\Controllers\Website\NewsletterController::class, 'subscribe']
+)->middleware('throttle:5,1');
+
+// Customer wallet API.
+// Wallet balance changes are owned by Laravel, never React.
+Route::get(
+    '/api/user/wallet',
+    [\App\Http\Controllers\Customer\CustomerWalletController::class, 'show']
+);
+
+Route::post(
+    '/api/user/wallet/top-up',
+    [\App\Http\Controllers\Customer\CustomerWalletController::class, 'topUp']
+)->middleware('throttle:20,1');

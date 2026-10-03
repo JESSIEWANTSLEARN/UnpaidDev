@@ -58,6 +58,36 @@ class NotificationService
         }
     }
 
+
+    public function recordWalletRefund(
+        int $orderId,
+        int $customerUserId,
+        string $amount
+    ): void {
+        if (!$this->ready()) {
+            return;
+        }
+
+        $stateKey =
+            "wallet-refund:{$orderId}:completed";
+
+        if ($this->hasState($stateKey)) {
+            return;
+        }
+
+        $this->insertNotification(
+            $customerUserId,
+            'Yellow',
+            "Wallet refund completed for order #{$orderId}",
+            "PHP {$amount} was returned to your Walang Brownout Wallet for order #{$orderId}."
+        );
+
+        $this->setState(
+            $stateKey,
+            'sent'
+        );
+    }
+
     public function syncCustomerOrderNotifications(int $userId): void
     {
         if (!$this->ready()) {

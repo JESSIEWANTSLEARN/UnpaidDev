@@ -60,6 +60,8 @@ class CustomerOrderService
                     'order_date' =>
                         $order->order_date,
                     'status' => $order->status,
+                    'cancelled_at' =>
+                        $order->cancelled_at ?? null,
                     'items' => $items,
                     'total' =>
                         (float) $items->sum('line_total'),

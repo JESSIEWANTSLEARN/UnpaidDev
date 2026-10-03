@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Services\Shared\NotificationService;
+use App\Services\Customer\CustomerWalletService;
 use App\Services\Sales\SalesDashboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,7 +54,8 @@ class SalesRoleController extends Controller
     public function updateOrderStatus(
         Request $request,
         int $orderId,
-        NotificationService $notifications
+        NotificationService $notifications,
+        CustomerWalletService $wallets
     ): JsonResponse {
         $role = $this->authorizeAction();
 
@@ -76,7 +78,8 @@ class SalesRoleController extends Controller
             function () use (
                 $orderId,
                 $action,
-                $role
+                $role,
+                $wallets
             ) {
                 $order =
                     DB::table('WBO_Orders')
@@ -295,6 +298,19 @@ class SalesRoleController extends Controller
                         );
                     }
 
+                    $walletRefund = null;
+
+                    if (
+                        $order->payment_method === 'WALLET' &&
+                        $order->payment_status === 'PAID'
+                    ) {
+                        $walletRefund =
+                            $wallets->refundOrder(
+                                (int) $order->customer_user_id,
+                                $orderId
+                            );
+                    }
+
                     DB::table('WBO_Orders')
                         ->where(
                             'order_id',
@@ -308,18 +324,32 @@ class SalesRoleController extends Controller
                             'cancelled_at' =>
                                 null,
                             'payment_status' =>
-                                'CANCELLED',
+                                $walletRefund
+                                    ? 'REFUNDED'
+                                    : 'CANCELLED',
                             'paid_at' =>
-                                null,
+                                $walletRefund
+                                    ? $order->paid_at
+                                    : null,
                         ]);
 
                     return [
                         'status' =>
                             'UNFULFILLED',
                         'message' =>
-                            "Order #{$orderId} marked unfulfilled.",
+                            $walletRefund
+                                ? sprintf(
+                                    'Order #%d marked unfulfilled. PHP %s was returned to the customer wallet.',
+                                    $orderId,
+                                    $walletRefund['amount']
+                                )
+                                : "Order #{$orderId} marked unfulfilled.",
                         'audit_action' =>
                             'ORDER_UNFULFILLED',
+                        'wallet_refund_amount' =>
+                            $walletRefund['amount'] ?? null,
+                        'customer_user_id' =>
+                            (int) $order->customer_user_id,
                     ];
                 }
 
@@ -350,6 +380,19 @@ class SalesRoleController extends Controller
                     );
                 }
 
+                $walletRefund = null;
+
+                if (
+                    $order->payment_method === 'WALLET' &&
+                    $order->payment_status === 'PAID'
+                ) {
+                    $walletRefund =
+                        $wallets->refundOrder(
+                            (int) $order->customer_user_id,
+                            $orderId
+                        );
+                }
+
                 DB::table('WBO_Orders')
                     ->where(
                         'order_id',
@@ -363,19 +406,34 @@ class SalesRoleController extends Controller
                         'cancelled_at' =>
                             now(),
                         'payment_status' =>
-                            'CANCELLED',
+                            $walletRefund
+                                ? 'REFUNDED'
+                                : 'CANCELLED',
                         'paid_at' =>
-                            null,
+                            $walletRefund
+                                ? $order->paid_at
+                                : null,
                     ]);
 
                 return [
                     'status' =>
                         'CANCELLED',
                     'message' =>
-                        "Order #{$orderId} cancelled.",
+                        $walletRefund
+                            ? sprintf(
+                                'Order #%d cancelled. PHP %s was returned to the customer wallet.',
+                                $orderId,
+                                $walletRefund['amount']
+                            )
+                            : "Order #{$orderId} cancelled.",
                     'audit_action' =>
                         'ORDER_CANCELLED',
+                    'wallet_refund_amount' =>
+                        $walletRefund['amount'] ?? null,
+                    'customer_user_id' =>
+                        (int) $order->customer_user_id,
                 ];
+
             }
         );
 
@@ -390,6 +448,17 @@ class SalesRoleController extends Controller
             )
         );
 
+        if (!empty($result['wallet_refund_amount'])) {
+            $this->audit(
+                $request,
+                'WALLET_REFUND',
+                sprintf(
+                    'PHP %s returned to customer wallet for order #%d.',
+                    $result['wallet_refund_amount'],
+                    $orderId
+                )
+            );
+        }
         $customerUserId = (int) DB::table('WBO_Orders')
             ->where('order_id', $orderId)
             ->value('customer_user_id');
@@ -398,6 +467,15 @@ class SalesRoleController extends Controller
             $notifications->syncCustomerOrderNotifications(
                 $customerUserId
             );
+
+            if (!empty($result['wallet_refund_amount'])) {
+                $notifications->recordWalletRefund(
+                    $orderId,
+                    $customerUserId,
+                    (string)
+                        $result['wallet_refund_amount']
+                );
+            }
         }
 
         // Stock reservation/release may change operational alert state.
