@@ -54,7 +54,10 @@ class StoreProductController extends Controller
                     'available_stock' =>
                         (int) ($product->available_stock ?? 0),
                     'image_url' =>
-                        $this->productImageUrl($product->primaryImage),
+                        $this->productImageUrl(
+                            $product->primaryImage,
+                            $product->updated_at
+                        ),
                 ];
             });
 
@@ -93,16 +96,25 @@ class StoreProductController extends Controller
         ]);
     }
 
-    private function productImageUrl($image): ?string
-    {
+    private function productImageUrl(
+        $image,
+        $updatedAt = null
+    ): ?string {
         if (!$image) {
             return null;
         }
 
+        $version = $updatedAt
+            ? '?v=' . rawurlencode((string) $updatedAt)
+            : '';
+
         if ($image->image_path) {
-            return Storage::url($image->image_path);
+            return Storage::url($image->image_path)
+                . $version;
         }
 
-        return '/api/store/product-images/' . $image->image_id;
+        return '/api/store/product-images/'
+            . $image->image_id
+            . $version;
     }
 }

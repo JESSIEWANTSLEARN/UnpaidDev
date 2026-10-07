@@ -307,9 +307,18 @@ class SuperAdminDashboardController extends Controller
                 $product->category = $product->category ?: 'Uncategorized';
 
                 if ($product->image_id) {
+                    $version = $product->updated_at
+                        ? '?v=' . rawurlencode(
+                            (string) $product->updated_at
+                        )
+                        : '';
+
                     $product->image_url = $product->image_path
                         ? Storage::url($product->image_path)
-                        : '/api/store/product-images/' . $product->image_id;
+                            . $version
+                        : '/api/store/product-images/'
+                            . $product->image_id
+                            . $version;
                 } else {
                     $product->image_url = null;
                 }
