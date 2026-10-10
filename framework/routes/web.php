@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\SessionSecurityController;
 
 use App\Http\Controllers\Shared\PresenceController;
+use App\Http\Controllers\Shared\AnonymousLandingVisitController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\Staff\RoleDashboardController;
@@ -146,6 +147,10 @@ Route::post('/logout', [LogoutController::class, 'logout']);
 Route::get('/api/session/status', [SessionSecurityController::class, 'status']);
 Route::post('/api/session/activity', [SessionSecurityController::class, 'activity']);
 Route::post('/api/session/forget-device', [SessionSecurityController::class, 'forgetDevice']);
+Route::post(
+    '/api/public/landing-page-visit',
+    [AnonymousLandingVisitController::class, 'store']
+)->middleware('throttle:30,1');
 
 // Store / public API
 Route::get('/api/store/products', [StoreProductController::class, 'index']);

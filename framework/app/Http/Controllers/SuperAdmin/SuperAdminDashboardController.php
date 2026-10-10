@@ -689,6 +689,37 @@ class SuperAdminDashboardController extends Controller
                 $hourlyActivity,
         ];
 
+        // Anonymous landing-page visitors are kept separate from authenticated activity.
+        $anonymousVisitCounts = DB::table('WBO_AnonymousLandingVisits')
+            ->whereBetween('visit_date', [
+                $activityStartManila->toDateString(),
+                $todayStartManila->toDateString(),
+            ])
+            ->select('visit_date', DB::raw('COUNT(*) AS visitors'))
+            ->groupBy('visit_date')
+            ->get()
+            ->pluck('visitors', 'visit_date');
+
+        $anonymousDaily = collect(range(0, 29))
+            ->map(function ($offset) use ($activityStartManila, $anonymousVisitCounts) {
+                $date = $activityStartManila->copy()->addDays($offset)->format('Y-m-d');
+
+                return [
+                    'date' => $date,
+                    'visitors' => (int) ($anonymousVisitCounts[$date] ?? 0),
+                ];
+            })
+            ->values();
+
+        $anonymousVisitors = [
+            'timezone' => 'Asia/Manila',
+            'definition' => 'Unique anonymous browser sessions per Manila calendar day.',
+            'today' => (int) ($anonymousVisitCounts[$todayStartManila->format('Y-m-d')] ?? 0),
+            'last_7_days' => (int) $anonymousDaily->slice(-7)->sum('visitors'),
+            'last_30_days' => (int) $anonymousDaily->sum('visitors'),
+            'daily_30' => $anonymousDaily,
+        ];
+
         // DASHBOARD METRICS
         $openPurchaseOrders = $purchaseOrders->filter(fn($po) => in_array($po->status, ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'ORDERED', 'PARTIALLY_RECEIVED'], true))->unique('po_id')->count();
 
@@ -724,6 +755,7 @@ class SuperAdminDashboardController extends Controller
             'audit_logs' => $auditLogs,
             'stock_trend' => $stockTrend,
             'user_activity' => $userActivity,
+            'anonymous_visitors' => $anonymousVisitors,
             'settings' => $this->systemSettings(),
             'backups' => $this->backupList()
         ];
