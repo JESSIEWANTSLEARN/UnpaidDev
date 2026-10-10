@@ -41,20 +41,24 @@ class ProductReviewController extends Controller
         $mine = DB::table('WBO_ProductReviews as r')
             ->join('WBO_Products as p', 'p.product_id', '=', 'r.product_id')
             ->where('r.user_id', $userId)
-            ->select('r.review_id','r.product_id','p.name as product_name','p.sku','r.rating','r.title','r.comment','r.status','r.verified_purchase','r.created_at')
+            ->select('r.review_id','r.product_id','r.order_id','p.name as product_name','p.sku','r.rating','r.title','r.comment','r.status','r.verified_purchase','r.created_at')
             ->orderByDesc('r.created_at')->get();
-
-        $reviewed = $mine->pluck('product_id')->map(fn($id)=>(int)$id)->all();
 
         $eligible = DB::table('WBO_Orders as o')
             ->join('WBO_OrderDetails as od','od.order_id','=','o.order_id')
             ->join('WBO_Products as p','p.product_id','=','od.product_id')
             ->where('o.customer_user_id',$userId)
             ->where('o.status','FULFILLED')
-            ->when($reviewed !== [], fn($q)=>$q->whereNotIn('p.product_id',$reviewed))
-            ->select('p.product_id','p.name','p.sku',DB::raw('MAX(o.order_id) AS order_id'),DB::raw('MAX(o.fulfilled_at) AS fulfilled_at'))
-            ->groupBy('p.product_id','p.name','p.sku')
-            ->orderByDesc('fulfilled_at')->get();
+            ->whereNotExists(function ($query) use ($userId) {
+                $query->selectRaw('1')
+                    ->from('WBO_ProductReviews as existing')
+                    ->whereColumn('existing.order_id','o.order_id')
+                    ->whereColumn('existing.product_id','od.product_id')
+                    ->where('existing.user_id',$userId);
+            })
+            ->select('p.product_id','p.name','p.sku','o.order_id','o.fulfilled_at')
+            ->groupBy('p.product_id','p.name','p.sku','o.order_id','o.fulfilled_at')
+            ->orderByDesc('o.fulfilled_at')->get();
 
         return response()->json(['eligible_products'=>$eligible,'my_reviews'=>$mine]);
     }
@@ -66,21 +70,29 @@ class ProductReviewController extends Controller
 
         $v = $request->validate([
             'product_id'=>['required','integer',Rule::exists('WBO_Products','product_id')],
+            'order_id'=>['required','integer',Rule::exists('WBO_Orders','order_id')],
             'rating'=>['required','integer','between:1,5'],
             'title'=>['nullable','string','max:120'],
             'comment'=>['required','string','min:3','max:2000'],
         ]);
 
-        if (DB::table('WBO_ProductReviews')->where('user_id',$userId)->where('product_id',$v['product_id'])->exists()) {
-            throw ValidationException::withMessages(['product_id'=>['You already reviewed this product.']]);
+        if (DB::table('WBO_ProductReviews')
+            ->where('user_id',$userId)
+            ->where('product_id',$v['product_id'])
+            ->where('order_id',$v['order_id'])
+            ->exists()) {
+            throw ValidationException::withMessages(['product_id'=>['You already reviewed this fulfilled purchase.']]);
         }
 
         $order = DB::table('WBO_Orders as o')
             ->join('WBO_OrderDetails as od','od.order_id','=','o.order_id')
-            ->where('o.customer_user_id',$userId)->where('od.product_id',$v['product_id'])->where('o.status','FULFILLED')
-            ->orderByDesc('o.fulfilled_at')->orderByDesc('o.order_id')->select('o.order_id')->first();
+            ->where('o.order_id',$v['order_id'])
+            ->where('o.customer_user_id',$userId)
+            ->where('od.product_id',$v['product_id'])
+            ->where('o.status','FULFILLED')
+            ->select('o.order_id')->first();
 
-        if (!$order) throw ValidationException::withMessages(['product_id'=>['Only fulfilled purchases can be reviewed.']]);
+        if (!$order) throw ValidationException::withMessages(['order_id'=>['Only your fulfilled purchases can be reviewed.']]);
 
         $id = DB::table('WBO_ProductReviews')->insertGetId([
             'product_id'=>$v['product_id'],'user_id'=>$userId,'order_id'=>$order->order_id,'rating'=>$v['rating'],

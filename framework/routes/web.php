@@ -259,6 +259,7 @@ Route::delete(
 Route::get('/api/store/reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'publicIndex']);
 Route::get('/api/user/reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'mine']);
 Route::post('/api/user/reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'store']);
+Route::put('/api/user/reviews/{reviewId}', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'update'])->whereNumber('reviewId');
 Route::get('/api/super-admin/product-reviews', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'adminIndex']);
 Route::put('/api/super-admin/product-reviews/{reviewId}/moderate', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'moderate'])->whereNumber('reviewId');
 Route::delete('/api/super-admin/product-reviews/{reviewId}', [\App\Http\Controllers\Reviews\ProductReviewController::class, 'destroy'])->whereNumber('reviewId');
