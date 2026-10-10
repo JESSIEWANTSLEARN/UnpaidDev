@@ -104,6 +104,37 @@ class ProductReviewController extends Controller
         return response()->json(['message'=>'Thank you. Your verified purchase review is now visible.','review_id'=>$id],201);
     }
 
+    public function update(Request $request, int $reviewId): JsonResponse
+    {
+        $userId = $this->customer();
+        $this->requireTable();
+
+        $review = DB::table('WBO_ProductReviews')
+            ->where('review_id', $reviewId)
+            ->where('user_id', $userId)
+            ->first();
+        if (!$review) abort(404, 'Review not found.');
+
+        $v = $request->validate([
+            'rating' => ['required', 'integer', 'between:1,5'],
+            'title' => ['nullable', 'string', 'max:120'],
+            'comment' => ['required', 'string', 'min:3', 'max:2000'],
+        ]);
+
+        DB::table('WBO_ProductReviews')
+            ->where('review_id', $reviewId)
+            ->where('user_id', $userId)
+            ->update([
+                'rating' => $v['rating'],
+                'title' => trim((string) ($v['title'] ?? '')) ?: null,
+                'comment' => trim($v['comment']),
+                'updated_at' => now(),
+            ]);
+
+        $this->audit($request, $userId, 'PRODUCT_REVIEW_UPDATED', "Customer updated product review #{$reviewId}.");
+        return response()->json(['message' => 'Your review was updated.']);
+    }
+
     public function adminIndex(): JsonResponse
     {
         $this->admin(); $this->requireTable();
